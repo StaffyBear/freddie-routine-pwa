@@ -1,9 +1,9 @@
 /**************************************************
  * Freddie Routine – app.js
- * Version: 2026-01-02-domready
+ * Version: 2026-01-02-rls-fix
  **************************************************/
 
-const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
+const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
 console.log("APP LOADED ✅", new Date().toISOString());
@@ -47,6 +47,15 @@ async function showApp() {
   await refreshAll();
 }
 
+/* ---------- Auth helpers ---------- */
+async function requireUser() {
+  const { data, error } = await sb.auth.getUser();
+  if (error || !data?.user) {
+    throw new Error("Not logged in (no user). Please login again.");
+  }
+  return data.user;
+}
+
 /* ---------- AUTH ---------- */
 async function doRegister() {
   console.log("Register clicked ✅");
@@ -60,7 +69,15 @@ async function doRegister() {
   }
 
   $("authMsg").textContent = "Registering…";
-  const res = await sb.auth.signUp({ email, password });
+  const res = await sb.auth.signUp({
+    email,
+    password,
+    options: {
+      // IMPORTANT: send confirmations back to your GitHub Pages site
+      emailRedirectTo: "https://staffybear.github.io/freddie-routine-pwa/"
+    }
+  });
+
   console.log("Register result:", res);
 
   if (res.error) {
@@ -126,7 +143,21 @@ async function createChild() {
   const name = $("childName").value.trim();
   if (!name) return alert("Enter a child name.");
 
-  const res = await sb.from("children").insert({ name }).select("id,name").single();
+  let user;
+  try {
+    user = await requireUser();
+  } catch (e) {
+    alert(e.message);
+    return;
+  }
+
+  // IMPORTANT: include user_id explicitly to satisfy RLS
+  const res = await sb
+    .from("children")
+    .insert({ name, user_id: user.id })
+    .select("id,name")
+    .single();
+
   console.log("Create child result:", res);
 
   if (res.error) return alert(res.error.message);
@@ -177,10 +208,13 @@ async function sleepStart() {
   if (!childId) return alert("Create/set child first.");
 
   const notes = $("sleepNote").value.trim() || null;
+  const user = await requireUser();
+
   const res = await sb.from("sleep_sessions").insert({
     child_id: childId,
     start_time: new Date().toISOString(),
-    notes
+    notes,
+    user_id: user.id
   });
 
   if (res.error) return alert(res.error.message);
@@ -217,12 +251,15 @@ async function sleepEnd() {
 async function addMeal() {
   if (!childId) return alert("Create/set child first.");
 
+  const user = await requireUser();
+
   const res = await sb.from("meals").insert({
     child_id: childId,
     meal_type: $("mealType").value,
     percent_eaten: parseInt($("mealPercent").value, 10),
     food_text: $("mealFood").value.trim() || null,
-    notes: $("mealNotes").value.trim() || null
+    notes: $("mealNotes").value.trim() || null,
+    user_id: user.id
   });
 
   if (res.error) return alert(res.error.message);
@@ -252,11 +289,14 @@ async function loadMeals() {
 async function saveMood() {
   if (!childId) return alert("Create/set child first.");
 
+  const user = await requireUser();
+
   const res = await sb.from("moods").insert({
     child_id: childId,
     period: $("moodPeriod").value,
     mood: $("moodValue").value,
-    notes: $("moodNotes").value.trim() || null
+    notes: $("moodNotes").value.trim() || null,
+    user_id: user.id
   });
 
   if (res.error) return alert(res.error.message);
@@ -317,7 +357,9 @@ async function addMedication() {
 
   if (!name) return alert("Enter medication name.");
 
-  const res = await sb.from("medications").insert({ name, default_unit });
+  const user = await requireUser();
+
+  const res = await sb.from("medications").insert({ name, default_unit, user_id: user.id });
   if (res.error) return alert(res.error.message);
 
   $("newMedName").value = "";
@@ -335,11 +377,14 @@ async function addDose() {
   if (!medication_id) return alert("Select (or add) a medication first.");
   if (!dose) return alert("Enter a dose.");
 
+  const user = await requireUser();
+
   const res = await sb.from("medication_doses").insert({
     child_id: childId,
     medication_id,
     dose,
-    notes
+    notes,
+    user_id: user.id
   });
 
   if (res.error) return alert(res.error.message);
@@ -353,30 +398,15 @@ async function addDose() {
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM READY ✅ wiring buttons...");
 
-  // Check required elements exist
-  const requiredIds = [
-    "btnRegister","btnLogin","btnCreateChild","btnSleepStart","btnSleepEnd",
-    "btnAddMeal","btnAddMood","btnAddMed","btnAddDose","btnLogout",
-    "email","password","authMsg"
-  ];
-  const missing = requiredIds.filter(id => !document.getElementById(id));
-  if (missing.length) {
-    console.error("Missing elements in index.html:", missing);
-    $("authMsg").textContent = "Page error: missing elements: " + missing.join(", ");
-    return;
-  }
-
   // Wire buttons
   $("btnRegister").onclick = doRegister;
   $("btnLogin").onclick = doLogin;
-  $("btnCreateChild").onclick = createChild;
 
+  $("btnCreateChild").onclick = createChild;
   $("btnSleepStart").onclick = sleepStart;
   $("btnSleepEnd").onclick = sleepEnd;
-
   $("btnAddMeal").onclick = addMeal;
   $("btnAddMood").onclick = saveMood;
-
   $("btnAddMed").onclick = addMedication;
   $("btnAddDose").onclick = addDose;
 
