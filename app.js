@@ -1,17 +1,11 @@
 /**************************************************
  * Freddie Routine – app.js
- * Version: 2026-01-02-debug
+ * Version: 2026-01-02-domready
  **************************************************/
 
-/* ===============================
-   1) CONFIG — CHANGE THESE ONLY
-   =============================== */
-const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co"; // your project URL
-const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl"; // publishable key ONLY
+const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
-/* ===============================
-   2) INIT
-   =============================== */
 console.log("APP LOADED ✅", new Date().toISOString());
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -19,17 +13,11 @@ const $ = (id) => document.getElementById(id);
 
 let childId = null;
 
-/* Catch silent JS failures */
-window.addEventListener("error", (e) => {
-  console.error("JS ERROR:", e.error || e.message);
-});
-window.addEventListener("unhandledrejection", (e) => {
-  console.error("PROMISE ERROR:", e.reason);
-});
+// Catch silent failures
+window.addEventListener("error", (e) => console.error("JS ERROR:", e.error || e.message));
+window.addEventListener("unhandledrejection", (e) => console.error("PROMISE ERROR:", e.reason));
 
-/* ===============================
-   3) DATE HELPERS
-   =============================== */
+/* ---------- Date helpers ---------- */
 function startOfToday() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -44,9 +32,7 @@ function hhmm(iso) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-/* ===============================
-   4) UI STATE
-   =============================== */
+/* ---------- UI state ---------- */
 function showAuth(msg = "") {
   $("auth").style.display = "block";
   $("app").style.display = "none";
@@ -54,21 +40,19 @@ function showAuth(msg = "") {
 }
 
 async function showApp() {
-  console.log("Showing app UI");
   $("auth").style.display = "none";
   $("app").style.display = "block";
-  await loadOrCreateChildHint();
+  $("statusMsg").textContent = "";
+  await loadOrSetChild();
   await refreshAll();
 }
 
-/* ===============================
-   5) AUTH (EMAIL + PASSWORD ONLY)
-   =============================== */
+/* ---------- AUTH ---------- */
 async function doRegister() {
   console.log("Register clicked ✅");
 
-  const email = $("email")?.value?.trim();
-  const password = $("password")?.value;
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
   if (!email || !password) {
     $("authMsg").textContent = "Enter BOTH email and password.";
@@ -76,7 +60,6 @@ async function doRegister() {
   }
 
   $("authMsg").textContent = "Registering…";
-
   const res = await sb.auth.signUp({ email, password });
   console.log("Register result:", res);
 
@@ -86,14 +69,14 @@ async function doRegister() {
   }
 
   $("authMsg").textContent =
-    "Registered ✅ Now click Login (check email if confirmations are on).";
+    "Registered ✅ Now click Login (check email if confirmations are ON).";
 }
 
 async function doLogin() {
   console.log("Login clicked ✅");
 
-  const email = $("email")?.value?.trim();
-  const password = $("password")?.value;
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
   if (!email || !password) {
     $("authMsg").textContent = "Enter BOTH email and password.";
@@ -101,7 +84,6 @@ async function doLogin() {
   }
 
   $("authMsg").textContent = "Logging in…";
-
   const res = await sb.auth.signInWithPassword({ email, password });
   console.log("Login result:", res);
 
@@ -114,25 +96,24 @@ async function doLogin() {
   await showApp();
 }
 
-/* ===============================
-   6) CHILD
-   =============================== */
-async function loadOrCreateChildHint() {
-  const { data, error } = await sb
+/* ---------- CHILD ---------- */
+async function loadOrSetChild() {
+  const res = await sb
     .from("children")
     .select("id,name")
     .order("created_at", { ascending: true })
     .limit(1);
 
-  if (error) {
-    console.error("Load child error:", error);
-    $("childInfo").textContent = "Error loading child";
+  if (res.error) {
+    console.error("Load child error:", res.error);
+    $("childInfo").textContent = "Error loading child: " + res.error.message;
+    childId = null;
     return;
   }
 
-  if (data && data.length) {
-    childId = data[0].id;
-    $("childInfo").textContent = `Using child: ${data[0].name}`;
+  if (res.data && res.data.length) {
+    childId = res.data[0].id;
+    $("childInfo").textContent = `Using child: ${res.data[0].name}`;
   } else {
     childId = null;
     $("childInfo").textContent = "No child yet. Create one above.";
@@ -140,18 +121,15 @@ async function loadOrCreateChildHint() {
 }
 
 async function createChild() {
-  console.log("Create child clicked");
+  console.log("Create child clicked ✅");
 
   const name = $("childName").value.trim();
-  if (!name) return alert("Enter a child name");
+  if (!name) return alert("Enter a child name.");
 
-  const res = await sb.from("children").insert({ name }).select().single();
+  const res = await sb.from("children").insert({ name }).select("id,name").single();
   console.log("Create child result:", res);
 
-  if (res.error) {
-    alert(res.error.message);
-    return;
-  }
+  if (res.error) return alert(res.error.message);
 
   childId = res.data.id;
   $("childName").value = "";
@@ -159,17 +137,13 @@ async function createChild() {
   await refreshAll();
 }
 
-/* ===============================
-   7) LOAD ALL DATA
-   =============================== */
+/* ---------- REFRESH ALL ---------- */
 async function refreshAll() {
   if (!childId) return;
-  await Promise.all([loadSleep(), loadMeals(), loadMoods()]);
+  await Promise.all([loadSleep(), loadMeals(), loadMoods(), loadMedsAndDoses()]);
 }
 
-/* ===============================
-   8) SLEEP
-   =============================== */
+/* ---------- SLEEP ---------- */
 async function loadSleep() {
   const res = await sb
     .from("sleep_sessions")
@@ -179,15 +153,12 @@ async function loadSleep() {
     .lte("start_time", endOfToday())
     .order("start_time", { ascending: false });
 
-  if (res.error) {
-    console.error("Load sleep error:", res.error);
-    return;
-  }
+  if (res.error) return console.error("Load sleep error:", res.error);
 
   $("sleepList").innerHTML = "";
   let totalMs = 0;
 
-  res.data.forEach((s) => {
+  (res.data || []).forEach((s) => {
     const st = new Date(s.start_time);
     const et = s.end_time ? new Date(s.end_time) : null;
     if (et) totalMs += et - st;
@@ -203,58 +174,58 @@ async function loadSleep() {
 }
 
 async function sleepStart() {
-  if (!childId) return alert("Create child first");
-  const notes = $("sleepNote").value.trim() || null;
+  if (!childId) return alert("Create/set child first.");
 
+  const notes = $("sleepNote").value.trim() || null;
   const res = await sb.from("sleep_sessions").insert({
     child_id: childId,
     start_time: new Date().toISOString(),
-    notes,
+    notes
   });
 
-  if (res.error) alert(res.error.message);
+  if (res.error) return alert(res.error.message);
+
   $("sleepNote").value = "";
   await loadSleep();
 }
 
 async function sleepEnd() {
+  if (!childId) return alert("Create/set child first.");
+
   const open = await sb
     .from("sleep_sessions")
-    .select("id")
+    .select("id,start_time")
     .eq("child_id", childId)
     .is("end_time", null)
     .order("start_time", { ascending: false })
     .limit(1);
 
-  if (!open.data || !open.data.length) {
-    alert("No active sleep session");
-    return;
-  }
+  if (open.error) return alert(open.error.message);
+  if (!open.data || !open.data.length) return alert("No active sleep session found.");
 
   const res = await sb
     .from("sleep_sessions")
     .update({ end_time: new Date().toISOString() })
     .eq("id", open.data[0].id);
 
-  if (res.error) alert(res.error.message);
+  if (res.error) return alert(res.error.message);
+
   await loadSleep();
 }
 
-/* ===============================
-   9) MEALS
-   =============================== */
+/* ---------- MEALS ---------- */
 async function addMeal() {
-  if (!childId) return alert("Create child first");
+  if (!childId) return alert("Create/set child first.");
 
   const res = await sb.from("meals").insert({
     child_id: childId,
     meal_type: $("mealType").value,
     percent_eaten: parseInt($("mealPercent").value, 10),
     food_text: $("mealFood").value.trim() || null,
-    notes: $("mealNotes").value.trim() || null,
+    notes: $("mealNotes").value.trim() || null
   });
 
-  if (res.error) alert(res.error.message);
+  if (res.error) return alert(res.error.message);
 
   $("mealFood").value = "";
   $("mealNotes").value = "";
@@ -270,35 +241,26 @@ async function loadMeals() {
     .lte("time", endOfToday())
     .order("time", { ascending: false });
 
-  if (res.error) {
-    console.error("Load meals error:", res.error);
-    return;
-  }
+  if (res.error) return console.error("Load meals error:", res.error);
 
-  $("mealList").innerHTML = res.data
-    .map(
-      (m) =>
-        `<li>${hhmm(m.time)} • ${m.meal_type} • ${m.percent_eaten}% • ${
-          m.food_text || ""
-        }</li>`
-    )
+  $("mealList").innerHTML = (res.data || [])
+    .map(m => `<li>${hhmm(m.time)} • ${m.meal_type} • ${m.percent_eaten}% • ${m.food_text ?? ""}${m.notes ? " • " + m.notes : ""}</li>`)
     .join("");
 }
 
-/* ===============================
-   10) MOODS
-   =============================== */
+/* ---------- MOODS ---------- */
 async function saveMood() {
-  if (!childId) return alert("Create child first");
+  if (!childId) return alert("Create/set child first.");
 
   const res = await sb.from("moods").insert({
     child_id: childId,
     period: $("moodPeriod").value,
     mood: $("moodValue").value,
-    notes: $("moodNotes").value.trim() || null,
+    notes: $("moodNotes").value.trim() || null
   });
 
-  if (res.error) alert(res.error.message);
+  if (res.error) return alert(res.error.message);
+
   $("moodNotes").value = "";
   await loadMoods();
 }
@@ -312,43 +274,122 @@ async function loadMoods() {
     .lte("time", endOfToday())
     .order("time", { ascending: false });
 
-  if (res.error) {
-    console.error("Load moods error:", res.error);
-    return;
-  }
+  if (res.error) return console.error("Load moods error:", res.error);
 
-  $("moodList").innerHTML = res.data
-    .map((m) => `<li>${hhmm(m.time)} • ${m.period}: ${m.mood}</li>`)
+  $("moodList").innerHTML = (res.data || [])
+    .map(m => `<li>${hhmm(m.time)} • ${m.period}: ${m.mood}${m.notes ? " • " + m.notes : ""}</li>`)
     .join("");
 }
 
-/* ===============================
-   11) BUTTON WIRING
-   =============================== */
-$("btnRegister").onclick = doRegister;
-$("btnLogin").onclick = doLogin;
-$("btnCreateChild").onclick = createChild;
-$("btnSleepStart").onclick = sleepStart;
-$("btnSleepEnd").onclick = sleepEnd;
-$("btnAddMeal").onclick = addMeal;
-$("btnAddMood").onclick = saveMood;
+/* ---------- MEDICATION ---------- */
+async function loadMedsAndDoses() {
+  const meds = await sb.from("medications").select("id,name,default_unit").order("name");
 
-$("btnLogout").onclick = async () => {
-  await sb.auth.signOut();
-  childId = null;
-  showAuth("Logged out");
-};
+  if (!meds.error) {
+    const options = (meds.data || [])
+      .map(m => `<option value="${m.id}">${m.name}${m.default_unit ? " (" + m.default_unit + ")" : ""}</option>`)
+      .join("");
+    $("medSelect").innerHTML = options || `<option value="">No meds yet</option>`;
+  } else {
+    console.error("Load meds error:", meds.error);
+  }
 
-/* ===============================
-   12) BOOT
-   =============================== */
-(async () => {
+  const doses = await sb
+    .from("medication_doses")
+    .select("given_at,dose,notes,medications(name)")
+    .eq("child_id", childId)
+    .gte("given_at", startOfToday())
+    .lte("given_at", endOfToday())
+    .order("given_at", { ascending: false });
+
+  if (!doses.error) {
+    $("medList").innerHTML = (doses.data || [])
+      .map(d => `<li>${hhmm(d.given_at)} • ${d.medications?.name ?? "Medication"} • ${d.dose}${d.notes ? " • " + d.notes : ""}</li>`)
+      .join("");
+  } else {
+    console.error("Load doses error:", doses.error);
+  }
+}
+
+async function addMedication() {
+  const name = $("newMedName").value.trim();
+  const default_unit = $("newMedUnit").value.trim() || null;
+
+  if (!name) return alert("Enter medication name.");
+
+  const res = await sb.from("medications").insert({ name, default_unit });
+  if (res.error) return alert(res.error.message);
+
+  $("newMedName").value = "";
+  $("newMedUnit").value = "";
+  await loadMedsAndDoses();
+}
+
+async function addDose() {
+  if (!childId) return alert("Create/set child first.");
+
+  const medication_id = $("medSelect").value;
+  const dose = $("medDose").value.trim();
+  const notes = $("medNotes").value.trim() || null;
+
+  if (!medication_id) return alert("Select (or add) a medication first.");
+  if (!dose) return alert("Enter a dose.");
+
+  const res = await sb.from("medication_doses").insert({
+    child_id: childId,
+    medication_id,
+    dose,
+    notes
+  });
+
+  if (res.error) return alert(res.error.message);
+
+  $("medDose").value = "";
+  $("medNotes").value = "";
+  await loadMedsAndDoses();
+}
+
+/* ---------- DOM READY (WIRING + BOOT) ---------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("DOM READY ✅ wiring buttons...");
+
+  // Check required elements exist
+  const requiredIds = [
+    "btnRegister","btnLogin","btnCreateChild","btnSleepStart","btnSleepEnd",
+    "btnAddMeal","btnAddMood","btnAddMed","btnAddDose","btnLogout",
+    "email","password","authMsg"
+  ];
+  const missing = requiredIds.filter(id => !document.getElementById(id));
+  if (missing.length) {
+    console.error("Missing elements in index.html:", missing);
+    $("authMsg").textContent = "Page error: missing elements: " + missing.join(", ");
+    return;
+  }
+
+  // Wire buttons
+  $("btnRegister").onclick = doRegister;
+  $("btnLogin").onclick = doLogin;
+  $("btnCreateChild").onclick = createChild;
+
+  $("btnSleepStart").onclick = sleepStart;
+  $("btnSleepEnd").onclick = sleepEnd;
+
+  $("btnAddMeal").onclick = addMeal;
+  $("btnAddMood").onclick = saveMood;
+
+  $("btnAddMed").onclick = addMedication;
+  $("btnAddDose").onclick = addDose;
+
+  $("btnLogout").onclick = async () => {
+    await sb.auth.signOut();
+    childId = null;
+    showAuth("Logged out.");
+  };
+
+  // Boot
   const { data } = await sb.auth.getSession();
   console.log("Initial session:", data);
 
-  if (data?.session) {
-    await showApp();
-  } else {
-    showAuth("");
-  }
-})();
+  if (data?.session) await showApp();
+  else showAuth("");
+});
