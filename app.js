@@ -1,11 +1,14 @@
 /**************************************************
  * Freddie Routine – app.js
- * Version: 2026-01-02-menu-date-reset
+ * Version: 2026-01-02-menu-date-reset-backdated-1006
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
 const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
+
+// Backdated entries (non-today selected date) will be stored at this time:
+const BACKDATED_TIME = "10:06"; // HH:MM
 
 console.log("APP LOADED ✅", new Date().toISOString());
 
@@ -23,6 +26,7 @@ function yyyyMmDd(d = new Date()) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
 function toIsoRangeForDate(dateStr) {
   // Local day start/end, converted to ISO (UTC)
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -30,24 +34,39 @@ function toIsoRangeForDate(dateStr) {
   const end = new Date(y, m - 1, d, 23, 59, 59, 999).toISOString();
   return { start, end };
 }
+
 function hhmm(iso) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
 function combineDateAndTime(dateStr, timeStr) {
   // timeStr "HH:MM"
   const [y, m, d] = dateStr.split("-").map(Number);
   const [hh, mm] = timeStr.split(":").map(Number);
   return new Date(y, m - 1, d, hh, mm, 0, 0).toISOString();
 }
+
 function nowTimeStr() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function isTodaySelected() {
+  return selectedDateStr === yyyyMmDd(new Date());
+}
+
+function autoTimestampForSelectedDay() {
+  // Today: actual current timestamp
+  // Backdated: fixed 10:06 so it's clearly a backdated item
+  return isTodaySelected()
+    ? new Date().toISOString()
+    : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
+}
+
 /* ----------------- View switching ----------------- */
 function hideAllViews() {
-  ["authView","resetView","menuView","trackerView","previousView","exportView"].forEach(id => {
+  ["authView", "resetView", "menuView", "trackerView", "previousView", "exportView"].forEach((id) => {
     const el = $(id);
     if (el) el.style.display = "none";
   });
@@ -78,7 +97,7 @@ async function doRegister() {
   const res = await sb.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: SITE_URL }
+    options: { emailRedirectTo: SITE_URL },
   });
 
   console.log("Register result:", res);
@@ -131,8 +150,6 @@ async function doForgotPassword() {
   $("authMsg").textContent = "Reset email sent ✅ Check your inbox/spam.";
 }
 
-/* When user clicks reset link, Supabase redirects back with tokens in hash.
-   Supabase-js will detect session in URL automatically, but we show a reset form. */
 function isRecoveryLink() {
   return (location.hash || "").includes("type=recovery");
 }
@@ -160,7 +177,6 @@ async function setNewPassword() {
   }
 
   $("resetMsg").textContent = "Password updated ✅ Please login.";
-  // Clear hash so it doesn't keep showing reset view
   history.replaceState(null, "", location.pathname + location.search);
   await sb.auth.signOut();
   showView("authView");
@@ -176,18 +192,15 @@ async function goMenu() {
 async function goTracker(dateStr = null) {
   showView("trackerView");
 
-  // Set selected date
   selectedDateStr = dateStr || yyyyMmDd(new Date());
   $("selectedDate").value = selectedDateStr;
 
-  // Default times for time inputs
-  $("mealTime").value = nowTimeStr();
-  $("moodTime").value = nowTimeStr();
-  $("medTime").value = nowTimeStr();
+  // Only meds keep a time picker:
+  if ($("medTime")) $("medTime").value = nowTimeStr();
 
-  // Sleep manual defaults: set date with blank times (user can set)
-  $("sleepStartManual").value = "";
-  $("sleepEndManual").value = "";
+  // Sleep manual inputs
+  if ($("sleepStartManual")) $("sleepStartManual").value = "";
+  if ($("sleepEndManual")) $("sleepEndManual").value = "";
 
   await loadChildrenDropdown();
   await refreshAll();
@@ -213,11 +226,10 @@ async function loadChildrenDropdown() {
     return;
   }
 
-  // Restore last selection if available
   const last = localStorage.getItem("activeChildId");
-  const exists = children.find(c => c.id === last);
+  const exists = children.find((c) => c.id === last);
 
-  children.forEach(c => {
+  children.forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
     opt.textContent = c.name;
@@ -227,13 +239,13 @@ async function loadChildrenDropdown() {
   childId = exists ? exists.id : children[0].id;
   sel.value = childId;
 
-  const active = children.find(c => c.id === childId);
+  const active = children.find((c) => c.id === childId);
   $("childInfo").textContent = `Using child: ${active?.name ?? ""}`;
 
   sel.onchange = () => {
     childId = sel.value;
     localStorage.setItem("activeChildId", childId);
-    const chosen = children.find(c => c.id === childId);
+    const chosen = children.find((c) => c.id === childId);
     $("childInfo").textContent = `Using child: ${chosen?.name ?? ""}`;
     refreshAll();
   };
@@ -279,18 +291,16 @@ async function loadSleep() {
   (res.data || []).forEach((s) => {
     const st = new Date(s.start_time);
     const et = s.end_time ? new Date(s.end_time) : null;
-    if (et) totalMs += (et - st);
+    if (et) totalMs += et - st;
 
     const li = document.createElement("li");
-    li.textContent = `${hhmm(s.start_time)} → ${s.end_time ? hhmm(s.end_time) : "…"}${s.notes ? " • " + s.notes : ""}`;
+    li.textContent = `${hhmm(s.start_time)} → ${s.end_time ? hhmm(s.end_time) : "…"}${
+      s.notes ? " • " + s.notes : ""
+    }`;
     $("sleepList").appendChild(li);
   });
 
   $("sleepTotal").textContent = (totalMs / 3600000).toFixed(2) + "h";
-}
-
-function isTodaySelected() {
-  return selectedDateStr === yyyyMmDd(new Date());
 }
 
 async function sleepStart() {
@@ -307,7 +317,7 @@ async function sleepStart() {
     child_id: childId,
     start_time: new Date().toISOString(),
     notes,
-    user_id: user.id
+    user_id: user.id,
   });
 
   if (res.error) return alert(res.error.message);
@@ -332,7 +342,8 @@ async function sleepEnd() {
   if (open.error) return alert(open.error.message);
   if (!open.data?.length) return alert("No active sleep session found.");
 
-  const res = await sb.from("sleep_sessions")
+  const res = await sb
+    .from("sleep_sessions")
     .update({ end_time: new Date().toISOString() })
     .eq("id", open.data[0].id);
 
@@ -348,7 +359,7 @@ async function addSleepManual() {
   const notes = $("sleepNote").value.trim() || null;
 
   if (!startVal) return alert("Pick a manual sleep START time.");
-  // end is optional (allows “still sleeping” entries if you want)
+
   const startIso = new Date(startVal).toISOString();
   const endIso = endVal ? new Date(endVal).toISOString() : null;
 
@@ -363,7 +374,7 @@ async function addSleepManual() {
     start_time: startIso,
     end_time: endIso,
     notes,
-    user_id: user.id
+    user_id: user.id,
   });
 
   if (res.error) return alert(res.error.message);
@@ -388,7 +399,12 @@ async function loadMeals() {
   if (res.error) return console.error("Load meals error:", res.error);
 
   $("mealList").innerHTML = (res.data || [])
-    .map(m => `<li>${hhmm(m.time)} • ${m.meal_type} • ${m.percent_eaten}% • ${m.food_text ?? ""}${m.notes ? " • " + m.notes : ""}</li>`)
+    .map(
+      (m) =>
+        `<li>${hhmm(m.time)} • ${m.meal_type} • ${m.percent_eaten}% • ${m.food_text ?? ""}${
+          m.notes ? " • " + m.notes : ""
+        }</li>`
+    )
     .join("");
 }
 
@@ -396,8 +412,7 @@ async function addMeal() {
   if (!childId) return alert("Select/add a child first.");
 
   const user = await requireUser();
-  const timeStr = $("mealTime").value || nowTimeStr();
-  const timeIso = combineDateAndTime(selectedDateStr, timeStr);
+  const timeIso = autoTimestampForSelectedDay();
 
   const res = await sb.from("meals").insert({
     child_id: childId,
@@ -406,7 +421,7 @@ async function addMeal() {
     food_text: $("mealFood").value.trim() || null,
     notes: $("mealNotes").value.trim() || null,
     time: timeIso,
-    user_id: user.id
+    user_id: user.id,
   });
 
   if (res.error) return alert(res.error.message);
@@ -431,7 +446,10 @@ async function loadMoods() {
   if (res.error) return console.error("Load moods error:", res.error);
 
   $("moodList").innerHTML = (res.data || [])
-    .map(m => `<li>${hhmm(m.time)} • ${m.period}: ${m.mood}${m.notes ? " • " + m.notes : ""}</li>`)
+    .map(
+      (m) =>
+        `<li>${hhmm(m.time)} • ${m.period}: ${m.mood}${m.notes ? " • " + m.notes : ""}</li>`
+    )
     .join("");
 }
 
@@ -439,8 +457,7 @@ async function addMood() {
   if (!childId) return alert("Select/add a child first.");
 
   const user = await requireUser();
-  const timeStr = $("moodTime").value || nowTimeStr();
-  const timeIso = combineDateAndTime(selectedDateStr, timeStr);
+  const timeIso = autoTimestampForSelectedDay();
 
   const res = await sb.from("moods").insert({
     child_id: childId,
@@ -448,7 +465,7 @@ async function addMood() {
     mood: $("moodValue").value,
     notes: $("moodNotes").value.trim() || null,
     time: timeIso,
-    user_id: user.id
+    user_id: user.id,
   });
 
   if (res.error) return alert(res.error.message);
@@ -462,9 +479,15 @@ async function loadMedsAndDoses() {
   // meds dropdown
   const meds = await sb.from("medications").select("id,name,default_unit").order("name");
   if (!meds.error) {
-    $("medSelect").innerHTML = (meds.data || [])
-      .map(m => `<option value="${m.id}">${m.name}${m.default_unit ? " (" + m.default_unit + ")" : ""}</option>`)
-      .join("") || `<option value="">No meds yet</option>`;
+    $("medSelect").innerHTML =
+      (meds.data || [])
+        .map(
+          (m) =>
+            `<option value="${m.id}">${m.name}${
+              m.default_unit ? " (" + m.default_unit + ")" : ""
+            }</option>`
+        )
+        .join("") || `<option value="">No meds yet</option>`;
   }
 
   // doses list for selected day
@@ -479,7 +502,12 @@ async function loadMedsAndDoses() {
 
   if (!doses.error) {
     $("medList").innerHTML = (doses.data || [])
-      .map(d => `<li>${hhmm(d.given_at)} • ${d.medications?.name ?? "Medication"} • ${d.dose}${d.notes ? " • " + d.notes : ""}</li>`)
+      .map(
+        (d) =>
+          `<li>${hhmm(d.given_at)} • ${d.medications?.name ?? "Medication"} • ${d.dose}${
+            d.notes ? " • " + d.notes : ""
+          }</li>`
+      )
       .join("");
   }
 }
@@ -508,17 +536,20 @@ async function addDose() {
   if (!medication_id) return alert("Add/select a medication first.");
   if (!dose) return alert("Enter a dose.");
 
-  const timeStr = $("medTime").value || nowTimeStr();
-  const given_at = combineDateAndTime(selectedDateStr, timeStr);
-
   const user = await requireUser();
+
+  // Medication still uses a time picker, but if backdated, force 10:06
+  const given_at = isTodaySelected()
+    ? combineDateAndTime(selectedDateStr, ($("medTime").value || nowTimeStr()))
+    : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
+
   const res = await sb.from("medication_doses").insert({
     child_id: childId,
     medication_id,
     dose,
     notes,
     given_at,
-    user_id: user.id
+    user_id: user.id,
   });
 
   if (res.error) return alert(res.error.message);
@@ -531,7 +562,10 @@ async function addDose() {
 /* ----------------- Navigation ----------------- */
 function setupNav() {
   $("btnGoTracker").onclick = () => goTracker(selectedDateStr || yyyyMmDd(new Date()));
-  $("btnGoPrevious").onclick = () => { showView("previousView"); $("previousPick").value = selectedDateStr || yyyyMmDd(new Date()); };
+  $("btnGoPrevious").onclick = () => {
+    showView("previousView");
+    $("previousPick").value = selectedDateStr || yyyyMmDd(new Date());
+  };
   $("btnGoExport").onclick = () => showView("exportView");
 
   $("btnBackToMenu").onclick = goMenu;
@@ -549,17 +583,16 @@ function setupNav() {
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM READY ✅ wiring...");
 
-  // Default date = today
   selectedDateStr = yyyyMmDd(new Date());
 
-  // Wire auth buttons
+  // Auth buttons
   $("btnRegister").onclick = doRegister;
   $("btnLogin").onclick = doLogin;
   $("btnForgotPassword").onclick = doForgotPassword;
 
   // Reset view
   $("btnSetNewPassword").onclick = setNewPassword;
-  $("btnBackToLogin").onclick = () => { showView("authView"); };
+  $("btnBackToLogin").onclick = () => showView("authView");
 
   // Menu + navigation
   setupNav();
@@ -569,43 +602,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("selectedDate").onchange = async () => {
     selectedDateStr = $("selectedDate").value;
-    $("mealTime").value = nowTimeStr();
-    $("moodTime").value = nowTimeStr();
-    $("medTime").value = nowTimeStr();
+    // Only meds keep a time picker default:
+    if ($("medTime")) $("medTime").value = nowTimeStr();
     await refreshAll();
   };
 
+  // Sleep
   $("btnSleepStart").onclick = sleepStart;
   $("btnSleepEnd").onclick = sleepEnd;
   $("btnAddSleepManual").onclick = addSleepManual;
 
+  // Meals + moods (no time inputs now)
   $("btnAddMeal").onclick = addMeal;
   $("btnAddMood").onclick = addMood;
 
+  // Medication
   $("btnAddMed").onclick = addMedication;
   $("btnAddDose").onclick = addDose;
 
+  // Logout
   $("btnLogout").onclick = async () => {
     await sb.auth.signOut();
     childId = null;
     showView("authView");
   };
 
-  // Boot logic:
-  // 1) If user clicked a password reset link, show reset view
+  // Boot
   if (isRecoveryLink()) {
     showView("resetView");
     $("resetMsg").textContent = "";
     return;
   }
 
-  // 2) If session exists, show menu; otherwise auth
   const { data } = await sb.auth.getSession();
   console.log("Initial session:", data);
 
-  if (data?.session) {
-    await goMenu();
-  } else {
-    showView("authView");
-  }
+  if (data?.session) await goMenu();
+  else showView("authView");
 });
