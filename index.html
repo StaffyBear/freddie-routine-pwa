@@ -148,19 +148,18 @@
     <div class="card">
       <h2>Meals</h2>
 
-      <div class="row3">
-        <select id="mealType">
-          <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
-          <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
-        </select>
+    <div class="row">
+      <select id="mealType">
+        <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
+        <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
+      </select>
+    
+      <select id="mealPercent">
+        <option value="0">0%</option><option value="25">25%</option><option value="50">50%</option>
+        <option value="75">75%</option><option value="100">100%</option>
+      </select>
+    </div>
 
-        <select id="mealPercent">
-          <option value="0">0%</option><option value="25">25%</option><option value="50">50%</option>
-          <option value="75">75%</option><option value="100">100%</option>
-        </select>
-
-        <input id="mealTime" type="time" />
-      </div>
 
       <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
       <textarea id="mealNotes" placeholder="Meal notes"></textarea>
@@ -172,20 +171,19 @@
     <div class="card">
       <h2>Mood</h2>
 
-      <div class="row3">
-        <select id="moodPeriod">
-          <option>Morning</option><option>Afternoon</option><option>Evening</option>
-        </select>
+    <div class="row">
+      <select id="moodPeriod">
+        <option>Morning</option><option>Afternoon</option><option>Evening</option>
+      </select>
+    
+      <select id="moodValue">
+        <option>Calm</option><option>Content</option><option>Energetic</option><option>Fussy</option>
+        <option>Happy</option><option>Irritable</option><option>Playful</option><option>Settled</option>
+        <option>Tired</option><option>Unwell</option><option>Sick</option><option>Teething</option>
+        <option>Upset / Crying</option>
+      </select>
+    </div>
 
-        <select id="moodValue">
-          <option>Calm</option><option>Content</option><option>Energetic</option><option>Fussy</option>
-          <option>Happy</option><option>Irritable</option><option>Playful</option><option>Settled</option>
-          <option>Tired</option><option>Unwell</option><option>Sick</option><option>Teething</option>
-          <option>Upset / Crying</option>
-        </select>
-
-        <input id="moodTime" type="time" />
-      </div>
 
       <textarea id="moodNotes" placeholder="Mood notes"></textarea>
       <button id="btnAddMood">Save Mood</button>
