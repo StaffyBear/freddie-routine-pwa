@@ -3,7 +3,7 @@
  * Version: 2026-01-02-domready
  **************************************************/
 
-const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co";
+const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
 console.log("APP LOADED ✅", new Date().toISOString());
