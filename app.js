@@ -3,7 +3,7 @@
  * Version: 2026-01-02-rls-fix2
  **************************************************/
 
-const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co";
+const SUPABASE_URL = "https://jjjombeomtbtzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
 console.log("APP LOADED ✅", new Date().toISOString());
