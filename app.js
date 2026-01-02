@@ -1,6 +1,6 @@
 /**************************************************
  * Freddie Routine – app.js
- * Version: 2026-01-02-rls-fix
+ * Version: 2026-01-02-rls-fix2
  **************************************************/
 
 const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co";
@@ -118,53 +118,59 @@ async function loadOrSetChild() {
   const res = await sb
     .from("children")
     .select("id,name")
-    .order("created_at", { ascending: true })
-    .limit(1);
+    .order("created_at", { ascending: true });
 
   if (res.error) {
-    console.error("Load child error:", res.error);
-    $("childInfo").textContent = "Error loading child: " + res.error.message;
-    childId = null;
+    console.error("Load children error:", res.error);
+    $("childInfo").textContent = "Error loading children";
     return;
   }
 
-  if (res.data && res.data.length) {
-    childId = res.data[0].id;
-    $("childInfo").textContent = `Using child: ${res.data[0].name}`;
-  } else {
+  const children = res.data || [];
+  const select = $("childSelect");
+
+  select.innerHTML = "";
+
+  if (!children.length) {
+    select.innerHTML = `<option value="">No children yet</option>`;
     childId = null;
-    $("childInfo").textContent = "No child yet. Create one above.";
+    $("childInfo").textContent = "No child yet. Add one below.";
+    return;
   }
+
+  children.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    select.appendChild(opt);
+  });
+
+  // Set active child (first by default)
+  childId = select.value = children[0].id;
+  $("childInfo").textContent = `Using child: ${children[0].name}`;
+
+  select.onchange = () => {
+    const chosen = children.find(c => c.id === select.value);
+    childId = chosen.id;
+    $("childInfo").textContent = `Using child: ${chosen.name}`;
+    refreshAll();
+  };
 }
 
 async function createChild() {
-  console.log("Create child clicked ✅");
-
   const name = $("childName").value.trim();
   if (!name) return alert("Enter a child name.");
 
-  let user;
-  try {
-    user = await requireUser();
-  } catch (e) {
-    alert(e.message);
-    return;
-  }
+  const user = await requireUser();
 
-  // IMPORTANT: include user_id explicitly to satisfy RLS
   const res = await sb
     .from("children")
-    .insert({ name, user_id: user.id })
-    .select("id,name")
-    .single();
-
-  console.log("Create child result:", res);
+    .insert({ name, user_id: user.id });
 
   if (res.error) return alert(res.error.message);
 
-  childId = res.data.id;
   $("childName").value = "";
-  $("childInfo").textContent = `Using child: ${res.data.name}`;
+  await loadOrSetChild();
   await refreshAll();
 }
 
