@@ -315,61 +315,47 @@ async function addDose() {
 
 // ======================= AUTH =======================
 async function doLogin() {
-  const email = $("email").value.trim();
-  const password = $("password").value;
+  const emailVal = $("email")?.value?.trim();
+  const passVal = $("password")?.value;
 
-  $("authMsg").textContent = "";
-
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    $("authMsg").textContent = error.message;
+  if (!emailVal || !passVal) {
+    $("authMsg").textContent = "Enter BOTH email and password.";
     return;
   }
 
+  $("authMsg").textContent = "Logging in...";
+
+  const res = await sb.auth.signInWithPassword({ email: emailVal, password: passVal });
+
+  if (res.error) {
+    console.error("LOGIN ERROR:", res.error);
+    $("authMsg").textContent = `Login error: ${res.error.message}`;
+    return;
+  }
+
+  $("authMsg").textContent = "";
   await showApp();
 }
 
 async function doRegister() {
-  const email = $("email").value.trim();
-  const password = $("password").value;
+  const emailVal = $("email")?.value?.trim();
+  const passVal = $("password")?.value;
 
-  $("authMsg").textContent = "";
-
-  const { error } = await sb.auth.signUp({ email, password });
-  if (error) {
-    $("authMsg").textContent = error.message;
+  if (!emailVal || !passVal) {
+    $("authMsg").textContent = "Enter BOTH email and password.";
     return;
   }
 
-  // If email confirmation is ON, user must confirm email first.
-  $("authMsg").textContent = "Registered! If login fails, check your email to confirm, then login.";
+  $("authMsg").textContent = "Registering...";
+
+  const res = await sb.auth.signUp({ email: emailVal, password: passVal });
+
+  if (res.error) {
+    console.error("REGISTER ERROR:", res.error);
+    $("authMsg").textContent = `Register error: ${res.error.message}`;
+    return;
+  }
+
+  $("authMsg").textContent = "Registered! Now press Login (or check email if confirmations are on).";
 }
 
-// Buttons
-$("btnLogin").onclick = doLogin;
-$("btnRegister").onclick = doRegister;
-$("btnCreateChild").onclick = createChild;
-
-$("btnSleepStart").onclick = sleepStart;
-$("btnSleepEnd").onclick = sleepEnd;
-
-$("btnAddMeal").onclick = addMeal;
-
-$("btnAddMood").onclick = saveMood;
-
-$("btnAddMed").onclick = addMedication;
-$("btnAddDose").onclick = addDose;
-
-$("btnLogout").onclick = async () => {
-  await sb.auth.signOut();
-  childId = null;
-  await showAuth("Logged out.");
-};
-
-// Boot
-(async () => {
-  // If you’re already logged in, go straight in.
-  const { data } = await sb.auth.getSession();
-  if (data?.session) await showApp();
-  else await showAuth("");
-})();
