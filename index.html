@@ -5,104 +5,204 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Freddie’s Routine</title>
   <link rel="manifest" href="manifest.json">
+
   <style>
-    body { font-family: system-ui; max-width: 760px; margin: 16px auto; padding: 0 12px; }
-    input, select, textarea, button { width: 100%; padding: 10px; margin: 6px 0; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin: 12px 0; }
-    ul { padding-left: 18px; }
-    small { color: #666; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui; max-width: 880px; margin: 16px auto; padding: 0 12px; }
+    h1 { margin: 10px 0 18px; }
+    h2 { margin: 0 0 10px; }
+    h3 { margin: 14px 0 8px; }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #cfcfcf;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    .card {
+      border: 1px solid #dedede;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .muted { color: #666; font-size: 13px; }
     .danger { color: #b00020; }
     .ok { color: #0a7b3b; }
+
+    .menuBtn { padding: 14px; font-weight: 600; }
+    .navRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .topBar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .topBar > div { flex: 1; min-width: 220px; }
+
+    ul { padding-left: 18px; margin: 8px 0; }
+    li { margin: 6px 0; }
   </style>
 </head>
+
 <body>
   <h1>Freddie’s Routine</h1>
 
-  <!-- AUTH -->
-  <div id="auth" class="card">
+  <!-- AUTH VIEW -->
+  <div id="authView" class="card">
     <h2>Login / Register</h2>
     <input id="email" placeholder="Email" autocomplete="email" />
     <input id="password" type="password" placeholder="Password (6+ chars)" autocomplete="current-password" />
+
     <div class="row">
       <button id="btnLogin">Login</button>
       <button id="btnRegister">Register</button>
     </div>
+
+    <button id="btnForgotPassword">Forgot password?</button>
+
     <p id="authMsg" class="danger"></p>
+    <p class="muted">Tip: if email confirmations are enabled, register → confirm email → then login.</p>
   </div>
 
-  <!-- APP -->
-  <div id="app" style="display:none">
+  <!-- PASSWORD RESET VIEW (when you click email link) -->
+  <div id="resetView" class="card" style="display:none;">
+    <h2>Set New Password</h2>
+    <p class="muted">You opened a password recovery link. Set a new password below.</p>
 
-<div class="card">
-  <h2>Child</h2>
+    <input id="newPassword" type="password" placeholder="New password" />
+    <input id="newPassword2" type="password" placeholder="Confirm new password" />
+    <button id="btnSetNewPassword">Update Password</button>
 
-  <!-- Select existing child -->
-  <select id="childSelect"></select>
-
-  <!-- Add new child -->
-  <div class="row">
-    <input id="childName" placeholder="Add new child (e.g. Freddie)" />
-    <button id="btnCreateChild">Add Child</button>
+    <p id="resetMsg" class="danger"></p>
+    <button id="btnBackToLogin">Back to login</button>
   </div>
 
-  <small id="childInfo"></small>
-</div>
+  <!-- MAIN MENU (after login) -->
+  <div id="menuView" class="card" style="display:none;">
+    <h2>Main Menu</h2>
+    <div class="navRow">
+      <button id="btnGoTracker" class="menuBtn">Routine Tracker</button>
+      <button id="btnGoPrevious" class="menuBtn">Previous Days</button>
+    </div>
+    <div class="navRow">
+      <button id="btnGoExport" class="menuBtn">Export Data</button>
+      <button id="btnLogout" class="menuBtn">Logout</button>
+    </div>
+    <p id="menuMsg" class="muted"></p>
+  </div>
 
+  <!-- TRACKER VIEW -->
+  <div id="trackerView" style="display:none;">
+    <div class="card">
+      <div class="topBar">
+        <div>
+          <h2>Routine Tracker</h2>
+          <p class="muted">Select a date to view or add entries for that day.</p>
+        </div>
+        <div>
+          <label class="muted">Selected date</label>
+          <input id="selectedDate" type="date" />
+        </div>
+      </div>
 
+      <div>
+        <label class="muted">Child</label>
+        <select id="childSelect"></select>
+
+        <div class="row">
+          <input id="childName" placeholder="Add new child (e.g. Freddie)" />
+          <button id="btnAddChild">Add Child</button>
+        </div>
+
+        <small id="childInfo" class="muted"></small>
+      </div>
+    </div>
+
+    <!-- SLEEP -->
     <div class="card">
       <h2>Sleep</h2>
+
       <div class="row">
-        <button id="btnSleepStart">Start Sleep</button>
-        <button id="btnSleepEnd">End Sleep</button>
+        <button id="btnSleepStart">Start Sleep (now)</button>
+        <button id="btnSleepEnd">End Sleep (now)</button>
       </div>
-      <textarea id="sleepNote" placeholder="Optional sleep notes (applies to next start/end)"></textarea>
-      <p><b>Total sleep today:</b> <span id="sleepTotal">0.00h</span></p>
+
+      <h3>Manual sleep entry</h3>
+      <div class="row">
+        <input id="sleepStartManual" type="datetime-local" />
+        <input id="sleepEndManual" type="datetime-local" />
+      </div>
+      <textarea id="sleepNote" placeholder="Sleep notes (optional)"></textarea>
+      <button id="btnAddSleepManual">Add Manual Sleep</button>
+
+      <p><b>Total sleep (selected day):</b> <span id="sleepTotal">0.00h</span></p>
       <ul id="sleepList"></ul>
     </div>
 
+    <!-- MEALS -->
     <div class="card">
       <h2>Meals</h2>
-      <select id="mealType">
-        <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
-        <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
-      </select>
-      <div class="row">
+
+      <div class="row3">
+        <select id="mealType">
+          <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
+          <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
+        </select>
+
         <select id="mealPercent">
           <option value="0">0%</option><option value="25">25%</option><option value="50">50%</option>
           <option value="75">75%</option><option value="100">100%</option>
         </select>
-        <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
+
+        <input id="mealTime" type="time" />
       </div>
+
+      <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
       <textarea id="mealNotes" placeholder="Meal notes"></textarea>
       <button id="btnAddMeal">Add Meal</button>
       <ul id="mealList"></ul>
     </div>
 
+    <!-- MOOD -->
     <div class="card">
       <h2>Mood</h2>
-      <div class="row">
+
+      <div class="row3">
         <select id="moodPeriod">
           <option>Morning</option><option>Afternoon</option><option>Evening</option>
         </select>
+
         <select id="moodValue">
           <option>Calm</option><option>Content</option><option>Energetic</option><option>Fussy</option>
           <option>Happy</option><option>Irritable</option><option>Playful</option><option>Settled</option>
           <option>Tired</option><option>Unwell</option><option>Sick</option><option>Teething</option>
           <option>Upset / Crying</option>
         </select>
+
+        <input id="moodTime" type="time" />
       </div>
+
       <textarea id="moodNotes" placeholder="Mood notes"></textarea>
       <button id="btnAddMood">Save Mood</button>
       <ul id="moodList"></ul>
+      <p class="muted">Tip: you can save multiple moods per day, but we can also make it “one per period per day” if you want.</p>
     </div>
 
+    <!-- MEDICATION -->
     <div class="card">
       <h2>Medication</h2>
-      <div class="row">
+
+      <div class="row3">
         <select id="medSelect"></select>
         <input id="medDose" placeholder="Dose (e.g. 5ml)" />
+        <input id="medTime" type="time" />
       </div>
+
       <textarea id="medNotes" placeholder="Medication notes"></textarea>
       <button id="btnAddDose">Add Dose</button>
 
@@ -116,8 +216,30 @@
       <ul id="medList"></ul>
     </div>
 
-    <button id="btnLogout">Logout</button>
-    <p id="statusMsg"></p>
+    <div class="card">
+      <button id="btnBackToMenu">Back to Menu</button>
+      <p id="statusMsg" class="muted"></p>
+    </div>
+  </div>
+
+  <!-- PREVIOUS DAYS VIEW -->
+  <div id="previousView" class="card" style="display:none;">
+    <h2>Previous Days</h2>
+    <p class="muted">Pick a date and jump into the tracker for that day.</p>
+
+    <input id="previousPick" type="date" />
+    <button id="btnOpenPrevious">Open Selected Day</button>
+
+    <button id="btnPrevBackToMenu">Back to Menu</button>
+  </div>
+
+  <!-- EXPORT VIEW -->
+  <div id="exportView" class="card" style="display:none;">
+    <h2>Export Data</h2>
+    <p class="muted">Next step: export to CSV/PDF for court-friendly evidence.</p>
+    <p class="muted">Tell me what format you want first: CSV, PDF, or both.</p>
+
+    <button id="btnExportBackToMenu">Back to Menu</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
