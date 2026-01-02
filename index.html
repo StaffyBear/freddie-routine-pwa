@@ -34,14 +34,21 @@
   <!-- APP -->
   <div id="app" style="display:none">
 
-    <div class="card">
-      <h2>Child</h2>
-      <div class="row">
-        <input id="childName" placeholder="Child name (e.g. Freddie)" />
-        <button id="btnCreateChild">Create / Set Child</button>
-      </div>
-      <small id="childInfo"></small>
-    </div>
+<div class="card">
+  <h2>Child</h2>
+
+  <!-- Select existing child -->
+  <select id="childSelect"></select>
+
+  <!-- Add new child -->
+  <div class="row">
+    <input id="childName" placeholder="Add new child (e.g. Freddie)" />
+    <button id="btnCreateChild">Add Child</button>
+  </div>
+
+  <small id="childInfo"></small>
+</div>
+
 
     <div class="card">
       <h2>Sleep</h2>
