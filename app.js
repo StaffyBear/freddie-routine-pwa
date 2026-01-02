@@ -4,7 +4,7 @@
  **************************************************/
 
 const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqam9tYmVvbXRienR6Y2hpdWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNzk5MTgsImV4cCI6MjA4Mjk1NTkxOH0.28ADFdTW2YKOMrp7klwbpRjKbSLIR7URaij_AmIqNOE";
+const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
 console.log("APP LOADED ✅", new Date().toISOString());
 
