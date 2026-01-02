@@ -1,3 +1,6 @@
+console.log("APP VERSION 2026-01-02-1");
+
+
 // 1) PUT YOUR VALUES HERE (Project URL + anon public key)
 const SUPABASE_URL = "https://jjombeomtbtzchiult.supabase.co"; // <-- replace if different
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqam9tYmVvbXRienR6Y2hpdWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNzk5MTgsImV4cCI6MjA4Mjk1NTkxOH0.28ADFdTW2YKOMrp7klwbpRjKbSLIR7URaij_AmIqNOE";        // <-- paste anon key
