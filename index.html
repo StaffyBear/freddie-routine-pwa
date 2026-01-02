@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Freddie Routine</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: system-ui; max-width: 720px; margin: 16px auto; padding: 0 12px; }
+    input, select, textarea, button { width: 100%; padding: 10px; margin: 6px 0; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin: 12px 0; }
+    ul { padding-left: 18px; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Freddie’s Routine</h1>
+
+  <div id="auth" class="card">
+    <h2>Login / Register</h2>
+    <input id="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <div class="row">
+      <button id="btnLogin">Login</button>
+      <button id="btnRegister">Register</button>
+    </div>
+    <p id="authMsg"></p>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="card">
+      <h2>Child</h2>
+      <div class="row">
+        <input id="childName" placeholder="Child name (e.g. Freddie)" />
+        <button id="btnCreateChild">Create / Set Child</button>
+      </div>
+      <small id="childInfo"></small>
+    </div>
+
+    <div class="card">
+      <h2>Sleep</h2>
+      <div class="row">
+        <button id="btnSleepStart">Start Sleep</button>
+        <button id="btnSleepEnd">End Sleep</button>
+      </div>
+      <p><b>Total sleep today:</b> <span id="sleepTotal">0h</span></p>
+      <ul id="sleepList"></ul>
+      <textarea id="sleepNote" placeholder="Optional notes (applies to next start/end)"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Meals</h2>
+      <select id="mealType">
+        <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
+        <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
+      </select>
+      <div class="row">
+        <select id="mealPercent">
+          <option value="0">0%</option><option value="25">25%</option><option value="50">50%</option>
+          <option value="75">75%</option><option value="100">100%</option>
+        </select>
+        <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
+      </div>
+      <textarea id="mealNotes" placeholder="Meal notes"></textarea>
+      <button id="btnAddMeal">Add Meal</button>
+      <ul id="mealList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Mood</h2>
+      <div class="row">
+        <select id="moodPeriod">
+          <option>Morning</option><option>Afternoon</option><option>Evening</option>
+        </select>
+        <select id="moodValue">
+          <option>Calm</option><option>Content</option><option>Energetic</option><option>Fussy</option>
+          <option>Happy</option><option>Irritable</option><option>Playful</option><option>Settled</option>
+          <option>Tired</option><option>Unwell</option><option>Sick</option><option>Teething</option>
+          <option>Upset / Crying</option>
+        </select>
+      </div>
+      <textarea id="moodNotes" placeholder="Mood notes"></textarea>
+      <button id="btnAddMood">Save Mood</button>
+      <ul id="moodList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Medication</h2>
+      <div class="row">
+        <select id="medSelect"></select>
+        <input id="medDose" placeholder="Dose (e.g. 5ml)" />
+      </div>
+      <textarea id="medNotes" placeholder="Medication notes"></textarea>
+      <button id="btnAddDose">Add Dose</button>
+
+      <h3>Add new medication</h3>
+      <div class="row">
+        <input id="newMedName" placeholder="Name (e.g. Calpol)" />
+        <input id="newMedUnit" placeholder="Unit (ml/mg)" />
+      </div>
+      <button id="btnAddMed">Add Medication</button>
+
+      <ul id="medList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Export</h2>
+      <p><small>We’ll implement proper CSV/PDF export next. For now, focus on logging.</small></p>
+    </div>
+
+    <button id="btnLogout">Logout</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
