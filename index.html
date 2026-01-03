@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Routine Tracker</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0F6F4F">
 
-  <!-- External CSS -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -25,7 +22,6 @@
     <input id="email" placeholder="Email" autocomplete="email" />
     <input id="password" type="password" placeholder="Password (6+ chars)" autocomplete="current-password" />
 
-    <!-- same line -->
     <div class="authRow">
       <button id="btnLogin">Login</button>
       <button id="btnRegister" class="secondary">Register</button>
@@ -157,7 +153,6 @@
 
       <h3>Manual sleep entry</h3>
 
-      <!-- manual fields + button on one line -->
       <div class="row">
         <input id="sleepStartManual" type="datetime-local" />
         <input id="sleepEndManual" type="datetime-local" />
@@ -186,8 +181,12 @@
       </div>
 
       <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
-      <textarea id="mealNotes" placeholder="Meal notes"></textarea>
-      <button id="btnAddMeal">Add Meal</button>
+
+      <div class="actionRow">
+        <textarea id="mealNotes" placeholder="Meal notes"></textarea>
+        <button id="btnAddMeal">Add Meal</button>
+      </div>
+
       <ul id="mealList"></ul>
     </div>
 
@@ -207,8 +206,11 @@
         </select>
       </div>
 
-      <textarea id="moodNotes" placeholder="Mood notes"></textarea>
-      <button id="btnAddMood">Save Mood</button>
+      <div class="actionRow">
+        <textarea id="moodNotes" placeholder="Mood notes"></textarea>
+        <button id="btnAddMood">Save Mood</button>
+      </div>
+
       <ul id="moodList"></ul>
     </div>
 
@@ -223,8 +225,10 @@
         </div>
       </div>
 
-      <textarea id="medNotes" placeholder="Medication notes"></textarea>
-      <button id="btnAddDose">Add Dose</button>
+      <div class="actionRow">
+        <textarea id="medNotes" placeholder="Medication notes"></textarea>
+        <button id="btnAddDose">Add Dose</button>
+      </div>
 
       <ul id="medList"></ul>
     </div>
@@ -253,6 +257,7 @@
       </div>
     </div>
 
+    <!-- the rest of A&I stays the same as your existing file -->
     <div id="accidentTab" class="card">
       <h2>Accident</h2>
 
