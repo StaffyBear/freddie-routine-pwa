@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Routine Tracker</title>
 
-  <!-- PWA --->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
 
@@ -44,7 +44,7 @@
     /* Historic styling: pale pink background, text stays black */
     .historicCard { background: #ffe8ee; }
 
-    .muted { color: #333; font-size: 13px; } /* keep readable, still black-ish */
+    .muted { color: #333; font-size: 13px; }
     .danger { color: #b00020; }
     .historicDate { color: #b00020; font-weight: 900; }
 
@@ -82,14 +82,14 @@
       font-size: 16px;
     }
 
-    /* Hover cursor for working buttons */
+    /* Hover cursor */
     button, .pill { cursor: pointer; }
     button:disabled { cursor: not-allowed; opacity: 0.6; }
 
-    /* Center logout if it's alone/at bottom */
+    /* Center logout */
     .centerBtn { max-width: 420px; margin: 10px auto 0; display:block; }
 
-    /* Small offline banner */
+    /* Offline banner */
     .banner {
       border-radius: 10px;
       padding: 10px;
@@ -132,10 +132,10 @@
     <button id="btnBackToLogin">Back to login</button>
   </div>
 
-  <!-- MAIN MENU (Title Page) -->
+  <!-- MAIN MENU -->
   <div id="menuView" style="display:none;">
     <div class="card">
-      <h1>Routine Tracker</h1>
+      <h1>Main Menu</h1>
 
       <div id="offlineBanner" class="banner hidden"></div>
 
@@ -156,22 +156,20 @@
 
       <div class="navRow">
         <button id="btnInstallApp" class="menuBtn" style="display:none;">Install App</button>
-        <button id="btnSyncNow" class="menuBtn">Sync Now</button>
       </div>
 
       <button id="btnLogout" class="menuBtn centerBtn">Logout</button>
 
       <p id="installMsg" class="muted"></p>
-      <p id="syncMsg" class="muted"></p>
     </div>
   </div>
 
-  <!-- ADD MEDICATION VIEW -->
+  <!-- NEW MEDICATION VIEW -->
   <div id="addMedicationView" class="card" style="display:none;">
+    <h2>New Medication</h2>
+
     <div class="dayBar">
-      <div class="dayBarLeft">
-        <span class="dateText">New Medication</span>
-      </div>
+      <div class="dayBarLeft"></div>
       <button id="btnAddMedBackToMenu" class="miniBtn" type="button">Back to Menu</button>
     </div>
 
@@ -203,9 +201,11 @@
     <button id="btnHistoricAIBackToMenu">Back to Menu</button>
   </div>
 
-  <!-- TRACKER VIEW -->
+  <!-- ROUTINE TRACKER VIEW -->
   <div id="trackerView" style="display:none;">
     <div id="trackerTopCard" class="card">
+      <h2>Routine Tracker</h2>
+
       <div class="dayBar">
         <div class="dayBarLeft">
           <button id="btnTrackerPrevDay" class="miniBtn" type="button">◀</button>
@@ -226,7 +226,6 @@
 
     <div id="sleepCard" class="card">
       <h2>Sleep</h2>
-
       <div class="row">
         <button id="btnSleepStart">Start Sleep (now)</button>
         <button id="btnSleepEnd">End Sleep (now)</button>
@@ -246,7 +245,6 @@
 
     <div id="mealsCard" class="card">
       <h2>Meals</h2>
-
       <div class="row">
         <select id="mealType">
           <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
@@ -267,7 +265,6 @@
 
     <div id="moodCard" class="card">
       <h2>Mood</h2>
-
       <div class="row">
         <select id="moodPeriod">
           <option>Morning</option><option>Afternoon</option><option>Evening</option>
@@ -288,7 +285,6 @@
 
     <div id="medCard" class="card">
       <h2>Medication</h2>
-
       <div class="row3">
         <select id="medSelect"></select>
         <input id="medDose" placeholder="Dose (e.g. 5ml)" />
@@ -307,6 +303,8 @@
   <!-- ACCIDENT & ILLNESS VIEW -->
   <div id="accidentView" style="display:none;">
     <div id="aiTopCard" class="card">
+      <h2>Accident &amp; Illness</h2>
+
       <div class="dayBar">
         <div class="dayBarLeft">
           <button id="btnAIPrevDay" class="miniBtn" type="button">◀</button>
@@ -327,7 +325,6 @@
 
     <div id="accidentTab" class="card">
       <h3>Accident</h3>
-
       <label class="muted">What happened</label>
       <textarea id="accWhat" placeholder="Describe what happened..."></textarea>
 
