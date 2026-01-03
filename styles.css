@@ -3,12 +3,11 @@
   --primary-hover: #0c5e42;
 
   --secondary: #cceee7;
-  --accent: #7fd1c7;
 
   --bg: #eef6f3;
   --card-bg: #f6fbf9;
   --today-bg: #e9f5f0;     /* present day tint */
-  --historic-bg: #f8d7da;  /* pale red/pink */
+  --historic-bg: #f8d7da;  /* pale red/pink fill */
 
   --text: #111;
   --muted: #6b7280;
@@ -18,6 +17,8 @@
 
   --radius: 14px;
   --control-height: 44px;
+
+  --gap: 10px;
 }
 
 * { box-sizing: border-box; }
@@ -37,6 +38,49 @@ h1, h2, h3 { margin: 0 0 10px; }
 .page-title {
   text-align: center;
   margin-bottom: 12px;
+}
+
+/* ===== Cards ===== */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Today tint */
+.card.today { background: var(--today-bg); }
+
+/* ✅ Historic MUST override everything (including .today) */
+.historicCard,
+.card.historic,
+.card.historicCard,
+.card.today.historicCard,
+.card.today.historic {
+  background: var(--historic-bg) !important; /* <- ensures filled pink */
+  border-color: #f0b9c0 !important;
+}
+
+/* ===== Consistent spacing inside cards ===== */
+/* Give breathing room between stacked elements */
+.card input,
+.card select,
+.card textarea,
+.card button {
+  margin-top: var(--gap);
+}
+
+/* But not for the first element in a card */
+.card > :first-child {
+  margin-top: 0;
+}
+
+/* Labels look better with a small top gap */
+label.muted {
+  display: block;
+  margin-top: var(--gap);
 }
 
 /* ===== Controls ===== */
@@ -81,6 +125,7 @@ button.secondary:hover { background: #b7e4dc; }
 button.miniBtn {
   width: auto;
   padding: 0 14px;
+  margin-top: 0; /* avoid pushing daybar down */
 }
 
 button:disabled {
@@ -88,91 +133,58 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ===== Cards ===== */
-.card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid var(--border);
-}
-
-/* Present day tint */
-.card.today { background: var(--today-bg); }
-
-/* Historic tint (IMPORTANT: your JS uses historicCard) */
-.historicCard,
-.card.historic {
-  background: var(--historic-bg);
-  border-color: #f0b9c0;
-}
-
-/* ===== Layout Rows ===== */
+/* ===== Layout rows ===== */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--gap);
   align-items: center;
+  margin-top: var(--gap);
 }
 
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  gap: var(--gap);
   align-items: center;
+  margin-top: var(--gap);
 }
 
-/* ✅ Notes + button beside it */
+/* Notes + button */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
-
-  /* KEY: makes the button match the textarea height */
-  align-items: stretch;
+  gap: var(--gap);
+  align-items: stretch; /* make button match notes height */
+  margin-top: var(--gap);
 }
 
+/* Make notes comfortably tall by default */
 .actionRow textarea {
-  min-height: calc(var(--control-height) * 2); /* makes notes box taller by default */
+  min-height: calc(var(--control-height) * 2);
 }
 
+/* Button matches textarea height */
 .actionRow button {
-  height: 100%;            /* KEY: button becomes same height as notes field */
+  height: 100%;
   min-height: var(--control-height);
-  align-self: stretch;
   min-width: 150px;
 }
 
-/* ===== Login spacing fix ===== */
-#authView input {
-  margin-top: 10px;
-}
-
-#authView input:first-of-type {
-  margin-top: 0;
-}
-
-.authRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-/* ===== Nav / Day Bar ===== */
+/* Day bar */
 .dayBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: var(--gap);
+  margin-top: 0;
+  margin-bottom: var(--gap);
 }
 
 .dayBarLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--gap);
 }
 
 .dateText { font-weight: 900; }
@@ -184,8 +196,8 @@ button:disabled {
 ul { margin: 10px 0 0; padding-left: 18px; }
 li { margin: 6px 0; }
 
-/* ===== Pills (Accident / Illness tabs) ===== */
-.pillRow { display: flex; gap: 10px; margin-top: 10px; }
+/* Pills */
+.pillRow { display: flex; gap: var(--gap); margin-top: var(--gap); }
 
 .pill {
   width: auto;
@@ -197,12 +209,21 @@ li { margin: 6px 0; }
   font-weight: 900;
   height: var(--control-height);
   cursor: pointer;
+  margin-top: 0;
 }
 
 .pill.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+/* Auth buttons row */
+.authRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--gap);
+  margin-top: var(--gap);
 }
 
 /* Center logout */
@@ -214,10 +235,10 @@ li { margin: 6px 0; }
 
 .hidden { display: none; }
 
-/* ===== Mobile ===== */
+/* Mobile */
 @media (max-width: 700px) {
   .row, .row3, .authRow { grid-template-columns: 1fr; }
   .actionRow { grid-template-columns: 1fr; }
-  .actionRow button { width: 100%; min-width: 0; height: var(--control-height); }
+  .actionRow button { width: 100%; height: var(--control-height); min-width: 0; }
   .dayBar { flex-direction: column; align-items: stretch; }
 }
