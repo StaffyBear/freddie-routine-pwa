@@ -6,210 +6,217 @@
 
   --bg: #eef6f3;
   --card-bg: #f6fbf9;
-  --today-bg: #e9f5f0;     /* present day tint */
-  --historic-bg: #f8d7da;  /* pale red/pink fill */
+  --today-bg: #e9f5f0;
+  --historic-bg: #f8d7da;
 
   --text: #111;
   --muted: #6b7280;
   --border: #dbe7e3;
-
   --danger: #9b1c1c;
 
   --radius: 14px;
   --control-height: 44px;
 
-  --gap: 10px;
+  /* 🔑 SINGLE spacing system */
+  --space: 12px;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* ================= BASE ================= */
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  margin: 0;
-  padding: 14px;
+  padding: var(--space);
   max-width: 900px;
   margin-inline: auto;
 }
 
-h1, h2, h3 { margin: 0 0 10px; }
-
 .page-title {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--space);
 }
 
-/* ===== Cards ===== */
+/* ================= CARDS ================= */
+
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 16px;
+  padding: var(--space);
   border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: calc(var(--space) * 1.25);
 }
 
-/* Today tint */
-.card.today { background: var(--today-bg); }
+.card.today {
+  background: var(--today-bg);
+}
 
-/* ✅ Historic MUST override everything (including .today) */
+/* Historic ALWAYS filled */
 .historicCard,
 .card.historic,
-.card.historicCard,
-.card.today.historicCard,
-.card.today.historic {
-  background: var(--historic-bg) !important; /* <- ensures filled pink */
+.card.today.historicCard {
+  background: var(--historic-bg) !important;
   border-color: #f0b9c0 !important;
 }
 
-/* ===== Consistent spacing inside cards ===== */
-/* Give breathing room between stacked elements */
-.card input,
-.card select,
-.card textarea,
-.card button {
-  margin-top: var(--gap);
-}
+/* ================= FORM CONTROLS ================= */
 
-/* But not for the first element in a card */
-.card > :first-child {
-  margin-top: 0;
-}
-
-/* Labels look better with a small top gap */
-label.muted {
-  display: block;
-  margin-top: var(--gap);
-}
-
-/* ===== Controls ===== */
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   width: 100%;
+  font-size: 14px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  font-size: 14px;
 }
 
-input, select, button {
+/* Inputs & buttons */
+input,
+select,
+button {
   height: var(--control-height);
   padding: 0 12px;
 }
 
+/* Textarea */
 textarea {
   padding: 10px 12px;
-  height: auto;
   min-height: var(--control-height);
   resize: vertical;
   background: #fff;
 }
 
-/* ===== Buttons ===== */
+/* ================= BUTTONS ================= */
+
 button {
   background: var(--primary);
   color: #fff;
   font-weight: 800;
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
 }
 
-button:hover { background: var(--primary-hover); }
+button:hover {
+  background: var(--primary-hover);
+}
 
 button.secondary {
   background: var(--secondary);
   color: #064;
 }
-button.secondary:hover { background: #b7e4dc; }
 
 button.miniBtn {
   width: auto;
   padding: 0 14px;
-  margin-top: 0; /* avoid pushing daybar down */
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* ================= LAYOUT ================= */
 
-/* ===== Layout rows ===== */
+/* Standard two-column row */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
+  gap: var(--space);
+  margin-top: var(--space);
   align-items: center;
-  margin-top: var(--gap);
 }
 
+/* Three-column row */
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--gap);
+  gap: var(--space);
+  margin-top: var(--space);
   align-items: center;
-  margin-top: var(--gap);
 }
 
-/* Notes + button */
+/* 🔑 NOTES + SAVE ROW (FIXED HEIGHT CONTEXT) */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: var(--gap);
-  align-items: stretch; /* make button match notes height */
-  margin-top: var(--gap);
+  gap: var(--space);
+  margin-top: var(--space);
+
+  /* FORCE shared height */
+  min-height: calc(var(--control-height) * 2.4);
 }
 
-/* Make notes comfortably tall by default */
-.actionRow textarea {
-  min-height: calc(var(--control-height) * 2);
-}
-
-/* Button matches textarea height */
+/* Stretch textarea and button to SAME height */
+.actionRow textarea,
 .actionRow button {
   height: 100%;
-  min-height: var(--control-height);
+}
+
+/* Button sizing */
+.actionRow button {
   min-width: 150px;
 }
 
-/* Day bar */
+/* ================= NAV / DAY BAR ================= */
+
 .dayBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--gap);
-  margin-top: 0;
-  margin-bottom: var(--gap);
+  gap: var(--space);
+  margin-bottom: var(--space);
 }
 
 .dayBarLeft {
   display: flex;
+  gap: var(--space);
   align-items: center;
-  gap: var(--gap);
 }
 
-.dateText { font-weight: 900; }
-.historicDate { color: var(--danger); font-weight: 900; }
+.dateText {
+  font-weight: 900;
+}
 
-.muted { color: var(--muted); font-size: 0.9rem; }
-.danger { color: var(--danger); }
+.historicDate {
+  color: var(--danger);
+  font-weight: 900;
+}
 
-ul { margin: 10px 0 0; padding-left: 18px; }
-li { margin: 6px 0; }
+/* ================= TEXT ================= */
 
-/* Pills */
-.pillRow { display: flex; gap: var(--gap); margin-top: var(--gap); }
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--space);
+}
+
+ul {
+  margin-top: var(--space);
+  padding-left: 18px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* ================= PILLS ================= */
+
+.pillRow {
+  display: flex;
+  gap: var(--space);
+  margin-top: var(--space);
+}
 
 .pill {
-  width: auto;
+  height: var(--control-height);
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: #fff;
   color: var(--primary);
   font-weight: 900;
-  height: var(--control-height);
   cursor: pointer;
-  margin-top: 0;
 }
 
 .pill.active {
@@ -218,27 +225,56 @@ li { margin: 6px 0; }
   border-color: var(--primary);
 }
 
-/* Auth buttons row */
+/* ================= AUTH ================= */
+
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--gap);
-  margin-top: var(--gap);
+  gap: var(--space);
+  margin-top: var(--space);
 }
 
-/* Center logout */
+#authView input {
+  margin-top: var(--space);
+}
+
+#authView input:first-of-type {
+  margin-top: 0;
+}
+
+/* ================= LOGOUT ================= */
+
 .logout-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: calc(var(--space) * 1.5);
 }
 
-.hidden { display: none; }
+/* ================= MOBILE ================= */
 
-/* Mobile */
 @media (max-width: 700px) {
-  .row, .row3, .authRow { grid-template-columns: 1fr; }
-  .actionRow { grid-template-columns: 1fr; }
-  .actionRow button { width: 100%; height: var(--control-height); min-width: 0; }
-  .dayBar { flex-direction: column; align-items: stretch; }
+  .row,
+  .row3,
+  .authRow {
+    grid-template-columns: 1fr;
+  }
+
+  .actionRow {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .actionRow textarea,
+  .actionRow button {
+    height: var(--control-height);
+  }
+
+  .actionRow button {
+    width: 100%;
+  }
+
+  .dayBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
