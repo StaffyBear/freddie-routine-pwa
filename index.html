@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0F6F4F">
 
-  <!-- External CSS (Option B) -->
+  <!-- External CSS -->
   <link rel="stylesheet" href="styles.css" />
 
   <!-- Supabase -->
@@ -22,16 +22,15 @@
   <div id="authView" class="card">
     <h1 class="page-title">Login</h1>
 
-    <h2>Login / Register</h2>
     <input id="email" placeholder="Email" autocomplete="email" />
     <input id="password" type="password" placeholder="Password (6+ chars)" autocomplete="current-password" />
 
-    <div class="row">
+    <!-- same line -->
+    <div class="authRow">
       <button id="btnLogin">Login</button>
       <button id="btnRegister" class="secondary">Register</button>
+      <button id="btnForgotPassword" class="secondary">Forgot password?</button>
     </div>
-
-    <button id="btnForgotPassword" class="secondary">Forgot password?</button>
 
     <p id="authMsg" class="danger"></p>
   </div>
@@ -40,8 +39,7 @@
   <div id="resetView" class="card" style="display:none;">
     <h1 class="page-title">Reset Password</h1>
 
-    <h2>Set New Password</h2>
-    <p class="muted">You opened a password recovery link. Set a new password below.</p>
+    <p class="muted">Set a new password below.</p>
 
     <input id="newPassword" type="password" placeholder="New password" />
     <input id="newPassword2" type="password" placeholder="Confirm new password" />
@@ -89,14 +87,10 @@
   <div id="addMedicationView" class="card" style="display:none;">
     <h1 class="page-title">New Medication</h1>
 
-    <h2>New Medication</h2>
-
     <div class="dayBar">
       <div class="dayBarLeft"></div>
       <button id="btnAddMedBackToMenu" class="miniBtn secondary" type="button">Back to Menu</button>
     </div>
-
-    <p class="muted">Add medication names (e.g. Calpol). These appear in dropdowns.</p>
 
     <div class="row">
       <input id="newMedNameMenu" placeholder="Name (e.g. Calpol)" />
@@ -112,7 +106,6 @@
   <div id="historicRoutineView" class="card" style="display:none;">
     <h1 class="page-title">Historic Routine Tracker</h1>
 
-    <h2>Historic Routine Tracker</h2>
     <p class="muted">Pick a date, then open the tracker for that day.</p>
 
     <input id="historicRoutinePick" type="date" />
@@ -124,7 +117,6 @@
   <div id="historicAIView" class="card" style="display:none;">
     <h1 class="page-title">Historic Accident &amp; Illness</h1>
 
-    <h2>Historic Accident &amp; Illness</h2>
     <p class="muted">Pick a date, then open Accident &amp; Illness for that day.</p>
 
     <input id="historicAIPick" type="date" />
@@ -137,8 +129,6 @@
     <h1 class="page-title">Routine Tracker</h1>
 
     <div id="trackerTopCard" class="card">
-      <h2>Routine Tracker</h2>
-
       <div class="dayBar">
         <div class="dayBarLeft">
           <button id="btnTrackerPrevDay" class="miniBtn secondary" type="button">◀</button>
@@ -166,13 +156,15 @@
       </div>
 
       <h3>Manual sleep entry</h3>
+
+      <!-- manual fields + button on one line -->
       <div class="row">
         <input id="sleepStartManual" type="datetime-local" />
         <input id="sleepEndManual" type="datetime-local" />
+        <button id="btnAddSleepManual">Add Manual</button>
       </div>
 
       <textarea id="sleepNote" placeholder="Sleep notes (optional)"></textarea>
-      <button id="btnAddSleepManual">Add Manual Sleep</button>
 
       <p><b>Total sleep:</b> <span id="sleepTotal">0.00h</span></p>
       <ul id="sleepList"></ul>
@@ -223,7 +215,7 @@
     <div id="medCard" class="card">
       <h2>Medication</h2>
 
-      <div class="row">
+      <div class="row3">
         <select id="medSelect"></select>
         <input id="medDose" placeholder="Dose (e.g. 5ml)" />
         <div id="medTimeWrap">
@@ -243,8 +235,6 @@
     <h1 class="page-title">Accident &amp; Illness</h1>
 
     <div id="aiTopCard" class="card">
-      <h2>Accident &amp; Illness</h2>
-
       <div class="dayBar">
         <div class="dayBarLeft">
           <button id="btnAIPrevDay" class="miniBtn secondary" type="button">◀</button>
@@ -257,9 +247,6 @@
       <label class="muted">Child</label>
       <select id="aiChildSelect"></select>
 
-      <p class="muted">If historic, stored at 10:06 automatically.</p>
-      <p class="muted">Historic days show in red.</p>
-
       <div class="pillRow">
         <button id="tabAccident" class="pill active" type="button">Accident</button>
         <button id="tabIllness" class="pill" type="button">Illness</button>
@@ -267,7 +254,7 @@
     </div>
 
     <div id="accidentTab" class="card">
-      <h3>Accident</h3>
+      <h2>Accident</h2>
 
       <label class="muted">What happened</label>
       <textarea id="accWhat" placeholder="Describe what happened..."></textarea>
@@ -323,7 +310,7 @@
     </div>
 
     <div id="illnessTab" class="card" style="display:none;">
-      <h3>Illness</h3>
+      <h2>Illness</h2>
 
       <label class="muted">Symptom</label>
       <select id="illSymptom">
@@ -380,13 +367,11 @@
   <div id="exportView" class="card" style="display:none;">
     <h1 class="page-title">Export Data</h1>
 
-    <h2>Export Data</h2>
     <p class="muted">We’ll build CSV export next (court-friendly).</p>
 
     <button id="btnExportBackToMenu" class="secondary">Back to Menu</button>
   </div>
 
-  <!-- App -->
   <script src="app.js"></script>
 </body>
 </html>
