@@ -1,6 +1,6 @@
 /**************************************************
- * Freddie Routine – app.js
- * Version: 2026-01-03-install-back-nav-add-med-page
+ * Routine Tracker – app.js
+ * Version: 2026-01-03-offline-queue-historic-ui
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
@@ -8,6 +8,7 @@ const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
 const BACKDATED_TIME = "10:06";
+const QUEUE_KEY = "offlineQueue_v1";
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = (id) => document.getElementById(id);
@@ -15,7 +16,7 @@ const $ = (id) => document.getElementById(id);
 let childId = null;
 let selectedDateStr = null;
 
-// Simple view history (for Android back button)
+// View stack for Android back
 const viewStack = [];
 
 window.addEventListener("error", (e) => console.error("JS ERROR:", e.error || e.message));
@@ -23,89 +24,129 @@ window.addEventListener("unhandledrejection", (e) => console.error("PROMISE ERRO
 
 /* ----------------- Helpers ----------------- */
 function pad2(n) { return String(n).padStart(2, "0"); }
-
-function yyyyMmDd(d = new Date()) {
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-}
+function yyyyMmDd(d = new Date()) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
 
 function parseDateStr(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d, 12, 0, 0, 0);
 }
-
 function addDays(dateStr, delta) {
   const dt = parseDateStr(dateStr);
   dt.setDate(dt.getDate() + delta);
   return yyyyMmDd(dt);
 }
-
 function toIsoRangeForDate(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const start = new Date(y, m - 1, d, 0, 0, 0, 0).toISOString();
   const end = new Date(y, m - 1, d, 23, 59, 59, 999).toISOString();
   return { start, end };
 }
-
-function hhmm(iso) {
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
+function hhmm(iso) { return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
 function combineDateAndTime(dateStr, timeStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const [hh, mm] = timeStr.split(":").map(Number);
   return new Date(y, m - 1, d, hh, mm, 0, 0).toISOString();
 }
-
 function nowTimeStr() {
   const d = new Date();
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
-
-function isToday(dateStr) {
-  return dateStr === yyyyMmDd(new Date());
-}
-
+function isToday(dateStr) { return dateStr === yyyyMmDd(new Date()); }
 function autoTimestampForSelectedDay(dateStr) {
   return isToday(dateStr)
     ? new Date().toISOString()
     : combineDateAndTime(dateStr, BACKDATED_TIME);
 }
-
 function formatDateNice(dateStr) {
   const d = parseDateStr(dateStr);
   return d.toLocaleDateString([], { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 }
 
-/* ----------------- Views + Android back ----------------- */
-function hideAllViews() {
-  [
-    "authView",
-    "resetView",
-    "menuView",
-    "addMedicationView",
-    "historicRoutineView",
-    "historicAIView",
-    "trackerView",
-    "accidentView",
-    "exportView"
-  ].forEach((id) => {
-    const el = $(id);
-    if (el) el.style.display = "none";
-  });
+/* ----------------- Offline queue ----------------- */
+function loadQueue() {
+  try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); }
+  catch { return []; }
+}
+function saveQueue(q) { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
+
+function queueInsert(table, payload) {
+  const q = loadQueue();
+  q.push({ op: "insert", table, payload, queued_at: new Date().toISOString() });
+  saveQueue(q);
+  showOfflineBanner();
 }
 
-function showView(id, pushHistory = true) {
-  // push to history stack for Android back button
-  if (pushHistory) {
-    const current = getCurrentViewId();
-    if (current && current !== id) {
-      viewStack.push(current);
-      history.pushState({ view: id }, "", "#view=" + id);
+async function flushQueue() {
+  const q = loadQueue();
+  if (!q.length) {
+    if ($("syncMsg")) $("syncMsg").textContent = "Nothing to sync.";
+    return;
+  }
+  if (!navigator.onLine) {
+    if ($("syncMsg")) $("syncMsg").textContent = "You are offline. Will sync when internet returns.";
+    return;
+  }
+
+  if ($("syncMsg")) $("syncMsg").textContent = `Syncing ${q.length} item(s)…`;
+
+  const user = await requireUser().catch(() => null);
+  if (!user) {
+    if ($("syncMsg")) $("syncMsg").textContent = "Login needed to sync.";
+    return;
+  }
+
+  const remaining = [];
+  for (const item of q) {
+    try {
+      if (item.op === "insert") {
+        const res = await sb.from(item.table).insert(item.payload);
+        if (res.error) throw res.error;
+      }
+    } catch (err) {
+      console.error("Sync failed for item:", item, err);
+      remaining.push(item); // keep it for later
     }
   }
 
-  hideAllViews();
-  $(id).style.display = "block";
+  saveQueue(remaining);
+  showOfflineBanner();
+
+  if ($("syncMsg")) {
+    $("syncMsg").textContent = remaining.length
+      ? `Synced with errors. Remaining queued: ${remaining.length}`
+      : "Sync complete ✅";
+  }
+
+  // Refresh visible data after sync
+  await refreshVisible();
+}
+
+function showOfflineBanner() {
+  const banner = $("offlineBanner");
+  if (!banner) return;
+
+  const q = loadQueue();
+  if (!navigator.onLine) {
+    banner.classList.remove("hidden");
+    banner.textContent = `OFFLINE: Entries will be saved and synced later. Queued: ${q.length}`;
+    return;
+  }
+
+  if (q.length) {
+    banner.classList.remove("hidden");
+    banner.textContent = `ONLINE: ${q.length} item(s) waiting to sync. Tap "Sync Now".`;
+    return;
+  }
+
+  banner.classList.add("hidden");
+}
+
+/* ----------------- Views + Android back ----------------- */
+function hideAllViews() {
+  [
+    "authView","resetView","menuView","addMedicationView","historicRoutineView",
+    "historicAIView","trackerView","accidentView","exportView"
+  ].forEach((id) => { const el = $(id); if (el) el.style.display = "none"; });
 }
 
 function getCurrentViewId() {
@@ -120,18 +161,30 @@ function getCurrentViewId() {
   return null;
 }
 
-// Handle Android system back
+function showView(id, pushHistory = true) {
+  if (pushHistory) {
+    const current = getCurrentViewId();
+    if (current && current !== id) {
+      viewStack.push(current);
+      history.pushState({ view: id }, "", "#view=" + id);
+    }
+  }
+  hideAllViews();
+  $(id).style.display = "block";
+  applyHistoricUI(); // ensure UI matches date state
+}
+
 window.addEventListener("popstate", () => {
   const prev = viewStack.pop();
   if (prev) {
     hideAllViews();
     $(prev).style.display = "block";
-    // update labels when coming back
     updateDateLabels();
+    applyHistoricUI();
   }
 });
 
-/* ----------------- Date label updates ----------------- */
+/* ----------------- Date labels + Historic UI rules ----------------- */
 function updateDateLabels() {
   const nice = formatDateNice(selectedDateStr);
   const historic = !isToday(selectedDateStr);
@@ -139,31 +192,60 @@ function updateDateLabels() {
   const t = $("trackerDateLabel");
   if (t) {
     t.textContent = nice;
-    t.classList.toggle("historic", historic);
+    t.classList.toggle("historicDate", historic);
   }
 
   const a = $("aiDateLabel");
   if (a) {
     a.textContent = nice;
-    a.classList.toggle("historic", historic);
+    a.classList.toggle("historicDate", historic);
   }
+}
+
+function setHistoricCards(isHistoric) {
+  const ids = [
+    "trackerTopCard","sleepCard","mealsCard","moodCard","medCard",
+    "aiTopCard","accidentTab","illnessTab"
+  ];
+  for (const id of ids) {
+    const el = $(id);
+    if (el) el.classList.toggle("historicCard", isHistoric);
+  }
+}
+
+function applyHistoricUI() {
+  if (!selectedDateStr) return;
+  const historic = !isToday(selectedDateStr);
+
+  updateDateLabels();
+  setHistoricCards(historic);
+
+  // Remove time input options on historic dates
+  const medWrap = $("medTimeWrap");
+  const accWrap = $("accTimeWrap");
+  const illWrap = $("illTimeWrap");
+
+  if (medWrap) medWrap.style.display = historic ? "none" : "block";
+  if (accWrap) accWrap.style.display = historic ? "none" : "block";
+  if (illWrap) illWrap.style.display = historic ? "none" : "block";
 }
 
 async function setSelectedDate(dateStr, refresh = true) {
   selectedDateStr = dateStr;
-  updateDateLabels();
+  applyHistoricUI();
+  if (refresh) await refreshVisible();
+}
 
-  if (refresh) {
-    const current = getCurrentViewId();
-    if (current === "trackerView") await refreshAll();
-    if (current === "accidentView") await Promise.all([loadAccidents(), loadIllnesses()]);
-  }
+async function refreshVisible() {
+  const current = getCurrentViewId();
+  if (current === "trackerView") await refreshAll();
+  if (current === "accidentView") await Promise.all([loadAccidents(), loadIllnesses()]);
 }
 
 /* ----------------- Auth helpers ----------------- */
 async function requireUser() {
   const { data, error } = await sb.auth.getUser();
-  if (error || !data?.user) throw new Error("Not logged in. Please login again.");
+  if (error || !data?.user) throw new Error("Not logged in.");
   return data.user;
 }
 
@@ -176,7 +258,6 @@ async function doRegister() {
   $("authMsg").textContent = "Registering…";
   const res = await sb.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL } });
   if (res.error) return ($("authMsg").textContent = res.error.message);
-
   $("authMsg").textContent = "Registered ✅ Now click Login (or confirm email if required).";
 }
 
@@ -204,9 +285,7 @@ async function doForgotPassword() {
   $("authMsg").textContent = "Reset email sent ✅ Check your inbox/spam.";
 }
 
-function isRecoveryLink() {
-  return (location.hash || "").includes("type=recovery");
-}
+function isRecoveryLink() { return (location.hash || "").includes("type=recovery"); }
 
 async function setNewPassword() {
   const p1 = $("newPassword").value;
@@ -225,42 +304,48 @@ async function setNewPassword() {
   showView("authView", false);
 }
 
-/* ----------------- MENU ----------------- */
-async function goMenu() {
-  showView("menuView");
-  $("menuMsg").textContent = "Choose what you want to do.";
-  $("installMsg").textContent = "";
-  $("medAdminMsg").textContent = "";
-}
-
 /* ----------------- PWA install prompt ----------------- */
 let deferredPrompt = null;
-
 window.addEventListener("beforeinstallprompt", (e) => {
-  // Allow us to show our own button
   e.preventDefault();
   deferredPrompt = e;
   const btn = $("btnInstallApp");
   if (btn) btn.style.display = "block";
 });
-
 async function promptInstall() {
   if (!deferredPrompt) {
-    $("installMsg").textContent = "If you don’t see an install prompt: Chrome menu (⋮) → Install app / Add to Home screen.";
+    if ($("installMsg")) $("installMsg").textContent =
+      "If you don’t see an install prompt: Chrome menu (⋮) → Install app / Add to Home screen.";
     return;
   }
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  $("installMsg").textContent = outcome === "accepted" ? "Installed ✅" : "Install cancelled.";
+  if ($("installMsg")) $("installMsg").textContent = outcome === "accepted" ? "Installed ✅" : "Install cancelled.";
   deferredPrompt = null;
   $("btnInstallApp").style.display = "none";
 }
 
-/* ----------------- Children dropdown ----------------- */
+/* ----------------- MENU ----------------- */
+async function goMenu() {
+  showView("menuView");
+  showOfflineBanner();
+}
+
+/* ----------------- Service Worker registration ----------------- */
+async function registerSW() {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    await navigator.serviceWorker.register("./sw.js", { scope: "./" });
+    console.log("SW registered ✅");
+  } catch (e) {
+    console.warn("SW register failed:", e);
+  }
+}
+
+/* ----------------- Children ----------------- */
 async function loadChildrenDropdown() {
   const res = await sb.from("children").select("id,name").order("created_at", { ascending: true });
   if (res.error) {
-    $("childInfo").textContent = "Error loading children: " + res.error.message;
     childId = null;
     return;
   }
@@ -271,7 +356,6 @@ async function loadChildrenDropdown() {
 
   if (!children.length) {
     sel.innerHTML = `<option value="">No children yet</option>`;
-    $("childInfo").textContent = "No child yet. Add one below.";
     childId = null;
     return;
   }
@@ -289,9 +373,6 @@ async function loadChildrenDropdown() {
   childId = exists ? exists.id : children[0].id;
   sel.value = childId;
 
-  const active = children.find((c) => c.id === childId);
-  $("childInfo").textContent = `Using child: ${active?.name ?? ""}`;
-
   sel.onchange = () => {
     childId = sel.value;
     localStorage.setItem("activeChildId", childId);
@@ -304,7 +385,16 @@ async function addChild() {
   if (!name) return alert("Enter a child name.");
 
   const user = await requireUser();
-  const res = await sb.from("children").insert({ name, user_id: user.id });
+  const payload = { name, user_id: user.id };
+
+  if (!navigator.onLine) {
+    queueInsert("children", payload);
+    $("childName").value = "";
+    alert("Saved offline. It will sync when online.");
+    return;
+  }
+
+  const res = await sb.from("children").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("childName").value = "";
@@ -312,7 +402,7 @@ async function addChild() {
   await refreshAll();
 }
 
-/* ----------------- Add Medication (NEW PAGE) ----------------- */
+/* ----------------- New Medication page ----------------- */
 async function goAddMedication() {
   showView("addMedicationView");
   $("medAdminMsg").textContent = "";
@@ -324,7 +414,17 @@ async function addMedicationFromPage() {
   if (!name) return alert("Enter medication name.");
 
   const user = await requireUser();
-  const res = await sb.from("medications").insert({ name, default_unit, user_id: user.id });
+  const payload = { name, default_unit, user_id: user.id };
+
+  if (!navigator.onLine) {
+    queueInsert("medications", payload);
+    $("newMedNameMenu").value = "";
+    $("newMedUnitMenu").value = "";
+    $("medAdminMsg").textContent = "Saved offline. Will sync when online.";
+    return;
+  }
+
+  const res = await sb.from("medications").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("newMedNameMenu").value = "";
@@ -335,7 +435,7 @@ async function addMedicationFromPage() {
   await loadIllnessMedicationDropdown();
 }
 
-/* ----------------- Tracker init ----------------- */
+/* ----------------- Tracker ----------------- */
 async function goTracker(dateStr) {
   showView("trackerView");
   await setSelectedDate(dateStr || yyyyMmDd(new Date()), false);
@@ -348,13 +448,6 @@ async function goTracker(dateStr) {
   await refreshAll();
 }
 
-/* ----------------- Day navigation ----------------- */
-async function trackerPrevDay() { await setSelectedDate(addDays(selectedDateStr, -1), true); }
-async function trackerNextDay() { await setSelectedDate(addDays(selectedDateStr,  1), true); }
-async function aiPrevDay() { await setSelectedDate(addDays(selectedDateStr, -1), true); }
-async function aiNextDay() { await setSelectedDate(addDays(selectedDateStr,  1), true); }
-
-/* ----------------- Data refresh ----------------- */
 async function refreshAll() {
   if (!childId) return;
   await Promise.all([loadSleep(), loadMeals(), loadMoods(), loadMedsAndDoses()]);
@@ -371,7 +464,7 @@ async function loadSleep() {
     .lte("start_time", end)
     .order("start_time", { ascending: false });
 
-  if (res.error) return console.error("Load sleep error:", res.error);
+  if (res.error) return;
 
   $("sleepList").innerHTML = "";
   let totalMs = 0;
@@ -391,25 +484,33 @@ async function loadSleep() {
 
 async function sleepStart() {
   if (!childId) return alert("Select/add a child first.");
-  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only. Use Manual sleep entry for historic.");
+  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only.");
+
+  if (!navigator.onLine) {
+    alert("Sleep Start requires internet (because it opens an active session). Use Manual sleep entry while offline.");
+    return;
+  }
 
   const user = await requireUser();
   const notes = $("sleepNote").value.trim() || null;
-
   const res = await sb.from("sleep_sessions").insert({
     child_id: childId,
     start_time: new Date().toISOString(),
     notes,
     user_id: user.id,
   });
-
   if (res.error) return alert(res.error.message);
   await loadSleep();
 }
 
 async function sleepEnd() {
   if (!childId) return alert("Select/add a child first.");
-  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only. Use Manual sleep entry for historic.");
+  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only.");
+
+  if (!navigator.onLine) {
+    alert("Sleep End requires internet. Use Manual sleep entry while offline.");
+    return;
+  }
 
   const open = await sb
     .from("sleep_sessions")
@@ -422,11 +523,7 @@ async function sleepEnd() {
   if (open.error) return alert(open.error.message);
   if (!open.data?.length) return alert("No active sleep session found.");
 
-  const res = await sb
-    .from("sleep_sessions")
-    .update({ end_time: new Date().toISOString() })
-    .eq("id", open.data[0].id);
-
+  const res = await sb.from("sleep_sessions").update({ end_time: new Date().toISOString() }).eq("id", open.data[0].id);
   if (res.error) return alert(res.error.message);
   await loadSleep();
 }
@@ -442,18 +539,20 @@ async function addSleepManual() {
 
   const startIso = new Date(startVal).toISOString();
   const endIso = endVal ? new Date(endVal).toISOString() : null;
-
   if (endIso && new Date(endIso) < new Date(startIso)) return alert("End time must be after start time.");
 
   const user = await requireUser();
-  const res = await sb.from("sleep_sessions").insert({
-    child_id: childId,
-    start_time: startIso,
-    end_time: endIso,
-    notes,
-    user_id: user.id,
-  });
+  const payload = { child_id: childId, start_time: startIso, end_time: endIso, notes, user_id: user.id };
 
+  if (!navigator.onLine) {
+    queueInsert("sleep_sessions", payload);
+    $("sleepStartManual").value = "";
+    $("sleepEndManual").value = "";
+    alert("Saved offline. Will sync when online.");
+    return;
+  }
+
+  const res = await sb.from("sleep_sessions").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("sleepStartManual").value = "";
@@ -461,7 +560,7 @@ async function addSleepManual() {
   await loadSleep();
 }
 
-/* ----------------- Meals (NO TIME SHOWN) ----------------- */
+/* ----------------- Meals ----------------- */
 async function loadMeals() {
   const { start, end } = toIsoRangeForDate(selectedDateStr);
   const res = await sb
@@ -472,7 +571,7 @@ async function loadMeals() {
     .lte("time", end)
     .order("time", { ascending: false });
 
-  if (res.error) return console.error("Load meals error:", res.error);
+  if (res.error) return;
 
   $("mealList").innerHTML = (res.data || [])
     .map(m => `<li>${m.meal_type} • ${m.percent_eaten}% • ${m.food_text ?? ""}${m.notes ? " • " + m.notes : ""}</li>`)
@@ -483,18 +582,25 @@ async function addMeal() {
   if (!childId) return alert("Select/add a child first.");
 
   const user = await requireUser();
-  const timeIso = autoTimestampForSelectedDay(selectedDateStr);
-
-  const res = await sb.from("meals").insert({
+  const payload = {
     child_id: childId,
     meal_type: $("mealType").value,
     percent_eaten: parseInt($("mealPercent").value, 10),
     food_text: $("mealFood").value.trim() || null,
     notes: $("mealNotes").value.trim() || null,
-    time: timeIso,
+    time: autoTimestampForSelectedDay(selectedDateStr),
     user_id: user.id,
-  });
+  };
 
+  if (!navigator.onLine) {
+    queueInsert("meals", payload);
+    $("mealFood").value = "";
+    $("mealNotes").value = "";
+    alert("Saved offline. Will sync when online.");
+    return;
+  }
+
+  const res = await sb.from("meals").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("mealFood").value = "";
@@ -502,7 +608,7 @@ async function addMeal() {
   await loadMeals();
 }
 
-/* ----------------- Moods (NO TIME SHOWN) ----------------- */
+/* ----------------- Moods ----------------- */
 async function loadMoods() {
   const { start, end } = toIsoRangeForDate(selectedDateStr);
   const res = await sb
@@ -513,7 +619,7 @@ async function loadMoods() {
     .lte("time", end)
     .order("time", { ascending: false });
 
-  if (res.error) return console.error("Load moods error:", res.error);
+  if (res.error) return;
 
   $("moodList").innerHTML = (res.data || [])
     .map(m => `<li>${m.period}: ${m.mood}${m.notes ? " • " + m.notes : ""}</li>`)
@@ -524,17 +630,23 @@ async function addMood() {
   if (!childId) return alert("Select/add a child first.");
 
   const user = await requireUser();
-  const timeIso = autoTimestampForSelectedDay(selectedDateStr);
-
-  const res = await sb.from("moods").insert({
+  const payload = {
     child_id: childId,
     period: $("moodPeriod").value,
     mood: $("moodValue").value,
     notes: $("moodNotes").value.trim() || null,
-    time: timeIso,
+    time: autoTimestampForSelectedDay(selectedDateStr),
     user_id: user.id,
-  });
+  };
 
+  if (!navigator.onLine) {
+    queueInsert("moods", payload);
+    $("moodNotes").value = "";
+    alert("Saved offline. Will sync when online.");
+    return;
+  }
+
+  const res = await sb.from("moods").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("moodNotes").value = "";
@@ -573,25 +685,27 @@ async function addDose() {
   const medication_id = $("medSelect").value;
   const dose = $("medDose").value.trim();
   const notes = $("medNotes").value.trim() || null;
-
   if (!medication_id) return alert("Add/select a medication first.");
   if (!dose) return alert("Enter a dose.");
 
   const user = await requireUser();
 
+  // Remove time option from historic dates: hide input; always use 10:06 for historic
   const given_at = isToday(selectedDateStr)
-    ? combineDateAndTime(selectedDateStr, ($("medTime").value || nowTimeStr()))
+    ? combineDateAndTime(selectedDateStr, ($("medTime")?.value || nowTimeStr()))
     : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
-  const res = await sb.from("medication_doses").insert({
-    child_id: childId,
-    medication_id,
-    dose,
-    notes,
-    given_at,
-    user_id: user.id,
-  });
+  const payload = { child_id: childId, medication_id, dose, notes, given_at, user_id: user.id };
 
+  if (!navigator.onLine) {
+    queueInsert("medication_doses", payload);
+    $("medDose").value = "";
+    $("medNotes").value = "";
+    alert("Saved offline. Will sync when online.");
+    return;
+  }
+
+  const res = await sb.from("medication_doses").insert(payload);
   if (res.error) return alert(res.error.message);
 
   $("medDose").value = "";
@@ -674,7 +788,7 @@ async function loadAccidents() {
     .lte("incident_time", end)
     .order("incident_time", { ascending: false });
 
-  if (res.error) return console.error("Load accidents error:", res.error);
+  if (res.error) return;
 
   $("accidentList").innerHTML = (res.data || [])
     .map(a => {
@@ -700,11 +814,12 @@ async function addAccident() {
   const repOther = $("accReportedOther").value.trim();
   if (repBy === "Other" && !repOther) return alert("Accident: Reported by 'Other' must be filled in.");
 
+  // Historic dates: no time option, always 10:06
   const incident_time = isToday(selectedDateStr)
-    ? combineDateAndTime(selectedDateStr, ($("accTime").value || nowTimeStr()))
+    ? combineDateAndTime(selectedDateStr, ($("accTime")?.value || nowTimeStr()))
     : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
-  const res = await sb.from("accidents").insert({
+  const payload = {
     user_id: user.id,
     child_id: childId,
     incident_time,
@@ -718,16 +833,23 @@ async function addAccident() {
     action_taken: $("accAction").value.trim() || null,
     safeguarding: $("accSafeguarding").value.trim() || null,
     notes: $("accNotes").value.trim() || null
-  });
+  };
 
-  if (res.error) return alert(res.error.message);
+  if (!navigator.onLine) {
+    queueInsert("accidents", payload);
+    alert("Saved offline. Will sync when online.");
+    // clear form
+  } else {
+    const res = await sb.from("accidents").insert(payload);
+    if (res.error) return alert(res.error.message);
+  }
 
   $("accWhat").value = "";
   $("accWhere").value = "";
   $("accAction").value = "";
   $("accSafeguarding").value = "";
   $("accNotes").value = "";
-  $("accTime").value = nowTimeStr();
+  if ($("accTime")) $("accTime").value = nowTimeStr();
   $("accBodyArea").value = "Head";
   $("accReportedBy").value = "Mum";
   toggleOther("accBodyArea", "accBodyOther");
@@ -761,7 +883,7 @@ async function loadIllnesses() {
     .lte("event_time", end)
     .order("event_time", { ascending: false });
 
-  if (res.error) return console.error("Load illnesses error:", res.error);
+  if (res.error) return;
 
   $("illnessList").innerHTML = (res.data || [])
     .map(i => {
@@ -786,8 +908,9 @@ async function addIllness() {
   const repOther = $("illReportedOther").value.trim();
   if (repBy === "Other" && !repOther) return alert("Illness: Reported by 'Other' must be filled in.");
 
+  // Historic dates: no time option, always 10:06
   const event_time = isToday(selectedDateStr)
-    ? combineDateAndTime(selectedDateStr, ($("illTime").value || nowTimeStr()))
+    ? combineDateAndTime(selectedDateStr, ($("illTime")?.value || nowTimeStr()))
     : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
   const tRaw = $("illTemp").value.trim();
@@ -800,7 +923,7 @@ async function addIllness() {
 
   const medication_id = $("illMedication").value || null;
 
-  const res = await sb.from("illnesses").insert({
+  const payload = {
     user_id: user.id,
     child_id: childId,
     event_time,
@@ -811,13 +934,19 @@ async function addIllness() {
     reported_by: repBy,
     reported_by_other: repBy === "Other" ? repOther : null,
     notes: $("illNotes").value.trim() || null
-  });
+  };
 
-  if (res.error) return alert(res.error.message);
+  if (!navigator.onLine) {
+    queueInsert("illnesses", payload);
+    alert("Saved offline. Will sync when online.");
+  } else {
+    const res = await sb.from("illnesses").insert(payload);
+    if (res.error) return alert(res.error.message);
+  }
 
   $("illNotes").value = "";
   $("illTemp").value = "";
-  $("illTime").value = nowTimeStr();
+  if ($("illTime")) $("illTime").value = nowTimeStr();
   $("illMedication").value = "";
   $("illSymptom").value = "Temperature";
   $("illReportedBy").value = "Mum";
@@ -836,11 +965,10 @@ function setupNav() {
   $("btnGoAccident").onclick = async () => {
     showView("accidentView");
     await setSelectedDate(yyyyMmDd(new Date()), false);
-    updateDateLabels();
 
     await syncAIChildSelect();
-    $("accTime").value = nowTimeStr();
-    $("illTime").value = nowTimeStr();
+    if ($("accTime")) $("accTime").value = nowTimeStr();
+    if ($("illTime")) $("illTime").value = nowTimeStr();
 
     setTab("accident");
     toggleOther("accBodyArea", "accBodyOther");
@@ -878,11 +1006,10 @@ function setupNav() {
 
     showView("accidentView");
     await setSelectedDate(d, false);
-    updateDateLabels();
 
     await syncAIChildSelect();
-    $("accTime").value = nowTimeStr();
-    $("illTime").value = nowTimeStr();
+    if ($("accTime")) $("accTime").value = nowTimeStr();
+    if ($("illTime")) $("illTime").value = nowTimeStr();
 
     setTab("accident");
     toggleOther("accBodyArea", "accBodyOther");
@@ -906,18 +1033,31 @@ function setupNav() {
 
   // Day nav
   $("btnTrackerPrevDay").onclick = () => setSelectedDate(addDays(selectedDateStr, -1), true);
-  $("btnTrackerNextDay").onclick = () => setSelectedDate(addDays(selectedDateStr, 1), true);
+  $("btnTrackerNextDay").onclick = () => setSelectedDate(addDays(selectedDateStr,  1), true);
   $("btnAIPrevDay").onclick = () => setSelectedDate(addDays(selectedDateStr, -1), true);
-  $("btnAINextDay").onclick = () => setSelectedDate(addDays(selectedDateStr, 1), true);
+  $("btnAINextDay").onclick = () => setSelectedDate(addDays(selectedDateStr,  1), true);
 
   // Install
   $("btnInstallApp").onclick = promptInstall;
+
+  // Sync
+  $("btnSyncNow").onclick = flushQueue;
 }
 
 /* ----------------- DOM READY ----------------- */
 document.addEventListener("DOMContentLoaded", async () => {
+  // SW for offline shell
+  await registerSW();
+
+  // online/offline events
+  window.addEventListener("online", async () => {
+    showOfflineBanner();
+    await flushQueue();
+  });
+  window.addEventListener("offline", () => showOfflineBanner());
+
   selectedDateStr = yyyyMmDd(new Date());
-  updateDateLabels();
+  applyHistoricUI();
 
   // Auth
   $("btnRegister").onclick = doRegister;
@@ -928,7 +1068,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("btnSetNewPassword").onclick = setNewPassword;
   $("btnBackToLogin").onclick = () => showView("authView", false);
 
-  // Add medication page
+  // New medication page
   $("btnAddMedMenu").onclick = addMedicationFromPage;
 
   // Tracker actions
@@ -970,4 +1110,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { data } = await sb.auth.getSession();
   if (data?.session) await goMenu();
   else showView("authView", false);
+
+  showOfflineBanner();
 });
