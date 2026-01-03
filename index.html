@@ -101,7 +101,6 @@
   <!-- HISTORIC ROUTINE PICKER -->
   <div id="historicRoutineView" class="card" style="display:none;">
     <h1 class="page-title">Historic Routine Tracker</h1>
-
     <p class="muted">Pick a date, then open the tracker for that day.</p>
 
     <input id="historicRoutinePick" type="date" />
@@ -112,7 +111,6 @@
   <!-- HISTORIC A&I PICKER -->
   <div id="historicAIView" class="card" style="display:none;">
     <h1 class="page-title">Historic Accident &amp; Illness</h1>
-
     <p class="muted">Pick a date, then open Accident &amp; Illness for that day.</p>
 
     <input id="historicAIPick" type="date" />
@@ -152,7 +150,6 @@
       </div>
 
       <h3>Manual sleep entry</h3>
-
       <div class="row">
         <input id="sleepStartManual" type="datetime-local" />
         <input id="sleepEndManual" type="datetime-local" />
@@ -257,7 +254,6 @@
       </div>
     </div>
 
-    <!-- the rest of A&I stays the same as your existing file -->
     <div id="accidentTab" class="card">
       <h2>Accident</h2>
 
@@ -305,10 +301,12 @@
       <label class="muted">Safeguarding put in place</label>
       <textarea id="accSafeguarding" placeholder="What safeguarding was put in place?"></textarea>
 
+      <!-- ✅ Notes + button on right -->
       <label class="muted">Notes</label>
-      <textarea id="accNotes" placeholder="Notes"></textarea>
-
-      <button id="btnAddAccident">Add Accident</button>
+      <div class="actionRow">
+        <textarea id="accNotes" placeholder="Notes"></textarea>
+        <button id="btnAddAccident">Add Accident</button>
+      </div>
 
       <h3>Accidents</h3>
       <ul id="accidentList"></ul>
@@ -354,10 +352,12 @@
       </select>
       <input id="illReportedOther" class="hidden" placeholder="Reported by (Other) – required" />
 
+      <!-- ✅ Notes + button on right -->
       <label class="muted">Notes</label>
-      <textarea id="illNotes" placeholder="Notes"></textarea>
-
-      <button id="btnAddIllness">Add Illness</button>
+      <div class="actionRow">
+        <textarea id="illNotes" placeholder="Notes"></textarea>
+        <button id="btnAddIllness">Add Illness</button>
+      </div>
 
       <h3>Illnesses</h3>
       <ul id="illnessList"></ul>
@@ -371,9 +371,7 @@
   <!-- EXPORT VIEW -->
   <div id="exportView" class="card" style="display:none;">
     <h1 class="page-title">Export Data</h1>
-
     <p class="muted">We’ll build CSV export next (court-friendly).</p>
-
     <button id="btnExportBackToMenu" class="secondary">Back to Menu</button>
   </div>
 
