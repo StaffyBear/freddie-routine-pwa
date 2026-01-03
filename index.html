@@ -4,7 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Freddie’s Routine</title>
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
 
   <style>
     * { box-sizing: border-box; }
@@ -37,17 +40,16 @@
 
     .muted { color: #666; font-size: 13px; }
     .danger { color: #b00020; }
-    .ok { color: #0a7b3b; }
-    .historic { color: #b00020; font-weight: 800; }
+    .historic { color: #b00020; font-weight: 900; }
 
-    .menuBtn { padding: 14px; font-weight: 800; }
+    .menuBtn { padding: 14px; font-weight: 900; }
     .navRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     ul { padding-left: 18px; margin: 8px 0; }
     li { margin: 6px 0; }
 
     .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
-    .pill { padding:10px; border:1px solid #cfcfcf; border-radius: 999px; background:#fff; font-weight:800; cursor:pointer; }
+    .pill { padding:10px; border:1px solid #cfcfcf; border-radius: 999px; background:#fff; font-weight:900; cursor:pointer; }
     .pill.active { border-width:2px; }
     .hidden { display:none; }
 
@@ -68,12 +70,16 @@
     .miniBtn {
       width: auto;
       padding: 8px 10px;
-      font-weight: 800;
+      font-weight: 900;
     }
     .dateText {
       font-weight: 900;
       font-size: 16px;
     }
+
+    /* Desktop hover cursor on working buttons */
+    button, .pill { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.6; }
   </style>
 </head>
 
@@ -126,24 +132,37 @@
       </div>
 
       <div class="navRow">
-        <button id="btnToggleMedAdmin" class="menuBtn">Add Medication</button>
+        <button id="btnGoAddMedication" class="menuBtn">Add Medication</button>
         <button id="btnGoExport" class="menuBtn">Export Data</button>
       </div>
 
-      <button id="btnLogout" class="menuBtn">Logout</button>
+      <div class="navRow">
+        <button id="btnInstallApp" class="menuBtn" style="display:none;">Install App</button>
+        <button id="btnLogout" class="menuBtn">Logout</button>
+      </div>
+
       <p id="menuMsg" class="muted"></p>
+      <p id="installMsg" class="muted"></p>
+    </div>
+  </div>
+
+  <!-- ADD MEDICATION VIEW (NEW PAGE) -->
+  <div id="addMedicationView" class="card" style="display:none;">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <span class="dateText">Add Medication</span>
+      </div>
+      <button id="btnAddMedBackToMenu" class="miniBtn" type="button">Back to Menu</button>
     </div>
 
-    <!-- ADD MEDICATION (hidden until button click) -->
-    <div id="medAdminCard" class="card" style="display:none;">
-      <h3>Add Medication</h3>
-      <div class="row">
-        <input id="newMedNameMenu" placeholder="Name (e.g. Calpol)" />
-        <input id="newMedUnitMenu" placeholder="Unit (ml/mg)" />
-      </div>
-      <button id="btnAddMedMenu">Save Medication</button>
-      <p id="medAdminMsg" class="muted"></p>
+    <p class="muted">Add medication names you might use (e.g. Calpol, Ibuprofen). These appear in the dropdowns.</p>
+
+    <div class="row">
+      <input id="newMedNameMenu" placeholder="Name (e.g. Calpol)" />
+      <input id="newMedUnitMenu" placeholder="Unit (ml/mg)" />
     </div>
+    <button id="btnAddMedMenu">Save Medication</button>
+    <p id="medAdminMsg" class="muted"></p>
   </div>
 
   <!-- HISTORIC ROUTINE PICKER -->
@@ -210,7 +229,7 @@
       <ul id="sleepList"></ul>
     </div>
 
-    <!-- MEALS (NO TIME INPUT) -->
+    <!-- MEALS -->
     <div class="card">
       <h2>Meals</h2>
 
@@ -232,7 +251,7 @@
       <ul id="mealList"></ul>
     </div>
 
-    <!-- MOOD (NO TIME INPUT) -->
+    <!-- MOOD -->
     <div class="card">
       <h2>Mood</h2>
 
@@ -254,7 +273,7 @@
       <ul id="moodList"></ul>
     </div>
 
-    <!-- MEDICATION (dose only) -->
+    <!-- MEDICATION -->
     <div class="card">
       <h2>Medication</h2>
 
