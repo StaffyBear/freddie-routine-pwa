@@ -16,7 +16,6 @@
   --border: #DCE7E3;
   --danger: #9B1C1C;
 
-  /* Single control height (inputs + row buttons) */
   --control-height: 44px;
 }
 
@@ -50,7 +49,7 @@ h1, h2, h3 { margin-top: 0; }
   box-shadow: var(--card-shadow);
 }
 
-/* Historic cards */
+/* Historic */
 .historicCard,
 .card.historic {
   background: var(--historic-bg);
@@ -58,7 +57,7 @@ h1, h2, h3 { margin-top: 0; }
   border-color: #f0b9c0;
 }
 
-/* Inputs */
+/* Controls */
 input, select, textarea {
   width: 100%;
   padding: 10px 12px;
@@ -70,7 +69,6 @@ input, select, textarea {
   color: var(--text);
 }
 
-/* Fixed height inputs */
 input, select,
 input[type="datetime-local"],
 input[type="time"],
@@ -78,9 +76,9 @@ input[type="date"] {
   height: var(--control-height);
 }
 
-/* Textareas can grow */
+/* Let textareas grow; keep a consistent baseline */
 textarea {
-  min-height: 44px;
+  min-height: var(--control-height);
   resize: vertical;
 }
 
@@ -90,17 +88,12 @@ button {
   color: white;
   border: none;
   border-radius: 10px;
-
-  /* IMPORTANT: no vertical padding so height matches inputs exactly */
-  padding: 0 14px;
-
+  padding: 0 14px; /* no vertical padding */
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-
   height: var(--control-height);
   line-height: 1.1;
-
   transition: background 0.15s ease, transform 0.05s ease;
 }
 
@@ -111,7 +104,6 @@ button.secondary {
   background: var(--accent);
   color: var(--primary);
 }
-
 button.secondary:hover { background: var(--secondary); }
 
 button:disabled {
@@ -119,34 +111,25 @@ button:disabled {
   opacity: 0.6;
 }
 
-/* Layout helpers */
+/* Rows */
 .row {
   display: flex;
   gap: 10px;
-
-  /* IMPORTANT: center aligns controls so heights match visually */
   align-items: center;
 }
-
-/* Remove margins INSIDE row so no hidden height differences */
 .row > * {
   flex: 1;
   margin: 0 !important;
 }
 
-/* 3 columns */
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   align-items: center;
 }
+.row3 > * { margin: 0 !important; }
 
-.row3 > * {
-  margin: 0 !important;
-}
-
-/* Nav rows */
 .navRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -154,7 +137,7 @@ button:disabled {
   margin-bottom: 10px;
 }
 
-/* Menu buttons can be taller */
+/* Menu buttons can be bigger */
 .menuBtn {
   font-size: 1.05rem;
   padding: 14px;
@@ -162,7 +145,6 @@ button:disabled {
   min-height: var(--control-height);
 }
 
-/* auth buttons on one line */
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -170,7 +152,7 @@ button:disabled {
   margin-top: 10px;
 }
 
-/* Day navigation */
+/* Day nav */
 .dayBar {
   display: flex;
   justify-content: space-between;
@@ -179,7 +161,6 @@ button:disabled {
   margin-bottom: 10px;
   flex-wrap: wrap;
 }
-
 .dayBarLeft {
   display: flex;
   align-items: center;
@@ -193,31 +174,25 @@ button:disabled {
   width: auto;
 }
 
-/* Text helpers */
+/* Text */
 .muted { color: var(--muted); font-size: 0.9rem; }
 .danger { color: var(--danger); }
 .historicDate { color: var(--danger); font-weight: 900; }
-
 .hidden { display:none; }
 
-/* Tabs / pills */
+/* Pills */
 .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
-
 .pill {
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--accent);
   color: var(--primary);
   font-weight: 800;
-
   height: var(--control-height);
   padding: 0 14px;
-
   cursor: pointer;
 }
-
 .pill:hover { background: var(--secondary); }
-
 .pill.active {
   background: var(--primary);
   color: #fff;
@@ -228,7 +203,7 @@ button:disabled {
 ul { padding-left: 18px; margin: 6px 0; }
 li { margin-bottom: 6px; }
 
-/* Centered logout */
+/* Center logout */
 .logout-wrapper {
   display: flex;
   justify-content: center;
@@ -245,27 +220,46 @@ li { margin-bottom: 6px; }
   font-weight: 700;
 }
 
-/* Notes + button on right */
+/* NOTES + BUTTON LAYOUT
+   Key change: button stays control-height unless textarea is taller */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  align-items: stretch;
+  align-items: start;
 }
+.actionRow > * { margin: 0 !important; }
 
-/* Remove margins inside action row */
-.actionRow > * {
-  margin: 0 !important;
-}
-
-/* IMPORTANT: actionRow buttons should stretch to textarea height */
+/* Default button size (matches inputs) */
 .actionRow button {
-  height: 100% !important;     /* overrides fixed 44px */
-  min-height: var(--control-height);
-  align-self: stretch;
-  width: auto;
+  height: var(--control-height) !important;
   min-width: 150px;
 }
+
+/* When textarea gets taller (multi-line), button can stretch */
+.actionRow textarea {
+  min-height: var(--control-height);
+}
+.actionRow textarea:focus,
+.actionRow textarea:not(:placeholder-shown) {
+  /* allow user to make textarea bigger; button won't stretch automatically */
+}
+
+/* Optional: if you WANT the button to stretch when textarea is resized,
+   uncomment below:
+.actionRow { align-items: stretch; }
+.actionRow button { height: 100% !important; }
+*/
+
+/* New helper: input row with a button */
+.rowBtn {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.rowBtn > * { margin: 0 !important; }
+.rowBtn button { height: var(--control-height); min-width: 170px; }
 
 /* Mobile */
 @media (max-width: 700px) {
@@ -273,7 +267,10 @@ li { margin-bottom: 6px; }
   .authRow { grid-template-columns: 1fr; }
 
   .actionRow { grid-template-columns: 1fr; }
-  .actionRow button { width: 100%; height: var(--control-height) !important; }
+  .actionRow button { width: 100%; }
+
+  .rowBtn { grid-template-columns: 1fr; }
+  .rowBtn button { width: 100%; }
 }
 
 @media (max-width: 520px) {
