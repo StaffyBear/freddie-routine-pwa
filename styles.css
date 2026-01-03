@@ -245,6 +245,32 @@ li { margin-bottom: 6px; }
   /* allow user to make textarea bigger; button won't stretch automatically */
 }
 
+/* --- FIX: actionRow button should align with top of textarea (not centered, not stretched) --- */
+.actionRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start; /* top-align */
+}
+
+.actionRow button {
+  height: var(--control-height) !important; /* always input height */
+  align-self: start; /* top aligned */
+  min-width: 150px;
+}
+
+/* Ensure textarea is a normal height by default so list starts nicely below */
+.actionRow textarea {
+  min-height: var(--control-height);
+}
+
+/* --- FIX: stop any accidental vertical centering in grid rows --- */
+.row3 {
+  align-items: center;
+}
+
+
+
 /* Optional: if you WANT the button to stretch when textarea is resized,
    uncomment below:
 .actionRow { align-items: stretch; }
