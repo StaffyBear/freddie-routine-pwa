@@ -7,8 +7,8 @@
 
   --bg: #eef6f3;
   --card-bg: #f6fbf9;
-  --today-bg: #e9f5f0;
-  --historic-bg: #f8d7da;
+  --today-bg: #e9f5f0;     /* present day tint */
+  --historic-bg: #f8d7da;  /* pale red/pink */
 
   --text: #111;
   --muted: #6b7280;
@@ -39,7 +39,7 @@ h1, h2, h3 { margin: 0 0 10px; }
   margin-bottom: 12px;
 }
 
-/* Inputs */
+/* ===== Controls ===== */
 input, select, textarea, button {
   width: 100%;
   border-radius: var(--radius);
@@ -60,7 +60,7 @@ textarea {
   background: #fff;
 }
 
-/* Buttons */
+/* ===== Buttons ===== */
 button {
   background: var(--primary);
   color: #fff;
@@ -88,7 +88,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Cards */
+/* ===== Cards ===== */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -98,10 +98,17 @@ button:disabled {
   border: 1px solid var(--border);
 }
 
+/* Present day tint */
 .card.today { background: var(--today-bg); }
-.card.historic { background: var(--historic-bg); border-color: #f0b9c0; }
 
-/* Rows */
+/* Historic tint (IMPORTANT: your JS uses historicCard) */
+.historicCard,
+.card.historic {
+  background: var(--historic-bg);
+  border-color: #f0b9c0;
+}
+
+/* ===== Layout Rows ===== */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -116,25 +123,44 @@ button:disabled {
   align-items: center;
 }
 
-/* ✅ Notes + button row (THIS fixes your issues) */
+/* ✅ Notes + button beside it */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  align-items: start; /* top align */
+
+  /* KEY: makes the button match the textarea height */
+  align-items: stretch;
 }
 
 .actionRow textarea {
-  min-height: var(--control-height);
+  min-height: calc(var(--control-height) * 2); /* makes notes box taller by default */
 }
 
 .actionRow button {
-  height: var(--control-height);
-  align-self: start;
+  height: 100%;            /* KEY: button becomes same height as notes field */
+  min-height: var(--control-height);
+  align-self: stretch;
   min-width: 150px;
 }
 
-/* Nav / day bar */
+/* ===== Login spacing fix ===== */
+#authView input {
+  margin-top: 10px;
+}
+
+#authView input:first-of-type {
+  margin-top: 0;
+}
+
+.authRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* ===== Nav / Day Bar ===== */
 .dayBar {
   display: flex;
   justify-content: space-between;
@@ -158,8 +184,9 @@ button:disabled {
 ul { margin: 10px 0 0; padding-left: 18px; }
 li { margin: 6px 0; }
 
-/* Pills */
+/* ===== Pills (Accident / Illness tabs) ===== */
 .pillRow { display: flex; gap: 10px; margin-top: 10px; }
+
 .pill {
   width: auto;
   padding: 0 14px;
@@ -171,14 +198,11 @@ li { margin: 6px 0; }
   height: var(--control-height);
   cursor: pointer;
 }
-.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* Login buttons */
-.authRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
+.pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 
 /* Center logout */
@@ -190,10 +214,10 @@ li { margin: 6px 0; }
 
 .hidden { display: none; }
 
-/* Mobile */
+/* ===== Mobile ===== */
 @media (max-width: 700px) {
   .row, .row3, .authRow { grid-template-columns: 1fr; }
   .actionRow { grid-template-columns: 1fr; }
-  .actionRow button { width: 100%; min-width: 0; }
+  .actionRow button { width: 100%; min-width: 0; height: var(--control-height); }
   .dayBar { flex-direction: column; align-items: stretch; }
 }
