@@ -1,3 +1,3 @@
 # freddie-routine-pwa
 
-Created with ChatGPT.
+Developed with ChatGPT.
