@@ -38,20 +38,42 @@
     .muted { color: #666; font-size: 13px; }
     .danger { color: #b00020; }
     .ok { color: #0a7b3b; }
+    .historic { color: #b00020; font-weight: 800; }
 
-    .menuBtn { padding: 14px; font-weight: 700; }
+    .menuBtn { padding: 14px; font-weight: 800; }
     .navRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .topBar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .topBar > div { flex: 1; min-width: 220px; }
 
     ul { padding-left: 18px; margin: 8px 0; }
     li { margin: 6px 0; }
 
     .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
-    .pill { padding:10px; border:1px solid #cfcfcf; border-radius: 999px; background:#fff; font-weight:700; cursor:pointer; }
+    .pill { padding:10px; border:1px solid #cfcfcf; border-radius: 999px; background:#fff; font-weight:800; cursor:pointer; }
     .pill.active { border-width:2px; }
     .hidden { display:none; }
+
+    /* Small day nav buttons */
+    .dayBar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .dayBarLeft {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .miniBtn {
+      width: auto;
+      padding: 8px 10px;
+      font-weight: 800;
+    }
+    .dateText {
+      font-weight: 900;
+      font-size: 16px;
+    }
   </style>
 </head>
 
@@ -95,11 +117,16 @@
 
       <div class="navRow">
         <button id="btnGoTracker" class="menuBtn">Routine Tracker</button>
-        <button id="btnGoPrevious" class="menuBtn">Previous Days</button>
+        <button id="btnGoHistoricTracker" class="menuBtn">Historic Routine Tracker</button>
       </div>
 
       <div class="navRow">
         <button id="btnGoAccident" class="menuBtn">Accident &amp; Illness</button>
+        <button id="btnGoHistoricAccident" class="menuBtn">Historic Accident &amp; Illness</button>
+      </div>
+
+      <div class="navRow">
+        <button id="btnToggleMedAdmin" class="menuBtn">Add Medication</button>
         <button id="btnGoExport" class="menuBtn">Export Data</button>
       </div>
 
@@ -107,31 +134,49 @@
       <p id="menuMsg" class="muted"></p>
     </div>
 
-    <!-- ADD MEDICATION (moved here) -->
-    <div class="card">
-      <h3>Add Medication (Admin)</h3>
+    <!-- ADD MEDICATION (hidden until button click) -->
+    <div id="medAdminCard" class="card" style="display:none;">
+      <h3>Add Medication</h3>
       <div class="row">
         <input id="newMedNameMenu" placeholder="Name (e.g. Calpol)" />
         <input id="newMedUnitMenu" placeholder="Unit (ml/mg)" />
       </div>
-      <button id="btnAddMedMenu">Add Medication</button>
+      <button id="btnAddMedMenu">Save Medication</button>
       <p id="medAdminMsg" class="muted"></p>
     </div>
+  </div>
+
+  <!-- HISTORIC ROUTINE PICKER -->
+  <div id="historicRoutineView" class="card" style="display:none;">
+    <h2>Historic Routine Tracker</h2>
+    <p class="muted">Pick a date, then open the Routine Tracker for that day.</p>
+    <input id="historicRoutinePick" type="date" />
+    <button id="btnOpenHistoricRoutine">Open</button>
+    <button id="btnHistoricRoutineBackToMenu">Back to Menu</button>
+  </div>
+
+  <!-- HISTORIC ACCIDENT PICKER -->
+  <div id="historicAIView" class="card" style="display:none;">
+    <h2>Historic Accident &amp; Illness</h2>
+    <p class="muted">Pick a date, then open Accident & Illness for that day.</p>
+    <input id="historicAIPick" type="date" />
+    <button id="btnOpenHistoricAI">Open</button>
+    <button id="btnHistoricAIBackToMenu">Back to Menu</button>
   </div>
 
   <!-- TRACKER VIEW -->
   <div id="trackerView" style="display:none;">
     <div class="card">
-      <div class="topBar">
-        <div>
-          <h2>Routine Tracker</h2>
-          <p class="muted">Select a date to view or add entries for that day.</p>
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="btnTrackerPrevDay" class="miniBtn" type="button">◀</button>
+          <button id="btnTrackerNextDay" class="miniBtn" type="button">▶</button>
+          <span id="trackerDateLabel" class="dateText"></span>
         </div>
-        <div>
-          <label class="muted">Selected date</label>
-          <input id="selectedDate" type="date" />
-        </div>
+        <button id="btnBackToMenu" class="miniBtn" type="button">Back to Menu</button>
       </div>
+
+      <p class="muted">Historic days show in red.</p>
 
       <label class="muted">Child</label>
       <select id="childSelect"></select>
@@ -209,7 +254,7 @@
       <ul id="moodList"></ul>
     </div>
 
-    <!-- MEDICATION (dose only; add-med removed) -->
+    <!-- MEDICATION (dose only) -->
     <div class="card">
       <h2>Medication</h2>
 
@@ -224,29 +269,24 @@
 
       <ul id="medList"></ul>
     </div>
-
-    <div class="card">
-      <button id="btnBackToMenu">Back to Menu</button>
-      <p id="statusMsg" class="muted"></p>
-    </div>
   </div>
 
   <!-- ACCIDENT & ILLNESS VIEW -->
   <div id="accidentView" style="display:none;">
     <div class="card">
-      <h2>Accident &amp; Illness</h2>
-      <p class="muted">Uses the selected date. Backdated items are stored at 10:06.</p>
-
-      <div class="topBar">
-        <div>
-          <label class="muted">Selected date</label>
-          <input id="aiDate" type="date" />
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="btnAIPrevDay" class="miniBtn" type="button">◀</button>
+          <button id="btnAINextDay" class="miniBtn" type="button">▶</button>
+          <span id="aiDateLabel" class="dateText"></span>
         </div>
-        <div>
-          <label class="muted">Child</label>
-          <select id="aiChildSelect"></select>
-        </div>
+        <button id="btnAIBackToMenu" class="miniBtn" type="button">Back to Menu</button>
       </div>
+
+      <p class="muted">Historic days show in red.</p>
+
+      <label class="muted">Child</label>
+      <select id="aiChildSelect"></select>
 
       <div class="pillRow">
         <button id="tabAccident" class="pill active" type="button">Accident</button>
@@ -293,7 +333,7 @@
         <div>
           <label class="muted">Time of incident (today only)</label>
           <input id="accTime" type="time" />
-          <p class="muted">If backdated, stored at 10:06 automatically.</p>
+          <p class="muted">If historic, stored at 10:06 automatically.</p>
         </div>
       </div>
 
@@ -341,7 +381,7 @@
         <div>
           <label class="muted">Time of event (today only)</label>
           <input id="illTime" type="time" />
-          <p class="muted">If backdated, stored at 10:06 automatically.</p>
+          <p class="muted">If historic, stored at 10:06 automatically.</p>
         </div>
       </div>
 
@@ -366,29 +406,12 @@
         Breathing difficulties flagged — if severe or worsening consider urgent medical advice.
       </p>
     </div>
-
-    <div class="card">
-      <button id="btnAIBackToMenu">Back to Menu</button>
-    </div>
-  </div>
-
-  <!-- PREVIOUS DAYS VIEW -->
-  <div id="previousView" class="card" style="display:none;">
-    <h2>Previous Days</h2>
-    <p class="muted">Pick a date and jump into the tracker for that day.</p>
-
-    <input id="previousPick" type="date" />
-    <button id="btnOpenPrevious">Open Selected Day</button>
-
-    <button id="btnPrevBackToMenu">Back to Menu</button>
   </div>
 
   <!-- EXPORT VIEW -->
   <div id="exportView" class="card" style="display:none;">
     <h2>Export Data</h2>
-    <p class="muted">Next step: export to CSV/PDF for court-friendly evidence.</p>
-    <p class="muted">We’ll build this next.</p>
-
+    <p class="muted">We’ll build CSV export next (court-friendly).</p>
     <button id="btnExportBackToMenu">Back to Menu</button>
   </div>
 
