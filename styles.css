@@ -1,125 +1,120 @@
 :root {
-  --primary: #0F6F4F;
-  --primary-hover: #0C5E42;
+  --primary: #0f6f4f;
+  --primary-hover: #0c5e42;
 
-  --secondary: #7FD1C7;
-  --accent: #BFEAE3;
+  --secondary: #cceee7;
+  --accent: #7fd1c7;
 
-  --bg: #EAF3F0;
-  --card-bg: #F2FBF7;
-  --card-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  --bg: #eef6f3;
+  --card-bg: #f6fbf9;
+  --today-bg: #e9f5f0;
+  --historic-bg: #f8d7da;
 
-  --historic-bg: #F8D7DA;
+  --text: #111;
+  --muted: #6b7280;
+  --border: #dbe7e3;
 
-  --text: #111111;
-  --muted: #6B7280;
-  --border: #DCE7E3;
-  --danger: #9B1C1C;
+  --danger: #9b1c1c;
 
+  --radius: 14px;
   --control-height: 44px;
 }
 
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  max-width: 900px;
-  margin-inline: auto;
-  padding: 12px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+* {
+  box-sizing: border-box;
 }
 
-h1, h2, h3 { margin-top: 0; }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 14px;
+}
+
+h1, h2 {
+  margin: 0 0 10px;
+}
 
 .page-title {
   text-align: center;
-  font-size: 1.6rem;
-  margin: 10px 0 16px;
+  margin-bottom: 12px;
 }
 
-/* Cards */
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 14px;
-  box-shadow: var(--card-shadow);
-}
-
-/* Historic */
-.historicCard,
-.card.historic {
-  background: var(--historic-bg);
-  color: var(--text);
-  border-color: #f0b9c0;
-}
-
-/* Controls */
-input, select, textarea {
+input,
+select,
+textarea,
+button {
   width: 100%;
-  padding: 10px 12px;
-  margin: 6px 0;
-  border-radius: 10px;
+  height: var(--control-height);
+  padding: 10px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   font-size: 14px;
-  background: #fff;
-  color: var(--text);
 }
 
-input, select,
-input[type="datetime-local"],
-input[type="time"],
-input[type="date"] {
-  height: var(--control-height);
-}
-
-/* Let textareas grow; keep a consistent baseline */
 textarea {
+  height: auto;
   min-height: var(--control-height);
   resize: vertical;
 }
 
-/* Buttons */
 button {
   background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 0 14px; /* no vertical padding */
-  font-size: 15px;
+  color: #fff;
   font-weight: 700;
+  border: none;
   cursor: pointer;
-  height: var(--control-height);
-  line-height: 1.1;
-  transition: background 0.15s ease, transform 0.05s ease;
+  transition: background 0.15s ease;
 }
 
-button:hover { background: var(--primary-hover); }
-button:active { transform: translateY(1px); }
+button:hover {
+  background: var(--primary-hover);
+}
 
 button.secondary {
-  background: var(--accent);
-  color: var(--primary);
+  background: var(--secondary);
+  color: #064;
 }
-button.secondary:hover { background: var(--secondary); }
+
+button.secondary:hover {
+  background: #b7e4dc;
+}
+
+button.miniBtn {
+  width: auto;
+  padding: 0 14px;
+}
 
 button:disabled {
-  cursor: not-allowed;
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Rows */
-.row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+/* ---------------- CARDS ---------------- */
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
-.row > * {
-  flex: 1;
-  margin: 0 !important;
+
+.card.today {
+  background: var(--today-bg);
+}
+
+.card.historic {
+  background: var(--historic-bg);
+}
+
+/* ---------------- LAYOUT ROWS ---------------- */
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .row3 {
@@ -128,178 +123,110 @@ button:disabled {
   gap: 10px;
   align-items: center;
 }
-.row3 > * { margin: 0 !important; }
 
-.navRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-/* Menu buttons can be bigger */
-.menuBtn {
-  font-size: 1.05rem;
-  padding: 14px;
-  height: auto;
-  min-height: var(--control-height);
-}
-
-.authRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-/* Day nav */
-.dayBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-.dayBarLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.miniBtn {
-  height: 38px;
-  padding: 0 12px;
-  font-size: 0.9rem;
-  width: auto;
-}
-
-/* Text */
-.muted { color: var(--muted); font-size: 0.9rem; }
-.danger { color: var(--danger); }
-.historicDate { color: var(--danger); font-weight: 900; }
-.hidden { display:none; }
-
-/* Pills */
-.pillRow { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
-.pill {
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--accent);
-  color: var(--primary);
-  font-weight: 800;
-  height: var(--control-height);
-  padding: 0 14px;
-  cursor: pointer;
-}
-.pill:hover { background: var(--secondary); }
-.pill.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-
-/* Lists */
-ul { padding-left: 18px; margin: 6px 0; }
-li { margin-bottom: 6px; }
-
-/* Center logout */
-.logout-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-/* Offline banner */
-.banner {
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid var(--border);
-  background: #F2F7F5;
-  font-weight: 700;
-}
-
-/* NOTES + BUTTON LAYOUT
-   Key change: button stays control-height unless textarea is taller */
+/* 🔑 IMPORTANT FIX */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: start;
 }
-.actionRow > * { margin: 0 !important; }
 
-/* Default button size (matches inputs) */
-.actionRow button {
-  height: var(--control-height) !important;
-  min-width: 150px;
-}
-
-/* When textarea gets taller (multi-line), button can stretch */
-.actionRow textarea {
-  min-height: var(--control-height);
-}
-.actionRow textarea:focus,
-.actionRow textarea:not(:placeholder-shown) {
-  /* allow user to make textarea bigger; button won't stretch automatically */
-}
-
-/* --- FIX: actionRow button should align with top of textarea (not centered, not stretched) --- */
-.actionRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: start; /* top-align */
-}
-
-.actionRow button {
-  height: var(--control-height) !important; /* always input height */
-  align-self: start; /* top aligned */
-  min-width: 150px;
-}
-
-/* Ensure textarea is a normal height by default so list starts nicely below */
 .actionRow textarea {
   min-height: var(--control-height);
 }
 
-/* --- FIX: stop any accidental vertical centering in grid rows --- */
-.row3 {
-  align-items: center;
+.actionRow button {
+  height: var(--control-height);
+  align-self: start;
+  min-width: 140px;
 }
 
+/* ---------------- NAV / DAY BAR ---------------- */
 
-
-/* Optional: if you WANT the button to stretch when textarea is resized,
-   uncomment below:
-.actionRow { align-items: stretch; }
-.actionRow button { height: 100% !important; }
-*/
-
-/* New helper: input row with a button */
-.rowBtn {
-  display: grid;
-  grid-template-columns: 1fr auto;
+.dayBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dayBarLeft {
+  display: flex;
   align-items: center;
-}
-.rowBtn > * { margin: 0 !important; }
-.rowBtn button { height: var(--control-height); min-width: 170px; }
-
-/* Mobile */
-@media (max-width: 700px) {
-  .row3 { grid-template-columns: 1fr; }
-  .authRow { grid-template-columns: 1fr; }
-
-  .actionRow { grid-template-columns: 1fr; }
-  .actionRow button { width: 100%; }
-
-  .rowBtn { grid-template-columns: 1fr; }
-  .rowBtn button { width: 100%; }
+  gap: 10px;
 }
 
-@media (max-width: 520px) {
-  .row { flex-direction: column; }
-  .navRow { grid-template-columns: 1fr; }
+.dateText {
+  font-weight: 800;
+}
+
+.historicDate {
+  color: var(--danger);
+}
+
+/* ---------------- LISTS ---------------- */
+
+ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+li {
+  margin: 6px 0;
+}
+
+/* ---------------- PILLS ---------------- */
+
+.pillRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ---------------- LOGIN ---------------- */
+
+.loginRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+/* ---------------- MOBILE ---------------- */
+
+@media (max-width: 600px) {
+  .row,
+  .row3,
+  .loginRow {
+    grid-template-columns: 1fr;
+  }
+
+  .actionRow {
+    grid-template-columns: 1fr;
+  }
+
+  .actionRow button {
+    width: 100%;
+  }
+
+  .dayBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
