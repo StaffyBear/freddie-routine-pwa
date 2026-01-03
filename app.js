@@ -1,6 +1,6 @@
 /**************************************************
- * Routine Tracker – app.js 1609
- * Version: 2026-01-03-auto-sync-headings-no-sync-button
+ * Routine Tracker – app.js 1610
+ * Version: 2026-01-03-no-future-dates
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
@@ -60,6 +60,32 @@ function autoTimestampForSelectedDay(dateStr) {
 function formatDateNice(dateStr) {
   const d = parseDateStr(dateStr);
   return d.toLocaleDateString([], { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+}
+
+/* ----------------- Prevent Future Dates ----------------- */
+function todayStr() {
+  return yyyyMmDd(new Date());
+}
+function clampToToday(dateStr) {
+  const t = todayStr();
+  if (!dateStr) return t;
+  return dateStr > t ? t : dateStr;
+}
+function setMaxDateOnPickers() {
+  const t = todayStr();
+  const ids = ["historicRoutinePick", "historicAIPick"];
+  for (const id of ids) {
+    const el = $(id);
+    if (el) el.max = t;
+  }
+}
+function updateNextButtonsDisabled() {
+  const t = todayStr();
+  const nextBtns = ["btnTrackerNextDay", "btnAINextDay"];
+  for (const id of nextBtns) {
+    const btn = $(id);
+    if (btn) btn.disabled = (selectedDateStr >= t);
+  }
 }
 
 /* ----------------- Offline queue ----------------- */
@@ -157,6 +183,7 @@ function showView(id, pushHistory = true) {
   hideAllViews();
   $(id).style.display = "block";
   applyHistoricUI();
+  updateNextButtonsDisabled();
 }
 
 window.addEventListener("popstate", () => {
@@ -165,6 +192,7 @@ window.addEventListener("popstate", () => {
     hideAllViews();
     $(prev).style.display = "block";
     applyHistoricUI();
+    updateNextButtonsDisabled();
   }
 });
 
@@ -211,11 +239,22 @@ function applyHistoricUI() {
   if (medWrap) medWrap.style.display = historic ? "none" : "block";
   if (accWrap) accWrap.style.display = historic ? "none" : "block";
   if (illWrap) illWrap.style.display = historic ? "none" : "block";
+
+  updateNextButtonsDisabled();
 }
 
 async function setSelectedDate(dateStr, refresh = true) {
-  selectedDateStr = dateStr;
+  // clamp date to today (blocks future)
+  selectedDateStr = clampToToday(dateStr);
+
   applyHistoricUI();
+
+  // also clamp pickers value if visible
+  const hr = $("historicRoutinePick");
+  if (hr && hr.value && hr.value > todayStr()) hr.value = todayStr();
+  const ha = $("historicAIPick");
+  if (ha && ha.value && ha.value > todayStr()) ha.value = todayStr();
+
   if (refresh) await refreshVisible();
 }
 
@@ -414,7 +453,7 @@ async function addMedicationFromPage() {
 /* ----------------- Tracker ----------------- */
 async function goTracker(dateStr) {
   showView("trackerView");
-  await setSelectedDate(dateStr || yyyyMmDd(new Date()), false);
+  await setSelectedDate(dateStr || todayStr(), false);
   if ($("medTime")) $("medTime").value = nowTimeStr();
 
   $("sleepStartManual").value = "";
@@ -913,11 +952,11 @@ async function addIllness() {
 
 /* ----------------- Navigation setup ----------------- */
 function setupNav() {
-  $("btnGoTracker").onclick = () => goTracker(yyyyMmDd(new Date()));
+  $("btnGoTracker").onclick = () => goTracker(todayStr());
 
   $("btnGoAccident").onclick = async () => {
     showView("accidentView");
-    await setSelectedDate(yyyyMmDd(new Date()), false);
+    await setSelectedDate(todayStr(), false);
 
     await syncAIChildSelect();
     if ($("accTime")) $("accTime").value = nowTimeStr();
@@ -939,23 +978,29 @@ function setupNav() {
 
   $("btnGoHistoricTracker").onclick = () => {
     showView("historicRoutineView");
-    $("historicRoutinePick").value = selectedDateStr || yyyyMmDd(new Date());
+    setMaxDateOnPickers();
+    const d = clampToToday(selectedDateStr || todayStr());
+    $("historicRoutinePick").value = d;
   };
 
   $("btnGoHistoricAccident").onclick = () => {
     showView("historicAIView");
-    $("historicAIPick").value = selectedDateStr || yyyyMmDd(new Date());
+    setMaxDateOnPickers();
+    const d = clampToToday(selectedDateStr || todayStr());
+    $("historicAIPick").value = d;
   };
 
   $("btnOpenHistoricRoutine").onclick = () => {
-    const d = $("historicRoutinePick").value;
+    let d = $("historicRoutinePick").value;
     if (!d) return alert("Pick a date.");
+    d = clampToToday(d);
     goTracker(d);
   };
 
   $("btnOpenHistoricAI").onclick = async () => {
-    const d = $("historicAIPick").value;
+    let d = $("historicAIPick").value;
     if (!d) return alert("Pick a date.");
+    d = clampToToday(d);
 
     showView("accidentView");
     await setSelectedDate(d, false);
@@ -984,6 +1029,7 @@ function setupNav() {
   $("btnBackToMenu").onclick = goMenu;
   $("btnAIBackToMenu").onclick = goMenu;
 
+  // Prev always allowed, Next blocked by clamp + disabled state
   $("btnTrackerPrevDay").onclick = () => setSelectedDate(addDays(selectedDateStr, -1), true);
   $("btnTrackerNextDay").onclick = () => setSelectedDate(addDays(selectedDateStr,  1), true);
   $("btnAIPrevDay").onclick = () => setSelectedDate(addDays(selectedDateStr, -1), true);
@@ -997,6 +1043,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Register service worker for offline app shell
   await registerSW();
 
+  // Prevent future date selection on pickers
+  setMaxDateOnPickers();
+
   // Online/offline events: auto sync
   window.addEventListener("online", async () => {
     showOfflineBanner();
@@ -1009,8 +1058,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (navigator.onLine) flushQueue();
   }, 60_000);
 
-  selectedDateStr = yyyyMmDd(new Date());
+  selectedDateStr = todayStr();
   applyHistoricUI();
+  updateNextButtonsDisabled();
 
   // Auth
   $("btnRegister").onclick = doRegister;
