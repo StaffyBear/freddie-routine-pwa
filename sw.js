@@ -1,5 +1,5 @@
 // sw.js — simple offline shell cache
-const CACHE_NAME = "routine-tracker-v3";
+const CACHE_NAME = "routine-tracker-v4";
 const ASSETS = [
   "./",
   "./index.html",
