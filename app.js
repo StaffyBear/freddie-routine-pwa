@@ -1,13 +1,13 @@
 /**************************************************
  * Freddie Routine – app.js
- * Version: 2026-01-03-accidents-illness-meds-menu
+ * Version: 2026-01-03-menu-historic-day-nav
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
 const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
 
-// Backdated entries (selected day != today) stored at 10:06
+// Backdated entries stored at 10:06
 const BACKDATED_TIME = "10:06"; // HH:MM
 
 console.log("APP LOADED ✅", new Date().toISOString());
@@ -22,9 +22,21 @@ window.addEventListener("error", (e) => console.error("JS ERROR:", e.error || e.
 window.addEventListener("unhandledrejection", (e) => console.error("PROMISE ERROR:", e.reason));
 
 /* ----------------- Helpers ----------------- */
+function pad2(n) { return String(n).padStart(2, "0"); }
+
 function yyyyMmDd(d = new Date()) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function parseDateStr(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0, 0); // midday avoids DST weirdness
+}
+
+function addDays(dateStr, delta) {
+  const dt = parseDateStr(dateStr);
+  dt.setDate(dt.getDate() + delta);
+  return yyyyMmDd(dt);
 }
 
 function toIsoRangeForDate(dateStr) {
@@ -46,32 +58,76 @@ function combineDateAndTime(dateStr, timeStr) {
 
 function nowTimeStr() {
   const d = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
-function isTodaySelected(dateStr) {
-  const ds = dateStr || selectedDateStr;
-  return ds === yyyyMmDd(new Date());
+function isToday(dateStr) {
+  return dateStr === yyyyMmDd(new Date());
 }
 
 function autoTimestampForSelectedDay(dateStr) {
-  const ds = dateStr || selectedDateStr;
-  return isTodaySelected(ds)
+  return isToday(dateStr)
     ? new Date().toISOString()
-    : combineDateAndTime(ds, BACKDATED_TIME);
+    : combineDateAndTime(dateStr, BACKDATED_TIME);
+}
+
+function formatDateNice(dateStr) {
+  const d = parseDateStr(dateStr);
+  return d.toLocaleDateString([], { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 }
 
 /* ----------------- View switching ----------------- */
 function hideAllViews() {
-  ["authView", "resetView", "menuView", "trackerView", "previousView", "exportView", "accidentView"].forEach((id) => {
+  [
+    "authView",
+    "resetView",
+    "menuView",
+    "historicRoutineView",
+    "historicAIView",
+    "trackerView",
+    "accidentView",
+    "exportView"
+  ].forEach((id) => {
     const el = $(id);
     if (el) el.style.display = "none";
   });
 }
+
 function showView(id) {
   hideAllViews();
   $(id).style.display = "block";
+}
+
+/* ----------------- Date label updates ----------------- */
+function updateDateLabels() {
+  const nice = formatDateNice(selectedDateStr);
+  const historic = !isToday(selectedDateStr);
+
+  const t = $("trackerDateLabel");
+  if (t) {
+    t.textContent = nice;
+    t.classList.toggle("historic", historic);
+  }
+
+  const a = $("aiDateLabel");
+  if (a) {
+    a.textContent = nice;
+    a.classList.toggle("historic", historic);
+  }
+}
+
+async function setSelectedDate(dateStr, refresh = true) {
+  selectedDateStr = dateStr;
+  updateDateLabels();
+  if (refresh) {
+    // refresh whichever view is currently open
+    if ($("trackerView").style.display !== "none") {
+      await refreshAll();
+    }
+    if ($("accidentView").style.display !== "none") {
+      await Promise.all([loadAccidents(), loadIllnesses()]);
+    }
+  }
 }
 
 /* ----------------- Auth helpers ----------------- */
@@ -85,42 +141,23 @@ async function requireUser() {
 async function doRegister() {
   const email = $("email").value.trim();
   const password = $("password").value;
-
-  if (!email || !password) {
-    $("authMsg").textContent = "Enter BOTH email and password.";
-    return;
-  }
+  if (!email || !password) return ($("authMsg").textContent = "Enter BOTH email and password.");
 
   $("authMsg").textContent = "Registering…";
-  const res = await sb.auth.signUp({
-    email,
-    password,
-    options: { emailRedirectTo: SITE_URL },
-  });
+  const res = await sb.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL } });
+  if (res.error) return ($("authMsg").textContent = res.error.message);
 
-  if (res.error) {
-    $("authMsg").textContent = res.error.message;
-    return;
-  }
   $("authMsg").textContent = "Registered ✅ Now click Login (or confirm email if required).";
 }
 
 async function doLogin() {
   const email = $("email").value.trim();
   const password = $("password").value;
-
-  if (!email || !password) {
-    $("authMsg").textContent = "Enter BOTH email and password.";
-    return;
-  }
+  if (!email || !password) return ($("authMsg").textContent = "Enter BOTH email and password.");
 
   $("authMsg").textContent = "Logging in…";
   const res = await sb.auth.signInWithPassword({ email, password });
-
-  if (res.error) {
-    $("authMsg").textContent = res.error.message;
-    return;
-  }
+  if (res.error) return ($("authMsg").textContent = res.error.message);
 
   $("authMsg").textContent = "";
   await goMenu();
@@ -128,18 +165,11 @@ async function doLogin() {
 
 async function doForgotPassword() {
   const email = $("email").value.trim();
-  if (!email) {
-    $("authMsg").textContent = "Enter your email first, then click Forgot password.";
-    return;
-  }
+  if (!email) return ($("authMsg").textContent = "Enter your email first, then click Forgot password.");
 
   $("authMsg").textContent = "Sending password reset email…";
   const res = await sb.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
-
-  if (res.error) {
-    $("authMsg").textContent = res.error.message;
-    return;
-  }
+  if (res.error) return ($("authMsg").textContent = res.error.message);
 
   $("authMsg").textContent = "Reset email sent ✅ Check your inbox/spam.";
 }
@@ -152,22 +182,12 @@ async function setNewPassword() {
   const p1 = $("newPassword").value;
   const p2 = $("newPassword2").value;
 
-  if (!p1 || p1.length < 6) {
-    $("resetMsg").textContent = "Password must be at least 6 characters.";
-    return;
-  }
-  if (p1 !== p2) {
-    $("resetMsg").textContent = "Passwords do not match.";
-    return;
-  }
+  if (!p1 || p1.length < 6) return ($("resetMsg").textContent = "Password must be at least 6 characters.");
+  if (p1 !== p2) return ($("resetMsg").textContent = "Passwords do not match.");
 
   $("resetMsg").textContent = "Updating password…";
   const res = await sb.auth.updateUser({ password: p1 });
-
-  if (res.error) {
-    $("resetMsg").textContent = res.error.message;
-    return;
-  }
+  if (res.error) return ($("resetMsg").textContent = res.error.message);
 
   $("resetMsg").textContent = "Password updated ✅ Please login.";
   history.replaceState(null, "", location.pathname + location.search);
@@ -182,22 +202,9 @@ async function goMenu() {
   $("medAdminMsg").textContent = "";
 }
 
-/* ----------------- Tracker init ----------------- */
-async function goTracker(dateStr = null) {
-  showView("trackerView");
-
-  selectedDateStr = dateStr || yyyyMmDd(new Date());
-  $("selectedDate").value = selectedDateStr;
-
-  // med time picker default only for today
-  $("medTime").value = nowTimeStr();
-
-  // Sleep manual inputs
-  $("sleepStartManual").value = "";
-  $("sleepEndManual").value = "";
-
-  await loadChildrenDropdown();
-  await refreshAll();
+function toggleMedAdmin() {
+  const card = $("medAdminCard");
+  card.style.display = (card.style.display === "none" || !card.style.display) ? "block" : "none";
 }
 
 /* ----------------- Children dropdown ----------------- */
@@ -258,7 +265,7 @@ async function addChild() {
   await refreshAll();
 }
 
-/* ----------------- Medications admin (moved to menu) ----------------- */
+/* ----------------- Medications admin (menu) ----------------- */
 async function addMedicationFromMenu() {
   const name = $("newMedNameMenu").value.trim();
   const default_unit = $("newMedUnitMenu").value.trim() || null;
@@ -272,10 +279,30 @@ async function addMedicationFromMenu() {
   $("newMedUnitMenu").value = "";
   $("medAdminMsg").textContent = "Medication added ✅";
 
-  // refresh tracker dropdown + illness dropdown if open
   await loadMedsAndDoses();
   await loadIllnessMedicationDropdown();
 }
+
+/* ----------------- Tracker init ----------------- */
+async function goTracker(dateStr) {
+  showView("trackerView");
+
+  await setSelectedDate(dateStr || yyyyMmDd(new Date()), false);
+  $("medTime").value = nowTimeStr();
+
+  $("sleepStartManual").value = "";
+  $("sleepEndManual").value = "";
+
+  await loadChildrenDropdown();
+  await refreshAll();
+}
+
+/* ----------------- Day navigation ----------------- */
+async function trackerPrevDay() { await setSelectedDate(addDays(selectedDateStr, -1), true); }
+async function trackerNextDay() { await setSelectedDate(addDays(selectedDateStr,  1), true); }
+
+async function aiPrevDay() { await setSelectedDate(addDays(selectedDateStr, -1), true); }
+async function aiNextDay() { await setSelectedDate(addDays(selectedDateStr,  1), true); }
 
 /* ----------------- Data refresh ----------------- */
 async function refreshAll() {
@@ -315,10 +342,7 @@ async function loadSleep() {
 
 async function sleepStart() {
   if (!childId) return alert("Select/add a child first.");
-  if (!isTodaySelected(selectedDateStr)) {
-    alert("Start/End buttons are for TODAY only. For previous days, use Manual sleep entry.");
-    return;
-  }
+  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only. Use Manual sleep entry for historic.");
 
   const user = await requireUser();
   const notes = $("sleepNote").value.trim() || null;
@@ -336,10 +360,7 @@ async function sleepStart() {
 
 async function sleepEnd() {
   if (!childId) return alert("Select/add a child first.");
-  if (!isTodaySelected(selectedDateStr)) {
-    alert("Start/End buttons are for TODAY only. For previous days, use Manual sleep entry.");
-    return;
-  }
+  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only. Use Manual sleep entry for historic.");
 
   const open = await sb
     .from("sleep_sessions")
@@ -373,9 +394,7 @@ async function addSleepManual() {
   const startIso = new Date(startVal).toISOString();
   const endIso = endVal ? new Date(endVal).toISOString() : null;
 
-  if (endIso && new Date(endIso) < new Date(startIso)) {
-    return alert("End time must be after start time.");
-  }
+  if (endIso && new Date(endIso) < new Date(startIso)) return alert("End time must be after start time.");
 
   const user = await requireUser();
   const res = await sb.from("sleep_sessions").insert({
@@ -513,7 +532,7 @@ async function addDose() {
 
   const user = await requireUser();
 
-  const given_at = isTodaySelected(selectedDateStr)
+  const given_at = isToday(selectedDateStr)
     ? combineDateAndTime(selectedDateStr, ($("medTime").value || nowTimeStr()))
     : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
@@ -533,7 +552,7 @@ async function addDose() {
   await loadMedsAndDoses();
 }
 
-/* ----------------- Accident & Illness view ----------------- */
+/* ----------------- Accident & Illness tabs ----------------- */
 function setTab(which) {
   const accTabBtn = $("tabAccident");
   const illTabBtn = $("tabIllness");
@@ -561,11 +580,13 @@ function toggleOther(selectId, inputId) {
   if (!isOther) inp.value = "";
 }
 
-async function syncAIChildrenAndDate() {
-  // date
-  $("aiDate").value = selectedDateStr || yyyyMmDd(new Date());
+function updateBreathingFlag() {
+  const isBreathing = $("illSymptom").value === "Breathing difficulties";
+  $("illFlag").style.display = isBreathing ? "block" : "none";
+}
 
-  // children dropdown (reuse children list)
+/* ----------------- A&I child select ----------------- */
+async function syncAIChildSelect() {
   const res = await sb.from("children").select("id,name").order("created_at", { ascending: true });
   if (res.error) return alert("Error loading children: " + res.error.message);
 
@@ -585,24 +606,17 @@ async function syncAIChildrenAndDate() {
     sel.appendChild(opt);
   });
 
-  // keep current child if possible
   sel.value = childId || children[0].id;
   childId = sel.value;
 
-  sel.onchange = () => {
+  sel.onchange = async () => {
     childId = sel.value;
     localStorage.setItem("activeChildId", childId);
-    loadAccidents();
-    loadIllnesses();
-  };
-
-  $("aiDate").onchange = () => {
-    selectedDateStr = $("aiDate").value;
-    loadAccidents();
-    loadIllnesses();
+    await Promise.all([loadAccidents(), loadIllnesses()]);
   };
 }
 
+/* ----------------- Accidents / Illnesses load+add ----------------- */
 async function loadAccidents() {
   if (!childId) return;
 
@@ -628,12 +642,8 @@ async function loadAccidents() {
 
 async function addAccident() {
   if (!childId) return alert("Select a child first.");
-
   const user = await requireUser();
-  const dateStr = $("aiDate").value;
-  selectedDateStr = dateStr;
 
-  // Required fields
   const what = $("accWhat").value.trim();
   if (!what) return alert("Accident: 'What happened' is required.");
 
@@ -645,9 +655,9 @@ async function addAccident() {
   const repOther = $("accReportedOther").value.trim();
   if (repBy === "Other" && !repOther) return alert("Accident: Reported by 'Other' must be filled in.");
 
-  const incident_time = isTodaySelected(dateStr)
-    ? combineDateAndTime(dateStr, ($("accTime").value || nowTimeStr()))
-    : combineDateAndTime(dateStr, BACKDATED_TIME);
+  const incident_time = isToday(selectedDateStr)
+    ? combineDateAndTime(selectedDateStr, ($("accTime").value || nowTimeStr()))
+    : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
   const res = await sb.from("accidents").insert({
     user_id: user.id,
@@ -667,7 +677,6 @@ async function addAccident() {
 
   if (res.error) return alert(res.error.message);
 
-  // Clear
   $("accWhat").value = "";
   $("accWhere").value = "";
   $("accAction").value = "";
@@ -692,7 +701,6 @@ async function loadIllnessMedicationDropdown() {
   const options = [`<option value="">None</option>`].concat(
     (meds.data || []).map(m => `<option value="${m.id}">${m.name}${m.default_unit ? " (" + m.default_unit + ")" : ""}</option>`)
   );
-
   $("illMedication").innerHTML = options.join("");
 }
 
@@ -723,10 +731,7 @@ async function loadIllnesses() {
 
 async function addIllness() {
   if (!childId) return alert("Select a child first.");
-
   const user = await requireUser();
-  const dateStr = $("aiDate").value;
-  selectedDateStr = dateStr;
 
   const symptom = $("illSymptom").value;
   const symptomOther = $("illSymptomOther").value.trim();
@@ -736,11 +741,10 @@ async function addIllness() {
   const repOther = $("illReportedOther").value.trim();
   if (repBy === "Other" && !repOther) return alert("Illness: Reported by 'Other' must be filled in.");
 
-  const event_time = isTodaySelected(dateStr)
-    ? combineDateAndTime(dateStr, ($("illTime").value || nowTimeStr()))
-    : combineDateAndTime(dateStr, BACKDATED_TIME);
+  const event_time = isToday(selectedDateStr)
+    ? combineDateAndTime(selectedDateStr, ($("illTime").value || nowTimeStr()))
+    : combineDateAndTime(selectedDateStr, BACKDATED_TIME);
 
-  // temp validation (optional but helpful)
   const tRaw = $("illTemp").value.trim();
   let temperature_c = null;
   if (tRaw) {
@@ -766,7 +770,6 @@ async function addIllness() {
 
   if (res.error) return alert(res.error.message);
 
-  // Clear
   $("illNotes").value = "";
   $("illTemp").value = "";
   $("illTime").value = nowTimeStr();
@@ -780,34 +783,19 @@ async function addIllness() {
   await loadIllnesses();
 }
 
-function updateBreathingFlag() {
-  const isBreathing = $("illSymptom").value === "Breathing difficulties";
-  $("illFlag").style.display = isBreathing ? "block" : "none";
-}
-
-/* ----------------- Navigation ----------------- */
+/* ----------------- Navigation setup ----------------- */
 function setupNav() {
-  $("btnGoTracker").onclick = () => goTracker(selectedDateStr || yyyyMmDd(new Date()));
-
-  $("btnGoPrevious").onclick = () => {
-    showView("previousView");
-    $("previousPick").value = selectedDateStr || yyyyMmDd(new Date());
-  };
-
-  $("btnGoExport").onclick = () => showView("exportView");
-
+  // Menu buttons
+  $("btnGoTracker").onclick = () => goTracker(yyyyMmDd(new Date()));
   $("btnGoAccident").onclick = async () => {
     showView("accidentView");
+    await setSelectedDate(yyyyMmDd(new Date()), false);
+    updateDateLabels();
 
-    // sync shared date/child
-    if (!selectedDateStr) selectedDateStr = yyyyMmDd(new Date());
-    await syncAIChildrenAndDate();
-
-    // defaults
+    await syncAIChildSelect();
     $("accTime").value = nowTimeStr();
     $("illTime").value = nowTimeStr();
 
-    // tab + other inputs
     setTab("accident");
     toggleOther("accBodyArea", "accBodyOther");
     toggleOther("accReportedBy", "accReportedOther");
@@ -819,46 +807,84 @@ function setupNav() {
     await Promise.all([loadAccidents(), loadIllnesses()]);
   };
 
-  $("btnBackToMenu").onclick = goMenu;
-  $("btnPrevBackToMenu").onclick = goMenu;
-  $("btnExportBackToMenu").onclick = goMenu;
-  $("btnAIBackToMenu").onclick = goMenu;
+  // Historic pickers
+  $("btnGoHistoricTracker").onclick = () => {
+    showView("historicRoutineView");
+    $("historicRoutinePick").value = selectedDateStr || yyyyMmDd(new Date());
+  };
+  $("btnGoHistoricAccident").onclick = () => {
+    showView("historicAIView");
+    $("historicAIPick").value = selectedDateStr || yyyyMmDd(new Date());
+  };
 
-  $("btnOpenPrevious").onclick = () => {
-    const d = $("previousPick").value;
+  $("btnOpenHistoricRoutine").onclick = () => {
+    const d = $("historicRoutinePick").value;
     if (!d) return alert("Pick a date.");
     goTracker(d);
   };
+  $("btnOpenHistoricAI").onclick = async () => {
+    const d = $("historicAIPick").value;
+    if (!d) return alert("Pick a date.");
+
+    showView("accidentView");
+    await setSelectedDate(d, false);
+    updateDateLabels();
+
+    await syncAIChildSelect();
+    $("accTime").value = nowTimeStr();
+    $("illTime").value = nowTimeStr();
+
+    setTab("accident");
+    toggleOther("accBodyArea", "accBodyOther");
+    toggleOther("accReportedBy", "accReportedOther");
+    toggleOther("illSymptom", "illSymptomOther");
+    toggleOther("illReportedBy", "illReportedOther");
+    updateBreathingFlag();
+
+    await loadIllnessMedicationDropdown();
+    await Promise.all([loadAccidents(), loadIllnesses()]);
+  };
+
+  $("btnHistoricRoutineBackToMenu").onclick = goMenu;
+  $("btnHistoricAIBackToMenu").onclick = goMenu;
+
+  // Add medication toggle button
+  $("btnToggleMedAdmin").onclick = toggleMedAdmin;
+
+  // Export
+  $("btnGoExport").onclick = () => showView("exportView");
+  $("btnExportBackToMenu").onclick = goMenu;
+
+  // Back buttons
+  $("btnBackToMenu").onclick = goMenu;
+  $("btnAIBackToMenu").onclick = goMenu;
+
+  // Day nav buttons
+  $("btnTrackerPrevDay").onclick = trackerPrevDay;
+  $("btnTrackerNextDay").onclick = trackerNextDay;
+  $("btnAIPrevDay").onclick = aiPrevDay;
+  $("btnAINextDay").onclick = aiNextDay;
 }
 
 /* ----------------- DOM READY ----------------- */
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOM READY ✅ wiring...");
-
   selectedDateStr = yyyyMmDd(new Date());
+  updateDateLabels();
 
   // Auth
   $("btnRegister").onclick = doRegister;
   $("btnLogin").onclick = doLogin;
   $("btnForgotPassword").onclick = doForgotPassword;
 
-  // Reset view
+  // Reset
   $("btnSetNewPassword").onclick = setNewPassword;
   $("btnBackToLogin").onclick = () => showView("authView");
 
-  // Menu admin
+  // Menu med admin
   $("btnAddMedMenu").onclick = addMedicationFromMenu;
 
-  // Navigation
-  setupNav();
-
-  // Tracker
+  // Tracker actions
   $("btnAddChild").onclick = addChild;
-  $("selectedDate").onchange = async () => {
-    selectedDateStr = $("selectedDate").value;
-    $("medTime").value = nowTimeStr();
-    await refreshAll();
-  };
 
   $("btnSleepStart").onclick = sleepStart;
   $("btnSleepEnd").onclick = sleepEnd;
@@ -869,7 +895,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("btnAddDose").onclick = addDose;
 
-  // Accident/Illness UI wiring
+  // A&I UI wiring
   $("tabAccident").onclick = () => setTab("accident");
   $("tabIllness").onclick = () => setTab("illness");
 
@@ -888,6 +914,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     childId = null;
     showView("authView");
   };
+
+  // Nav
+  setupNav();
 
   // Boot
   if (isRecoveryLink()) {
