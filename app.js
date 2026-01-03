@@ -1,5 +1,5 @@
 /**************************************************
- * Routine Tracker – app.js
+ * Routine Tracker – app.js 1609
  * Version: 2026-01-03-auto-sync-headings-no-sync-button
  **************************************************/
 
