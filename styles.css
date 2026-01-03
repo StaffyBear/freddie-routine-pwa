@@ -5,16 +5,19 @@
   --secondary: #7FD1C7;
   --accent: #BFEAE3;
 
-  --bg: #EAF3F0;          /* page background */
-  --card-bg: #F2FBF7;     /* PRESENT DAY: soft mint tint (less white) */
+  --bg: #EAF3F0;
+  --card-bg: #F2FBF7;
   --card-shadow: 0 6px 18px rgba(0,0,0,0.06);
 
-  --historic-bg: #F8D7DA; /* historic day */
+  --historic-bg: #F8D7DA;
+
   --text: #111111;
   --muted: #6B7280;
   --border: #DCE7E3;
-
   --danger: #9B1C1C;
+
+  /* NEW: single control height so buttons & inputs match */
+  --control-height: 44px;
 }
 
 * { box-sizing: border-box; }
@@ -58,7 +61,7 @@ h1, h2, h3 { margin-top: 0; }
 /* Inputs */
 input, select, textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 12px;
   margin: 6px 0;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -67,7 +70,23 @@ input, select, textarea {
   color: var(--text);
 }
 
-textarea { resize: vertical; }
+/* NEW: force consistent control height */
+input, select {
+  height: var(--control-height);
+}
+
+/* Make datetime-local and time match too (browsers differ) */
+input[type="datetime-local"],
+input[type="time"],
+input[type="date"] {
+  height: var(--control-height);
+}
+
+/* Let textareas be natural height */
+textarea {
+  min-height: 44px;
+  resize: vertical;
+}
 
 /* Buttons */
 button {
@@ -75,12 +94,12 @@ button {
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 10px 12px;      /* same as input padding */
+  padding: 10px 12px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.05s ease;
-  min-height: 42px;        /* aligns with inputs */
+  height: var(--control-height); /* NEW: match inputs */
   line-height: 1.1;
 }
 
@@ -106,9 +125,12 @@ button:disabled {
   align-items: stretch;
 }
 
-.row > * { flex: 1; }
+/* NEW: remove margins INSIDE row so heights line up perfectly */
+.row > * {
+  flex: 1;
+  margin: 0 !important;
+}
 
-/* 3 columns */
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -116,7 +138,11 @@ button:disabled {
   align-items: stretch;
 }
 
-/* nav rows */
+/* NEW: remove margins inside grid rows too */
+.row3 > * {
+  margin: 0 !important;
+}
+
 .navRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -127,9 +153,10 @@ button:disabled {
 .menuBtn {
   font-size: 1.05rem;
   padding: 14px;
+  height: auto; /* allow big menu buttons */
+  min-height: var(--control-height);
 }
 
-/* auth buttons on one line */
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -154,34 +181,32 @@ button:disabled {
 }
 
 .miniBtn {
+  height: 38px;
   padding: 8px 12px;
   font-size: 0.9rem;
   width: auto;
-  min-height: 38px;
 }
 
 /* Text helpers */
 .muted { color: var(--muted); font-size: 0.9rem; }
 .danger { color: var(--danger); }
+.historicDate { color: var(--danger); font-weight: 900; }
 
 /* Tabs / pills */
 .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
 
-/* Make pills follow same rules as buttons */
 .pill {
-  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--accent);
   color: var(--primary);
   font-weight: 800;
   cursor: pointer;
-  min-height: 42px;
+  height: var(--control-height);
+  padding: 10px 12px;
 }
 
-.pill:hover {
-  background: var(--secondary);
-}
+.pill:hover { background: var(--secondary); }
 
 .pill.active {
   background: var(--primary);
@@ -212,9 +237,7 @@ li { margin-bottom: 6px; }
   font-weight: 700;
 }
 
-/* ===== Optional: Right-side action layout for desktop (mobile-safe) =====
-   Use: wrap textarea + button in .actionRow
-*/
+/* Notes + button on right (desktop), stack (mobile) */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -222,16 +245,24 @@ li { margin-bottom: 6px; }
   align-items: stretch;
 }
 
+/* NEW: remove margins inside action row */
+.actionRow > * {
+  margin: 0 !important;
+}
+
 .actionRow button {
   width: auto;
   min-width: 150px;
-  height: 100%;
+  height: auto;        /* allow it to grow to textarea height */
+  min-height: var(--control-height);
+  align-self: stretch; /* match textarea */
 }
 
-/* Mobile rules */
+/* Mobile */
 @media (max-width: 700px) {
   .row3 { grid-template-columns: 1fr; }
   .authRow { grid-template-columns: 1fr; }
+
   .actionRow { grid-template-columns: 1fr; }
   .actionRow button { width: 100%; }
 }
