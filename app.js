@@ -1,6 +1,6 @@
 /**************************************************
  * Routine Tracker – app.js
- * Version: 2026-01-04-separate-pages-admin-invitecode
+ * Version: 2026-01-04-fixes-v2
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
@@ -51,6 +51,7 @@ function nowTimeStr() {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 function autoTimestampForSelectedDay(dateStr) {
+  // Anything logged for a non-today date is stored at 10:06 so it's obvious it’s backdated.
   return isToday(dateStr) ? new Date().toISOString() : combineDateAndTime(dateStr, BACKDATED_TIME);
 }
 
@@ -356,7 +357,6 @@ async function loadChildrenIntoSelect(selectId) {
     sel.appendChild(opt);
   });
 
-  // set active child
   childId = exists ? exists.id : children[0].id;
   sel.value = childId;
 
@@ -385,7 +385,6 @@ async function addChildAdmin() {
 
   $("childNameAdmin").value = "";
   $("childAdminMsg").textContent = "Child added ✅";
-
   await initAllChildDropdowns();
 }
 
@@ -422,37 +421,35 @@ async function addMedicationAdmin() {
   $("newMedNameAdmin").value = "";
   $("newMedUnitAdmin").value = "";
   $("medAdminMsg").textContent = "Medication added ✅";
-
   await loadMedicationDropdowns();
 }
 
 async function loadMedicationDropdowns() {
-  // medSelect + illness medication dropdown share
   const meds = await sb.from("medications").select("id,name,default_unit").order("name", { ascending: true });
-  if (!meds.error) {
-    const list = meds.data || [];
+  if (meds.error) return;
 
-    const sel = $("medSelect");
-    if (sel) {
-      sel.innerHTML = "";
-      list.forEach((m) => {
-        const opt = document.createElement("option");
-        opt.value = m.id;
-        opt.textContent = m.default_unit ? `${m.name} (${m.default_unit})` : m.name;
-        sel.appendChild(opt);
-      });
-    }
+  const list = meds.data || [];
 
-    const ill = $("illMedication");
-    if (ill) {
-      ill.innerHTML = `<option value="">None</option>`;
-      list.forEach((m) => {
-        const opt = document.createElement("option");
-        opt.value = m.id;
-        opt.textContent = m.default_unit ? `${m.name} (${m.default_unit})` : m.name;
-        ill.appendChild(opt);
-      });
-    }
+  const sel = $("medSelect");
+  if (sel) {
+    sel.innerHTML = "";
+    list.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.default_unit ? `${m.name} (${m.default_unit})` : m.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  const ill = $("illMedication");
+  if (ill) {
+    ill.innerHTML = `<option value="">None</option>`;
+    list.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.default_unit ? `${m.name} (${m.default_unit})` : m.name;
+      ill.appendChild(opt);
+    });
   }
 }
 
@@ -501,9 +498,14 @@ function wireDateControls(prefix, pickId) {
 
   if (pick) {
     pick.onchange = async () => {
+      // ✅ "X" (clear) behaviour: if cleared, go to TODAY
       const v = pick.value;
-      if (!v) return;
-      await setSelectedDate(isFuture(v) ? yyyyMmDd() : v);
+      const today = yyyyMmDd();
+      if (!v) {
+        await setSelectedDate(today);
+        return;
+      }
+      await setSelectedDate(isFuture(v) ? today : v);
     };
   }
 
@@ -619,6 +621,14 @@ async function addSleepManual() {
 }
 
 /* ---------------- Meals ---------------- */
+function getMealPercent(m) {
+  // ✅ Fix "undefined%" – support different column names
+  const pct = m.percent ?? m.percent_eaten ?? m.percentage ?? m.eaten_percent;
+  if (pct === null || pct === undefined || pct === "") return null;
+  const n = Number(pct);
+  return Number.isFinite(n) ? n : null;
+}
+
 async function loadMeals() {
   if (!childId) return;
   const { start, end } = toIsoRangeForDate(selectedDateStr);
@@ -635,8 +645,9 @@ async function loadMeals() {
   $("mealList").innerHTML = "";
   (res.data || []).forEach((m) => {
     const li = document.createElement("li");
-    // no time shown
-    li.textContent = `${m.meal_type} • ${m.percent}% • ${m.food || ""}`.trim();
+    const pct = getMealPercent(m);
+    const pctText = pct === null ? "" : ` • ${pct}%`;
+    li.textContent = `${m.meal_type}${pctText} • ${m.food || ""}`.replace(/\s•\s$/, "").trim();
     $("mealList").appendChild(li);
   });
 }
@@ -650,6 +661,7 @@ async function addMeal() {
   const food = $("mealFood").value.trim() || null;
   const notes = $("mealNotes").value.trim() || null;
 
+  // ✅ Important: items are stored under the SELECTED DAY (day it happened)
   const payload = {
     child_id: childId,
     user_id: user.id,
@@ -665,7 +677,6 @@ async function addMeal() {
     alert("Saved offline. Will sync when online.");
     $("mealFood").value = "";
     $("mealNotes").value = "";
-    await loadMeals(); // local list won't include offline item, but OK
     return;
   }
 
@@ -694,7 +705,6 @@ async function loadMoods() {
   $("moodList").innerHTML = "";
   (res.data || []).forEach((m) => {
     const li = document.createElement("li");
-    // no time shown
     li.textContent = `${m.period}: ${m.mood}${m.notes ? " • " + m.notes : ""}`;
     $("moodList").appendChild(li);
   });
@@ -708,6 +718,7 @@ async function addMood() {
   const mood = $("moodValue").value;
   const notes = $("moodNotes").value.trim() || null;
 
+  // ✅ Stored under selected day
   const payload = {
     child_id: childId,
     user_id: user.id,
@@ -734,8 +745,6 @@ async function addMood() {
 /* ---------------- Medication doses ---------------- */
 async function loadMedsAndDoses() {
   if (!childId) return;
-
-  // Load meds list if empty
   await loadMedicationDropdowns();
 
   const { start, end } = toIsoRangeForDate(selectedDateStr);
@@ -752,7 +761,6 @@ async function loadMedsAndDoses() {
   $("medList").innerHTML = "";
   (res.data || []).forEach((d) => {
     const li = document.createElement("li");
-    // show time only for today; historic hidden by UI anyway
     const name = d.medications?.name || "Medication";
     li.textContent = isToday(selectedDateStr)
       ? `${hhmm(d.created_at)} • ${name} • ${d.dose || ""}`.trim()
@@ -770,7 +778,6 @@ async function addDose() {
   const dose = $("medDose").value.trim() || null;
   const notes = $("medNotes").value.trim() || null;
 
-  // if today use chosen time, else backdate
   const created_at = isToday(selectedDateStr)
     ? combineDateAndTime(selectedDateStr, ($("medTime").value || nowTimeStr()))
     : autoTimestampForSelectedDay(selectedDateStr);
@@ -856,6 +863,9 @@ async function addAccident() {
   const safeguarding = $("accSafeguarding").value.trim() || null;
   const notes = $("accNotes").value.trim() || null;
 
+  // ✅ IMPORTANT:
+  // This ensures it shows under the day you SELECT (the day it happened),
+  // not the day you happened to type it in.
   let time_of_incident = null;
   if (isToday(selectedDateStr)) time_of_incident = $("accTime").value || nowTimeStr();
 
@@ -930,13 +940,13 @@ async function addIllness() {
   const reported_by_other = $("illReportedOther").value.trim() || null;
   const notes = $("illNotes").value.trim() || null;
 
+  // ✅ Stored under selected day
   let time_of_event = null;
   if (isToday(selectedDateStr)) time_of_event = $("illTime").value || nowTimeStr();
 
   if (symptom === "Other" && !symptom_other) return alert("Please fill 'Other symptom'.");
   if (reported_by === "Other" && !reported_by_other) return alert("Please fill 'Reported by (other)'.");
 
-  // flag breathing
   const flag = $("illFlag");
   if (flag) flag.classList.toggle("hidden", symptom !== "Breathing difficulties");
 
