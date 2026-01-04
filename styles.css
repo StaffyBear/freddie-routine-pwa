@@ -1,7 +1,9 @@
+/* ======================================================
+   ROOT VARIABLES
+   ====================================================== */
 :root {
   --primary: #0f6f4f;
   --primary-hover: #0c5e42;
-
   --secondary: #cceee7;
 
   --bg: #eef6f3;
@@ -16,18 +18,24 @@
 
   --radius: 14px;
   --control-height: 44px;
-
-  /* ONE spacing value everywhere */
   --space: 12px;
 
-  /* Menu tile size (match logo-ish) */
-  --tile: 120px; /* change to 110px if you want exact logo size */
+  /* 🔒 LOCKED MENU / LOGO SIZE */
+  --menu-tile-size: 110px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ======================================================
+   BASE RESET
+   ====================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   padding: var(--space);
@@ -35,24 +43,36 @@ body {
   margin-inline: auto;
 }
 
+.hidden {
+  display: none !important;
+}
+
+/* ======================================================
+   HEADINGS
+   ====================================================== */
 .page-title {
   text-align: center;
   margin-bottom: var(--space);
+  font-weight: 900;
 }
 
-/* Cards */
+/* ======================================================
+   CARDS
+   ====================================================== */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
   padding: var(--space);
   border: 1px solid var(--border);
   margin-bottom: calc(var(--space) * 1.25);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.card.today { background: var(--today-bg); }
+.card.today {
+  background: var(--today-bg);
+}
 
-/* Historic ALWAYS filled */
+/* Historic cards ALWAYS filled */
 .historicCard,
 .card.historic,
 .card.today.historicCard {
@@ -60,15 +80,22 @@ body {
   border-color: #f0b9c0 !important;
 }
 
-/* Controls */
-input, select, textarea, button {
+/* ======================================================
+   FORM CONTROLS
+   ====================================================== */
+input,
+select,
+textarea,
+button {
   width: 100%;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   font-size: 14px;
 }
 
-input, select, button {
+input,
+select,
+button {
   height: var(--control-height);
   padding: 0 12px;
 }
@@ -80,7 +107,9 @@ textarea {
   background: #fff;
 }
 
-/* Buttons */
+/* ======================================================
+   BUTTONS
+   ====================================================== */
 button {
   background: var(--primary);
   color: #fff;
@@ -89,25 +118,35 @@ button {
   cursor: pointer;
   transition: background 0.15s ease;
 }
-button:hover { background: var(--primary-hover); }
+
+button:hover {
+  background: var(--primary-hover);
+}
 
 button.secondary {
   background: var(--secondary);
   color: #064;
 }
-button.secondary:hover { background: #b7e4dc; }
+
+button.secondary:hover {
+  background: #b7e4dc;
+}
 
 button.miniBtn {
   width: auto;
   padding: 0 14px;
 }
 
-/* ✅ consistent vertical spacing */
+/* ======================================================
+   STACK SPACING (CRITICAL)
+   ====================================================== */
 .stack > * + * {
   margin-top: var(--space);
 }
 
-/* Rows */
+/* ======================================================
+   ROW LAYOUTS
+   ====================================================== */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -122,7 +161,9 @@ button.miniBtn {
   align-items: center;
 }
 
-/* Notes + button */
+/* ======================================================
+   NOTES + SAVE ROW
+   ====================================================== */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -130,11 +171,19 @@ button.miniBtn {
   align-items: stretch;
   min-height: calc(var(--control-height) * 2.4);
 }
-.actionRow textarea,
-.actionRow button { height: 100%; }
-.actionRow button { min-width: 150px; }
 
-/* Day bar */
+.actionRow textarea,
+.actionRow button {
+  height: 100%;
+}
+
+.actionRow button {
+  min-width: 150px;
+}
+
+/* ======================================================
+   DAY BAR / DATE
+   ====================================================== */
 .dayBar {
   display: flex;
   justify-content: space-between;
@@ -157,23 +206,46 @@ button.miniBtn {
   text-overflow: ellipsis;
   max-width: 260px;
 }
-.historicDate { color: var(--danger); font-weight: 900; }
+
+.historicDate {
+  color: var(--danger);
+  font-weight: 900;
+}
 
 .datePick {
   height: var(--control-height);
-  width: auto;
   min-width: 150px;
   max-width: 170px;
 }
 
-.muted { color: var(--muted); font-size: 0.9rem; }
-.danger { color: var(--danger); }
+/* ======================================================
+   TEXT
+   ====================================================== */
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
 
-ul { padding-left: 18px; }
-li { margin-bottom: 6px; }
+.danger {
+  color: var(--danger);
+}
 
-/* Pills */
-.pillRow { display: flex; gap: var(--space); }
+ul {
+  padding-left: 18px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* ======================================================
+   PILLS
+   ====================================================== */
+.pillRow {
+  display: flex;
+  gap: var(--space);
+}
+
 .pill {
   height: var(--control-height);
   padding: 0 14px;
@@ -184,75 +256,109 @@ li { margin-bottom: 6px; }
   font-weight: 900;
   cursor: pointer;
 }
-.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* Auth row */
+.pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ======================================================
+   AUTH
+   ====================================================== */
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
 }
 
-/* Login logo */
+/* ======================================================
+   LOGIN LOGO (LOCKED SIZE)
+   ====================================================== */
 .logoBox {
   display: grid;
   place-items: center;
   padding: 8px;
 }
+
 .logoBox img {
-  width: 110px;
-  height: 110px;
+  width: var(--menu-tile-size);
+  height: var(--menu-tile-size);
   object-fit: contain;
   border-radius: 14px;
 }
 
-/* MAIN MENU: tiles same size as logo */
-.menuGrid{
+/* ======================================================
+   MAIN MENU – TILE SIZE LOCKED
+   ====================================================== */
+.menuGrid {
   display: grid;
-  grid-template-columns: repeat(2, var(--tile));
+  grid-template-columns: repeat(2, var(--menu-tile-size));
   gap: 12px;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
-.menuTile{
-  width: var(--tile);
-  height: var(--tile);
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.1;
-  padding: 10px;
-  display: flex;
+.menuTile {
+  width: var(--menu-tile-size) !important;
+  height: var(--menu-tile-size) !important;
+
+  display: flex !important;
   align-items: center;
   justify-content: center;
+
+  padding: 10px;
+  border-radius: 16px;
+
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.1;
   text-align: center;
+
+  background: var(--primary);
+  color: #fff;
   cursor: pointer;
 }
 
-/* keep logout full-width */
-#btnLogout{
+.menuTile:hover {
+  background: var(--primary-hover);
+}
+
+/* Logout full width */
+#btnLogout {
   grid-column: 1 / -1;
-  width: 100%;
+  width: 100% !important;
   height: 48px;
   border-radius: 12px;
 }
 
-/* Hidden */
-.hidden { display: none; }
-
-/* Mobile */
+/* ======================================================
+   MOBILE
+   ====================================================== */
 @media (max-width: 700px) {
-  .row, .row3, .authRow { grid-template-columns: 1fr; }
-  .actionRow { grid-template-columns: 1fr; min-height: auto; }
-  .actionRow textarea, .actionRow button { height: var(--control-height); }
-  .actionRow button { width: 100%; min-width: 0; }
-  .dayBar { flex-direction: column; align-items: stretch; }
-}
+  .row,
+  .row3,
+  .authRow {
+    grid-template-columns: 1fr;
+  }
 
-/* Small phones: keep menu tidy */
-@media (max-width: 420px){
-  :root { --tile: 110px; }
-  .menuGrid { gap: 10px; }
-  .menuTile { font-size: 14px; }
+  .actionRow {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .actionRow textarea,
+  .actionRow button {
+    height: var(--control-height);
+  }
+
+  .actionRow button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .dayBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
