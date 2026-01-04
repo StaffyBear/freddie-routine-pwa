@@ -189,3 +189,42 @@ button.miniBtn { width: auto; padding: 0 14px; }
   .menuGrid { grid-template-columns: 1fr 1fr; }
   .pillRow { flex-direction: row; }
 }
+
+
+/* ===== FIX: Logout red even when also .menuTile ===== */
+button.dangerBtn,
+.menuTile.dangerBtn {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+button.dangerBtn:hover,
+.menuTile.dangerBtn:hover {
+  filter: brightness(0.95);
+}
+
+/* ===== FIX: Accident/Illness pills ALWAYS side-by-side ===== */
+.pillRow {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: var(--space) !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+}
+
+.pillRow .pill {
+  width: auto !important;
+  flex: 1 1 0 !important;   /* make them equal width */
+  min-width: 0 !important;
+}
+
+/* On small phones still keep them side-by-side */
+@media (max-width: 700px) {
+  .pillRow {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+  }
+  .pillRow .pill {
+    flex: 1 1 0 !important;
+  }
+}
