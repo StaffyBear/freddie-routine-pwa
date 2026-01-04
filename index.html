@@ -19,8 +19,14 @@
   <h1 class="page-title">Login</h1>
 
   <div class="stack">
+    <div class="logoBox">
+      <img src="./icons/icon-512.png" alt="Routine Tracker Logo" />
+    </div>
+
     <input id="email" placeholder="Email" autocomplete="email" />
     <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+    <input id="inviteCode" placeholder="Invite Code (required for Register)" inputmode="numeric" />
 
     <div class="authRow">
       <button id="btnLogin">Login</button>
@@ -54,99 +60,80 @@
 
     <div id="offlineBanner" class="banner hidden"></div>
 
-    <div class="stack">
-      <div class="row">
-        <button id="btnGoTracker">Routine Tracker</button>
-        <button id="btnGoHistoricTracker">Historic Routine Tracker</button>
-      </div>
+    <div class="menuGrid">
+      <button id="btnGoSleep" class="menuTile">Sleep</button>
+      <button id="btnGoMeals" class="menuTile">Meals</button>
+      <button id="btnGoMoods" class="menuTile">Moods</button>
+      <button id="btnGoMedication" class="menuTile">Medication</button>
+      <button id="btnGoAI" class="menuTile">Accidents &amp; Illnesses</button>
+      <button id="btnGoExport" class="menuTile">Export</button>
+    </div>
 
-      <div class="row">
-        <button id="btnGoAccident">Accident &amp; Illness</button>
-        <button id="btnGoHistoricAccident">Historic Accident &amp; Illness</button>
-      </div>
-
-      <div class="row">
-        <button id="btnGoAddMedication">New Medication</button>
-        <button id="btnGoExport">Export Data</button>
-      </div>
-
-      <button id="btnInstallApp" class="secondary hidden">Install App</button>
+    <div class="logout-wrapper stack" style="margin-top: var(--space);">
+      <button id="btnGoAdmin" class="secondary" style="max-width:280px;">Admin</button>
+      <button id="btnLogout" style="max-width:420px;">Log Out</button>
+      <button id="btnInstallApp" class="secondary hidden" style="max-width:420px;">Install App</button>
       <p id="installMsg" class="muted"></p>
+    </div>
+  </div>
+</div>
 
-      <div class="logout-wrapper">
-        <button id="btnLogout" style="max-width:420px;">Logout</button>
+<!-- ================= ADMIN ================= -->
+<div id="adminView" class="hidden">
+  <div class="card">
+    <h1 class="page-title">Admin</h1>
+
+    <div class="stack">
+      <div class="dayBar">
+        <div></div>
+        <button id="btnAdminBackToMenu" class="miniBtn secondary">Back to Menu</button>
+      </div>
+
+      <div class="card today">
+        <h2>Add Child</h2>
+        <div class="stack">
+          <input id="childNameAdmin" placeholder="Child name (e.g. Freddie)" />
+          <button id="btnAddChildAdmin">Save</button>
+          <p id="childAdminMsg" class="muted"></p>
+        </div>
+      </div>
+
+      <div class="card today">
+        <h2>New Medication</h2>
+        <div class="stack">
+          <div class="row">
+            <input id="newMedNameAdmin" placeholder="Medication name (e.g. Calpol)" />
+            <input id="newMedUnitAdmin" placeholder="Unit (ml / mg)" />
+          </div>
+          <button id="btnAddMedAdmin">Save</button>
+          <p id="medAdminMsg" class="muted"></p>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ================= NEW MEDICATION ================= -->
-<div id="addMedicationView" class="card hidden">
-  <h1 class="page-title">New Medication</h1>
+<!-- ================= SLEEP ================= -->
+<div id="sleepView" class="hidden">
+  <h1 class="page-title">Sleep</h1>
 
-  <div class="stack">
-    <div class="dayBar">
-      <div></div>
-      <button id="btnAddMedBackToMenu" class="miniBtn secondary">Back to Menu</button>
-    </div>
-
-    <div class="row3">
-      <input id="newMedNameMenu" placeholder="Medication name (e.g. Calpol)" />
-      <input id="newMedUnitMenu" placeholder="Unit (ml / mg)" />
-      <button id="btnAddMedMenu">Save</button>
-    </div>
-
-    <p id="medAdminMsg" class="muted"></p>
-  </div>
-</div>
-
-<!-- ================= HISTORIC PICKERS ================= -->
-<div id="historicRoutineView" class="card hidden">
-  <h1 class="page-title">Historic Routine Tracker</h1>
-
-  <div class="stack">
-    <input id="historicRoutinePick" type="date" />
-    <button id="btnOpenHistoricRoutine">Open</button>
-    <button id="btnHistoricRoutineBackToMenu" class="secondary">Back to Menu</button>
-  </div>
-</div>
-
-<div id="historicAIView" class="card hidden">
-  <h1 class="page-title">Historic Accident &amp; Illness</h1>
-
-  <div class="stack">
-    <input id="historicAIPick" type="date" />
-    <button id="btnOpenHistoricAI">Open</button>
-    <button id="btnHistoricAIBackToMenu" class="secondary">Back to Menu</button>
-  </div>
-</div>
-
-<!-- ================= ROUTINE TRACKER ================= -->
-<div id="trackerView" class="hidden">
-  <h1 class="page-title">Routine Tracker</h1>
-
-  <div id="trackerTopCard" class="card today">
+  <div id="sleepTopCard" class="card today">
     <div class="stack">
       <div class="dayBar">
         <div class="dayBarLeft">
-          <button id="btnTrackerPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnTrackerNextDay" class="miniBtn secondary">▶</button>
-          <span id="trackerDateLabel" class="dateText"></span>
+          <button id="btnSleepPrevDay" class="miniBtn secondary">◀</button>
+          <button id="btnSleepNextDay" class="miniBtn secondary">▶</button>
+          <input id="sleepDatePick" type="date" class="datePick" />
+          <span id="sleepDateLabel" class="dateText"></span>
         </div>
-        <button id="btnBackToMenu" class="miniBtn secondary">Back to Menu</button>
+        <button id="btnSleepBackToMenu" class="miniBtn secondary">Back to Menu</button>
       </div>
 
       <label class="muted">Child</label>
-      <select id="childSelect"></select>
-
-      <div class="row">
-        <input id="childName" placeholder="Add new child" />
-        <button id="btnAddChild">Add</button>
-      </div>
+      <select id="sleepChildSelect"></select>
     </div>
   </div>
 
-  <!-- Sleep -->
   <div id="sleepCard" class="card today">
     <h2>Sleep</h2>
 
@@ -168,8 +155,29 @@
       <ul id="sleepList"></ul>
     </div>
   </div>
+</div>
 
-  <!-- Meals -->
+<!-- ================= MEALS ================= -->
+<div id="mealsView" class="hidden">
+  <h1 class="page-title">Meals</h1>
+
+  <div id="mealsTopCard" class="card today">
+    <div class="stack">
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="btnMealsPrevDay" class="miniBtn secondary">◀</button>
+          <button id="btnMealsNextDay" class="miniBtn secondary">▶</button>
+          <input id="mealsDatePick" type="date" class="datePick" />
+          <span id="mealsDateLabel" class="dateText"></span>
+        </div>
+        <button id="btnMealsBackToMenu" class="miniBtn secondary">Back to Menu</button>
+      </div>
+
+      <label class="muted">Child</label>
+      <select id="mealsChildSelect"></select>
+    </div>
+  </div>
+
   <div id="mealsCard" class="card today">
     <h2>Meals</h2>
 
@@ -197,8 +205,29 @@
       <ul id="mealList"></ul>
     </div>
   </div>
+</div>
 
-  <!-- Mood -->
+<!-- ================= MOODS ================= -->
+<div id="moodsView" class="hidden">
+  <h1 class="page-title">Moods</h1>
+
+  <div id="moodsTopCard" class="card today">
+    <div class="stack">
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="btnMoodsPrevDay" class="miniBtn secondary">◀</button>
+          <button id="btnMoodsNextDay" class="miniBtn secondary">▶</button>
+          <input id="moodsDatePick" type="date" class="datePick" />
+          <span id="moodsDateLabel" class="dateText"></span>
+        </div>
+        <button id="btnMoodsBackToMenu" class="miniBtn secondary">Back to Menu</button>
+      </div>
+
+      <label class="muted">Child</label>
+      <select id="moodsChildSelect"></select>
+    </div>
+  </div>
+
   <div id="moodCard" class="card today">
     <h2>Mood</h2>
 
@@ -222,8 +251,29 @@
       <ul id="moodList"></ul>
     </div>
   </div>
+</div>
 
-  <!-- Medication -->
+<!-- ================= MEDICATION ================= -->
+<div id="medicationView" class="hidden">
+  <h1 class="page-title">Medication</h1>
+
+  <div id="medTopCard" class="card today">
+    <div class="stack">
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="btnMedPrevDay" class="miniBtn secondary">◀</button>
+          <button id="btnMedNextDay" class="miniBtn secondary">▶</button>
+          <input id="medDatePick" type="date" class="datePick" />
+          <span id="medDateLabel" class="dateText"></span>
+        </div>
+        <button id="btnMedBackToMenu" class="miniBtn secondary">Back to Menu</button>
+      </div>
+
+      <label class="muted">Child</label>
+      <select id="medChildSelect"></select>
+    </div>
+  </div>
+
   <div id="medCard" class="card today">
     <h2>Medication</h2>
 
@@ -245,8 +295,8 @@
 </div>
 
 <!-- ================= ACCIDENT & ILLNESS ================= -->
-<div id="accidentView" class="hidden">
-  <h1 class="page-title">Accident &amp; Illness</h1>
+<div id="aiView" class="hidden">
+  <h1 class="page-title">Accidents &amp; Illnesses</h1>
 
   <div id="aiTopCard" class="card today">
     <div class="stack">
@@ -254,6 +304,7 @@
         <div class="dayBarLeft">
           <button id="btnAIPrevDay" class="miniBtn secondary">◀</button>
           <button id="btnAINextDay" class="miniBtn secondary">▶</button>
+          <input id="aiDatePick" type="date" class="datePick" />
           <span id="aiDateLabel" class="dateText"></span>
         </div>
         <button id="btnAIBackToMenu" class="miniBtn secondary">Back to Menu</button>
@@ -350,7 +401,7 @@
 
 <!-- ================= EXPORT ================= -->
 <div id="exportView" class="card hidden">
-  <h1 class="page-title">Export Data</h1>
+  <h1 class="page-title">Export</h1>
 
   <div class="stack">
     <p class="muted">Export tools will be added next.</p>
