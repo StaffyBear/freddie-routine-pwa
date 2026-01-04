@@ -15,12 +15,10 @@
 
   --radius: 14px;
   --control-height: 44px;
-  --space: 12px;
-
-  /* logo + menu tile size */
-  --menu-tile-size: 110px;
+  --space: 16px;
 }
 
+/* Reset */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -32,49 +30,24 @@ body {
   margin-inline: auto;
 }
 
-.hidden { display: none !important; }
-
-.page-title {
-  text-align: center;
-  margin-bottom: var(--space);
-  font-weight: 900;
-}
-
-.offlineBanner{
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  border: 1px solid #ffe69c;
-  background: #fff3cd;
-  color: #664d03;
-  font-weight: 800;
-  margin-bottom: var(--space);
-}
-
+/* ---------- CARDS ---------- */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: var(--space);
+  padding: calc(var(--space) * 1.25);
   border: 1px solid var(--border);
-  margin-bottom: calc(var(--space) * 1.25);
+  margin-bottom: calc(var(--space) * 1.5);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.cardInner{
-  background: transparent;
-  border-radius: var(--radius);
-  padding: 0;
-  border: none;
-}
+.card.today { background: var(--today-bg); }
 
-/* Historic ALWAYS filled (applied via JS by adding .historic to cardInner) */
-.historicCard,
-.card.historic,
-.cardInner.historic {
+.card.historic {
   background: var(--historic-bg) !important;
-  border: 1px solid #f0b9c0 !important;
-  padding: var(--space) !important;
+  border-color: #f1b0b7 !important;
 }
 
+/* ---------- CONTROLS ---------- */
 input, select, textarea, button {
   width: 100%;
   border-radius: var(--radius);
@@ -84,194 +57,138 @@ input, select, textarea, button {
 
 input, select, button {
   height: var(--control-height);
-  padding: 0 12px;
+  padding: 0 14px;
 }
 
 textarea {
-  padding: 10px 12px;
-  min-height: var(--control-height);
+  min-height: calc(var(--control-height) * 2.2);
+  padding: 12px 14px;
   resize: vertical;
-  background: #fff;
 }
 
-label{
-  display:block;
-  font-size: 13px;
-  color: var(--muted);
-  margin: 10px 0 6px;
-  font-weight: 800;
-}
-
+/* ---------- BUTTONS ---------- */
 button {
   background: var(--primary);
   color: #fff;
-  font-weight: 900;
+  font-weight: 800;
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
 }
+
 button:hover { background: var(--primary-hover); }
 
 button.secondary {
   background: var(--secondary);
   color: #064;
 }
-button.secondary:hover { background: #b7e4dc; }
 
-.dangerBtn{
-  background: var(--danger);
-}
-.dangerBtn:hover{
-  filter: brightness(0.95);
+/* ---------- STACK / SPACING ---------- */
+.stack > * + * {
+  margin-top: var(--space);
 }
 
-button.miniBtn {
-  width: auto;
-  padding: 0 14px;
-}
-
-.stack > * + * { margin-top: var(--space); }
-
+/* ---------- ROWS ---------- */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space);
-  align-items: center;
 }
 
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
-  align-items: center;
 }
 
-/* Notes + button */
+/* Notes + Save button */
 .actionRow {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr 160px;
   gap: var(--space);
   align-items: stretch;
-  min-height: calc(var(--control-height) * 2.4);
 }
-.actionRow textarea,
-.actionRow button { height: 100%; }
-.actionRow button { min-width: 150px; }
 
+.actionRow textarea,
+.actionRow button {
+  height: 100%;
+}
+
+/* ---------- DAY BAR ---------- */
 .dayBar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: var(--space);
-  flex-wrap: nowrap;
+  justify-content: space-between;
 }
+
 .dayBarLeft {
   display: flex;
   gap: var(--space);
   align-items: center;
-  min-width: 0;
 }
+
 .dateText {
   font-weight: 900;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 260px;
 }
 
-.datePick {
-  height: var(--control-height);
-  min-width: 150px;
-  max-width: 170px;
+.historicDate { color: var(--danger); }
+
+/* ---------- LOGIN ---------- */
+.logoBox {
+  display: flex;
+  justify-content: center;
 }
 
-.muted { color: var(--muted); font-size: 0.9rem; }
-.danger { color: var(--danger); }
+.logoBox img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 16px;
+}
 
-ul { padding-left: 18px; }
-li { margin-bottom: 6px; }
+/* ---------- MAIN MENU ---------- */
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 110px);
+  gap: 14px;
+  justify-content: center;
+  margin-top: var(--space);
+}
 
-/* Pills */
-.pillRow { display: flex; gap: var(--space); margin-top: var(--space); }
-.pill {
-  height: var(--control-height);
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--primary);
+.menuTile {
+  width: 110px;
+  height: 110px;
+  border-radius: 16px;
   font-weight: 900;
-  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* Auth row */
+/* Admin + Logout SAME SIZE */
+.menuTile.small {
+  width: 110px;
+  height: 110px;
+}
+
+/* ---------- AUTH BUTTONS ---------- */
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
 }
 
-/* Login logo */
-.logoBox {
-  display: grid;
-  place-items: center;
-  padding: 8px;
-}
-.logoBox img {
-  width: var(--menu-tile-size);
-  height: var(--menu-tile-size);
-  object-fit: contain;
-  border-radius: 14px;
-}
+/* ---------- UTIL ---------- */
+.hidden { display: none; }
+.muted { color: var(--muted); }
+.danger { color: var(--danger); }
 
-/* Main menu tiles locked to logo size */
-.menuGrid{
-  display: grid;
-  grid-template-columns: repeat(2, var(--menu-tile-size));
-  gap: 12px;
-  justify-content: center;
-  margin-top: 12px;
-}
-.menuTile{
-  width: var(--menu-tile-size) !important;
-  height: var(--menu-tile-size) !important;
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 15px;
-  line-height: 1.1;
-  padding: 10px;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-}
-.menuTile:hover { background: var(--primary-hover); }
-
-/* Admin grid: let them be slightly larger if wanted */
-.adminGrid .menuTile{
-  font-size: 16px;
-}
-
-/* Admin + Logout on same row */
-.menuBottomRow{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space);
-  margin-top: 14px;
-}
-.menuBottomRow button{
-  height: 52px;
-  border-radius: 12px;
-}
-
-/* Mobile */
+/* ---------- MOBILE ---------- */
 @media (max-width: 700px) {
   .row, .row3, .authRow { grid-template-columns: 1fr; }
-  .actionRow { grid-template-columns: 1fr; min-height: auto; }
-  .actionRow textarea, .actionRow button { height: var(--control-height); }
-  .actionRow button { width: 100%; min-width: 0; }
-  .dayBar { flex-direction: column; align-items: stretch; }
-  .menuBottomRow{ grid-template-columns: 1fr; }
+  .actionRow { grid-template-columns: 1fr; }
+  .menuGrid { grid-template-columns: 1fr 1fr; }
 }
