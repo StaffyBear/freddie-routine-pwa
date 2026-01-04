@@ -1,6 +1,3 @@
-/* ======================================================
-   ROOT VARIABLES
-   ====================================================== */
 :root {
   --primary: #0f6f4f;
   --primary-hover: #0c5e42;
@@ -20,22 +17,14 @@
   --control-height: 44px;
   --space: 12px;
 
-  /* 🔒 LOCKED MENU / LOGO SIZE */
+  /* logo + menu tile size */
   --menu-tile-size: 110px;
 }
 
-/* ======================================================
-   BASE RESET
-   ====================================================== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   padding: var(--space);
@@ -43,59 +32,57 @@ body {
   margin-inline: auto;
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
-/* ======================================================
-   HEADINGS
-   ====================================================== */
 .page-title {
   text-align: center;
   margin-bottom: var(--space);
   font-weight: 900;
 }
 
-/* ======================================================
-   CARDS
-   ====================================================== */
+.offlineBanner{
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid #ffe69c;
+  background: #fff3cd;
+  color: #664d03;
+  font-weight: 800;
+  margin-bottom: var(--space);
+}
+
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
   padding: var(--space);
   border: 1px solid var(--border);
   margin-bottom: calc(var(--space) * 1.25);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.card.today {
-  background: var(--today-bg);
+.cardInner{
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 0;
+  border: none;
 }
 
-/* Historic cards ALWAYS filled */
+/* Historic ALWAYS filled (applied via JS by adding .historic to cardInner) */
 .historicCard,
 .card.historic,
-.card.today.historicCard {
+.cardInner.historic {
   background: var(--historic-bg) !important;
-  border-color: #f0b9c0 !important;
+  border: 1px solid #f0b9c0 !important;
+  padding: var(--space) !important;
 }
 
-/* ======================================================
-   FORM CONTROLS
-   ====================================================== */
-input,
-select,
-textarea,
-button {
+input, select, textarea, button {
   width: 100%;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   font-size: 14px;
 }
 
-input,
-select,
-button {
+input, select, button {
   height: var(--control-height);
   padding: 0 12px;
 }
@@ -107,29 +94,35 @@ textarea {
   background: #fff;
 }
 
-/* ======================================================
-   BUTTONS
-   ====================================================== */
+label{
+  display:block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 10px 0 6px;
+  font-weight: 800;
+}
+
 button {
   background: var(--primary);
   color: #fff;
-  font-weight: 800;
+  font-weight: 900;
   border: none;
   cursor: pointer;
   transition: background 0.15s ease;
 }
-
-button:hover {
-  background: var(--primary-hover);
-}
+button:hover { background: var(--primary-hover); }
 
 button.secondary {
   background: var(--secondary);
   color: #064;
 }
+button.secondary:hover { background: #b7e4dc; }
 
-button.secondary:hover {
-  background: #b7e4dc;
+.dangerBtn{
+  background: var(--danger);
+}
+.dangerBtn:hover{
+  filter: brightness(0.95);
 }
 
 button.miniBtn {
@@ -137,16 +130,8 @@ button.miniBtn {
   padding: 0 14px;
 }
 
-/* ======================================================
-   STACK SPACING (CRITICAL)
-   ====================================================== */
-.stack > * + * {
-  margin-top: var(--space);
-}
+.stack > * + * { margin-top: var(--space); }
 
-/* ======================================================
-   ROW LAYOUTS
-   ====================================================== */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -161,9 +146,7 @@ button.miniBtn {
   align-items: center;
 }
 
-/* ======================================================
-   NOTES + SAVE ROW
-   ====================================================== */
+/* Notes + button */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -171,19 +154,10 @@ button.miniBtn {
   align-items: stretch;
   min-height: calc(var(--control-height) * 2.4);
 }
-
 .actionRow textarea,
-.actionRow button {
-  height: 100%;
-}
+.actionRow button { height: 100%; }
+.actionRow button { min-width: 150px; }
 
-.actionRow button {
-  min-width: 150px;
-}
-
-/* ======================================================
-   DAY BAR / DATE
-   ====================================================== */
 .dayBar {
   display: flex;
   justify-content: space-between;
@@ -191,14 +165,12 @@ button.miniBtn {
   gap: var(--space);
   flex-wrap: nowrap;
 }
-
 .dayBarLeft {
   display: flex;
   gap: var(--space);
   align-items: center;
   min-width: 0;
 }
-
 .dateText {
   font-weight: 900;
   white-space: nowrap;
@@ -207,45 +179,20 @@ button.miniBtn {
   max-width: 260px;
 }
 
-.historicDate {
-  color: var(--danger);
-  font-weight: 900;
-}
-
 .datePick {
   height: var(--control-height);
   min-width: 150px;
   max-width: 170px;
 }
 
-/* ======================================================
-   TEXT
-   ====================================================== */
-.muted {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
+.muted { color: var(--muted); font-size: 0.9rem; }
+.danger { color: var(--danger); }
 
-.danger {
-  color: var(--danger);
-}
+ul { padding-left: 18px; }
+li { margin-bottom: 6px; }
 
-ul {
-  padding-left: 18px;
-}
-
-li {
-  margin-bottom: 6px;
-}
-
-/* ======================================================
-   PILLS
-   ====================================================== */
-.pillRow {
-  display: flex;
-  gap: var(--space);
-}
-
+/* Pills */
+.pillRow { display: flex; gap: var(--space); margin-top: var(--space); }
 .pill {
   height: var(--control-height);
   padding: 0 14px;
@@ -256,31 +203,21 @@ li {
   font-weight: 900;
   cursor: pointer;
 }
+.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-.pill.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-
-/* ======================================================
-   AUTH
-   ====================================================== */
+/* Auth row */
 .authRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
 }
 
-/* ======================================================
-   LOGIN LOGO (LOCKED SIZE)
-   ====================================================== */
+/* Login logo */
 .logoBox {
   display: grid;
   place-items: center;
   padding: 8px;
 }
-
 .logoBox img {
   width: var(--menu-tile-size);
   height: var(--menu-tile-size);
@@ -288,77 +225,53 @@ li {
   border-radius: 14px;
 }
 
-/* ======================================================
-   MAIN MENU – TILE SIZE LOCKED
-   ====================================================== */
-.menuGrid {
+/* Main menu tiles locked to logo size */
+.menuGrid{
   display: grid;
   grid-template-columns: repeat(2, var(--menu-tile-size));
   gap: 12px;
   justify-content: center;
   margin-top: 12px;
 }
-
-.menuTile {
+.menuTile{
   width: var(--menu-tile-size) !important;
   height: var(--menu-tile-size) !important;
-
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-
-  padding: 10px;
   border-radius: 16px;
-
   font-weight: 900;
   font-size: 15px;
   line-height: 1.1;
+  padding: 10px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-
-  background: var(--primary);
-  color: #fff;
   cursor: pointer;
 }
+.menuTile:hover { background: var(--primary-hover); }
 
-.menuTile:hover {
-  background: var(--primary-hover);
+/* Admin grid: let them be slightly larger if wanted */
+.adminGrid .menuTile{
+  font-size: 16px;
 }
 
-/* Logout full width */
-#btnLogout {
-  grid-column: 1 / -1;
-  width: 100% !important;
-  height: 48px;
+/* Admin + Logout on same row */
+.menuBottomRow{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space);
+  margin-top: 14px;
+}
+.menuBottomRow button{
+  height: 52px;
   border-radius: 12px;
 }
 
-/* ======================================================
-   MOBILE
-   ====================================================== */
+/* Mobile */
 @media (max-width: 700px) {
-  .row,
-  .row3,
-  .authRow {
-    grid-template-columns: 1fr;
-  }
-
-  .actionRow {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .actionRow textarea,
-  .actionRow button {
-    height: var(--control-height);
-  }
-
-  .actionRow button {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .dayBar {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  .row, .row3, .authRow { grid-template-columns: 1fr; }
+  .actionRow { grid-template-columns: 1fr; min-height: auto; }
+  .actionRow textarea, .actionRow button { height: var(--control-height); }
+  .actionRow button { width: 100%; min-width: 0; }
+  .dayBar { flex-direction: column; align-items: stretch; }
+  .menuBottomRow{ grid-template-columns: 1fr; }
 }
