@@ -18,7 +18,6 @@
   --space: 16px;
 }
 
-/* Reset */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -30,7 +29,7 @@ body {
   margin-inline: auto;
 }
 
-/* ---------- CARDS ---------- */
+/* Cards */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -42,12 +41,13 @@ body {
 
 .card.today { background: var(--today-bg); }
 
+/* Historic = pink filled */
 .card.historic {
   background: var(--historic-bg) !important;
   border-color: #f1b0b7 !important;
 }
 
-/* ---------- CONTROLS ---------- */
+/* Controls */
 input, select, textarea, button {
   width: 100%;
   border-radius: var(--radius);
@@ -66,7 +66,7 @@ textarea {
   resize: vertical;
 }
 
-/* ---------- BUTTONS ---------- */
+/* Buttons */
 button {
   background: var(--primary);
   color: #fff;
@@ -74,72 +74,62 @@ button {
   border: none;
   cursor: pointer;
 }
-
 button:hover { background: var(--primary-hover); }
 
 button.secondary {
   background: var(--secondary);
   color: #064;
 }
+button.secondary:hover { background: #b7e4dc; }
 
-/* ---------- STACK / SPACING ---------- */
-.stack > * + * {
-  margin-top: var(--space);
-}
+button.miniBtn { width: auto; padding: 0 14px; }
 
-/* ---------- ROWS ---------- */
+/* Logout red */
+.dangerBtn { background: var(--danger) !important; }
+.dangerBtn:hover { filter: brightness(0.95); }
+
+/* spacing */
+.stack > * + * { margin-top: var(--space); }
+
+/* Rows */
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space);
+  align-items: center;
 }
-
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
+  align-items: center;
 }
 
-/* Notes + Save button */
+/* Notes + save button */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr 160px;
   gap: var(--space);
   align-items: stretch;
 }
-
 .actionRow textarea,
-.actionRow button {
-  height: 100%;
-}
+.actionRow button { height: 100%; }
 
-/* ---------- DAY BAR ---------- */
+/* Day bar */
 .dayBar {
   display: flex;
   align-items: center;
   gap: var(--space);
   justify-content: space-between;
 }
-
 .dayBarLeft {
   display: flex;
   gap: var(--space);
   align-items: center;
 }
 
-.dateText {
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.historicDate { color: var(--danger); }
-
-/* ---------- LOGIN ---------- */
-.logoBox {
-  display: flex;
-  justify-content: center;
-}
-
+/* Login */
+.logoBox { display: flex; justify-content: center; }
 .logoBox img {
   width: 110px;
   height: 110px;
@@ -147,7 +137,7 @@ button.secondary {
   border-radius: 16px;
 }
 
-/* ---------- MAIN MENU ---------- */
+/* Menu */
 .menuGrid {
   display: grid;
   grid-template-columns: repeat(2, 110px);
@@ -155,7 +145,6 @@ button.secondary {
   justify-content: center;
   margin-top: var(--space);
 }
-
 .menuTile {
   width: 110px;
   height: 110px;
@@ -168,27 +157,35 @@ button.secondary {
   text-align: center;
 }
 
-/* Admin + Logout SAME SIZE */
-.menuTile.small {
-  width: 110px;
-  height: 110px;
-}
-
-/* ---------- AUTH BUTTONS ---------- */
-.authRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+/* Pills (Accident / Illness) – side by side */
+.pillRow {
+  display: flex;
   gap: var(--space);
+  align-items: center;
+}
+.pill {
+  height: var(--control-height);
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--primary);
+  font-weight: 900;
+  cursor: pointer;
+}
+.pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 
-/* ---------- UTIL ---------- */
 .hidden { display: none; }
 .muted { color: var(--muted); }
 .danger { color: var(--danger); }
 
-/* ---------- MOBILE ---------- */
 @media (max-width: 700px) {
   .row, .row3, .authRow { grid-template-columns: 1fr; }
   .actionRow { grid-template-columns: 1fr; }
   .menuGrid { grid-template-columns: 1fr 1fr; }
+  .pillRow { flex-direction: row; }
 }
