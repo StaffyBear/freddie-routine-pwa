@@ -1,241 +1,67 @@
-:root {
-  --primary: #0f6f4f;
-  --primary-hover: #0c5e42;
+/* ====== UI FIX PACK (2026-01-04) ====== */
 
-  --secondary: #cceee7;
-
-  --bg: #eef6f3;
-  --card-bg: #f6fbf9;
-  --today-bg: #e9f5f0;
-  --historic-bg: #f8d7da;
-
-  --text: #111;
-  --muted: #6b7280;
-  --border: #dbe7e3;
-  --danger: #9b1c1c;
-
-  --radius: 14px;
-  --control-height: 44px;
-
-  /* ONE spacing value everywhere */
-  --space: 12px;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  padding: var(--space);
-  max-width: 900px;
-  margin-inline: auto;
-}
-
-.page-title {
-  text-align: center;
-  margin-bottom: var(--space);
-}
-
-/* Cards */
-.card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: var(--space);
-  border: 1px solid var(--border);
-  margin-bottom: calc(var(--space) * 1.25);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.card.today { background: var(--today-bg); }
-
-/* Historic ALWAYS filled */
-.historicCard,
-.card.historic,
-.card.today.historicCard {
-  background: var(--historic-bg) !important;
-  border-color: #f0b9c0 !important;
-}
-
-/* Controls */
-input, select, textarea, button {
-  width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  font-size: 14px;
-}
-
-input, select, button {
-  height: var(--control-height);
-  padding: 0 12px;
-}
-
-textarea {
-  padding: 10px 12px;
-  min-height: var(--control-height);
-  resize: vertical;
-  background: #fff;
-}
-
-/* Buttons */
-button {
-  background: var(--primary);
-  color: #fff;
-  font-weight: 800;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-button:hover { background: var(--primary-hover); }
-
-button.secondary {
-  background: var(--secondary);
-  color: #064;
-}
-button.secondary:hover { background: #b7e4dc; }
-
-button.miniBtn {
-  width: auto;
-  padding: 0 14px;
-}
-
-/* ✅ THE IMPORTANT BIT: consistent vertical spacing */
-.stack > * + * {
-  margin-top: var(--space);
-}
-
-/* Rows */
-.row {
+/* Login logo: smaller + centred */
+.logoBox {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space);
-  align-items: center;
+  place-items: center;
+  padding: 8px;
+}
+.logoBox img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 14px;
 }
 
-.row3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space);
-  align-items: center;
-}
-
-/* Notes + button */
-.actionRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--space);
-  align-items: stretch;
-  min-height: calc(var(--control-height) * 2.4);
-}
-
-.actionRow textarea,
-.actionRow button { height: 100%; }
-
-.actionRow button {
-  min-width: 150px;
-}
-
-/* Day bar */
-.dayBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space);
-}
-
-.dayBarLeft {
-  display: flex;
-  gap: var(--space);
-  align-items: center;
-}
-
-.dateText { font-weight: 900; }
-.historicDate { color: var(--danger); font-weight: 900; }
-
-.muted { color: var(--muted); font-size: 0.9rem; }
-.danger { color: var(--danger); }
-
-ul { padding-left: 18px; }
-li { margin-bottom: 6px; }
-
-/* Pills */
-.pillRow { display: flex; gap: var(--space); }
-.pill {
-  height: var(--control-height);
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--primary);
-  font-weight: 900;
-  cursor: pointer;
-}
-.pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-/* Auth row */
-.authRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space);
-}
-
-#authView input + input { margin-top: var(--space); }
-
-.logout-wrapper {
-  display: flex;
-  justify-content: center;
-}
-
-/* Hidden */
-.hidden { display: none; }
-
-/* Mobile */
-@media (max-width: 700px) {
-  .row, .row3, .authRow { grid-template-columns: 1fr; }
-  .actionRow { grid-template-columns: 1fr; min-height: auto; }
-  .actionRow textarea, .actionRow button { height: var(--control-height); }
-
-  /* --- Menu grid layout --- */
+/* Main menu: 2-across square tiles + small gaps */
 .menuGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: calc(var(--space) * 1.25);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   margin-top: var(--space);
 }
 
 .menuTile {
-  height: 120px;
+  aspect-ratio: 1 / 1;   /* makes them square */
+  height: auto;          /* let aspect-ratio control it */
+  width: 100%;
   font-size: 18px;
   font-weight: 900;
   border-radius: var(--radius);
-}
-
-/* date pick input */
-.datePick {
-  height: var(--control-height);
-  width: auto;
-  min-width: 150px;
-}
-
-/* login logo box */
-.logoBox {
+  padding: 10px;
   display: grid;
   place-items: center;
-  padding: 14px;
-}
-.logoBox img {
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  border-radius: 16px;
+  text-align: center;
 }
 
-/* mobile menu stack */
-@media (max-width: 700px) {
-  .menuGrid { grid-template-columns: 1fr; }
-  .menuTile { height: 90px; }
+/* Slightly smaller on small mobiles */
+@media (max-width: 420px) {
+  .menuTile { font-size: 16px; }
 }
 
-  .actionRow button { width: 100%; min-width: 0; }
-  .dayBar { flex-direction: column; align-items: stretch; }
+/* Date bar: keep date on one line */
+.dayBar {
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+}
+
+.dayBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dateText {
+  white-space: nowrap;     /* stop wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;        /* prevents pushing buttons off-screen */
+}
+
+/* Date picker */
+.datePick {
+  height: var(--control-height);
+  min-width: 150px;
+  max-width: 170px;
 }
