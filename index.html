@@ -13,41 +13,31 @@
     :root{
       --bg1:#EAF7F2;
       --bg2:#D9F0E8;
-      --card:#F3FBF7;
-      --card2:#EAF7F2;
+      --card:rgba(243,251,247,.92);
       --primary:#0B6B4F;
-      --primary2:#18A07A;
       --mint:#BFECE0;
       --text:#0E2A22;
       --muted:#3b5a52;
       --border:#cfe7de;
-
       --radius:16px;
       --pad:16px;
       --gap:12px;
       --controlH:46px;
     }
-
     *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          var(--bg1),
-          var(--bg1) 40px,
-          var(--bg2) 40px,
-          var(--bg2) 80px
-        );
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--bg1), var(--bg1) 40px,
+        var(--bg2), var(--bg2) 80px
+      );
       min-height:100vh;
     }
-
-    a{ color:inherit; }
     .hidden{ display:none !important; }
 
-    /* Top banner */
     #offlineBanner{
       display:none;
       position:sticky;
@@ -71,11 +61,10 @@
       font-size: 28px;
       font-weight: 800;
       margin: 8px 0 16px;
-      letter-spacing:.2px;
     }
 
     .card{
-      background: rgba(243,251,247,.92);
+      background: var(--card);
       border:1px solid var(--border);
       border-radius: var(--radius);
       padding: var(--pad);
@@ -89,9 +78,7 @@
       align-items:stretch;
       flex-wrap:wrap;
     }
-
     .row.nowrap{ flex-wrap:nowrap; }
-
     .col{ flex:1; min-width: 210px; }
 
     label{
@@ -122,11 +109,6 @@
       line-height:1.3;
     }
 
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(24,160,122,.7);
-      box-shadow: 0 0 0 3px rgba(24,160,122,.18);
-    }
-
     .btn{
       height: var(--controlH);
       border:none;
@@ -138,37 +120,26 @@
       cursor:pointer;
       white-space:nowrap;
     }
-
-    .btn:hover{ background: #085a42; }
-    .btn:active{ transform: translateY(1px); }
-
+    .btn:hover{ background:#085a42; }
     .btn.secondary{
       background: var(--mint);
       color: var(--primary);
       font-weight:900;
     }
     .btn.secondary:hover{ filter: brightness(.95); }
-
-    .btn.danger{
-      background:#a73737;
-    }
+    .btn.danger{ background:#a73737; }
     .btn.danger:hover{ background:#8f2f2f; }
 
-    .center{ justify-content:center; }
+    .helpText{ font-size: 13px; color: var(--muted); margin-top: 10px; }
 
-    .helpText{
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
+    .logoWrap{ display:flex; justify-content:center; margin: 10px 0 14px; }
+    .logoWrap img{ width: 110px; height: 110px; object-fit:contain; border-radius: 18px; }
 
-    /* Menu tiles (2 across, square-ish) */
     .menuGrid{
       display:grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
-
     .tile{
       background: rgba(243,251,247,.95);
       border: 1px solid var(--border);
@@ -186,44 +157,12 @@
       user-select:none;
       box-shadow: 0 10px 24px rgba(0,0,0,.05);
     }
+    .tile:hover{ background: rgba(191,236,224,.55); }
 
-    .tile:hover{
-      background: rgba(191,236,224,.55);
-      border-color: rgba(24,160,122,.4);
-    }
-
-    .footerSingle{
-      margin-top: 14px;
-      display:flex;
-      justify-content:center;
-    }
-
-    /* Lists */
-    ul{ padding-left: 18px; margin: 10px 0 0; }
-    li{ margin: 6px 0; }
-
-    /* Historic highlighting (if your JS adds .historic to a card) */
-    .historicCard{
-      background: rgba(255, 220, 230, 0.55);
-      border-color: rgba(190, 60, 90, 0.30);
-    }
-
-    /* Logo sizing for login */
-    .logoWrap{
-      display:flex;
-      justify-content:center;
-      margin: 10px 0 14px;
-    }
-    .logoWrap img{
-      width: 110px;
-      height: 110px;
-      object-fit: contain;
-      border-radius: 18px;
-    }
+    .footerSingle{ margin-top: 14px; display:flex; justify-content:center; }
 
     @media (max-width: 520px){
       .pageTitle{ font-size:24px; }
-      .menuGrid{ gap:10px; }
       .tile{ min-height: 104px; font-size:16px; }
       :root{ --controlH:48px; }
     }
@@ -235,7 +174,7 @@
 
   <div class="container">
 
-    <!-- AUTH / LOGIN -->
+    <!-- LOGIN -->
     <section id="authView" class="card">
       <div class="pageTitle">Login</div>
 
@@ -243,51 +182,38 @@
         <img src="./icons/icon-192.png" alt="Routine Tracker Logo">
       </div>
 
-      <div class="row">
-        <div class="col">
-          <label for="email">Email</label>
-          <input id="email" type="email" placeholder="Email" autocomplete="email" />
-        </div>
-      </div>
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="Email" autocomplete="email" />
 
-      <div class="row">
-        <div class="col">
-          <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-        </div>
-      </div>
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
 
-      <div class="row">
-        <div class="col">
-          <label for="inviteCode">Invite code (required to register)</label>
-          <input id="inviteCode" type="text" placeholder="Invite Code" />
-        </div>
-      </div>
+      <label for="inviteCode">Invite code (required to register)</label>
+      <input id="inviteCode" type="text" placeholder="Invite Code" />
 
-      <!-- Buttons on same line -->
-      <div class="row nowrap">
-        <button id="loginBtn" class="btn col">Login</button>
-        <button id="registerBtn" class="btn secondary col">Register</button>
-        <button id="forgotBtn" class="btn secondary col">Forgotten Password</button>
+      <div class="row nowrap" style="margin-top:12px;">
+        <!-- THESE IDs MUST MATCH app.js -->
+        <button id="btnLogin" class="btn col">Login</button>
+        <button id="btnRegister" class="btn secondary col">Register</button>
+        <button id="btnForgotPassword" class="btn secondary col">Forgotten Password</button>
       </div>
 
       <div id="authMsg" class="helpText"></div>
     </section>
 
-    <!-- PASSWORD RESET (optional view if your JS uses it) -->
+    <!-- RESET PASSWORD VIEW -->
     <section id="resetView" class="card hidden">
       <div class="pageTitle">Reset Password</div>
 
-      <div class="row">
-        <div class="col">
-          <label for="resetEmail">Email</label>
-          <input id="resetEmail" type="email" placeholder="Email" />
-        </div>
-      </div>
+      <label for="newPassword">New password</label>
+      <input id="newPassword" type="password" placeholder="New password" />
 
-      <div class="row">
-        <button id="sendResetBtn" class="btn col">Send reset email</button>
-        <button id="resetBackBtn" class="btn secondary col">Back</button>
+      <label for="newPassword2">Confirm new password</label>
+      <input id="newPassword2" type="password" placeholder="Confirm new password" />
+
+      <div class="row nowrap" style="margin-top:12px;">
+        <button id="btnSetNewPassword" class="btn col">Set Password</button>
+        <button id="btnBackToLogin" class="btn secondary col">Back</button>
       </div>
 
       <div id="resetMsg" class="helpText"></div>
@@ -298,57 +224,269 @@
       <div class="pageTitle">Main Menu</div>
 
       <div class="menuGrid">
-        <div class="tile" id="goSleep">Sleep</div>
-        <div class="tile" id="goMeals">Meals</div>
-        <div class="tile" id="goMoods">Moods</div>
-        <div class="tile" id="goMedication">Medication</div>
-        <div class="tile" id="goAI">Accidents &amp; Illnesses</div>
-        <div class="tile" id="goExport">Export</div>
+        <div class="tile" id="btnGoTracker">Routine Tracker</div>
+        <div class="tile" id="btnGoAccident">Accident &amp; Illness</div>
+        <div class="tile" id="btnGoAddMedication">New Medication</div>
+        <div class="tile" id="btnGoHistoricTracker">Historic Routine Tracker</div>
+        <div class="tile" id="btnGoHistoricAccident">Historic Accident &amp; Illness</div>
+        <div class="tile" id="btnInstallApp">Install App</div>
       </div>
+
+      <div id="installMsg" class="helpText"></div>
 
       <div class="footerSingle">
-        <button id="logoutBtn" class="btn danger" style="min-width:220px;">Log Out</button>
-      </div>
-
-      <div class="footerSingle" style="margin-top:10px;">
-        <button id="adminBtn" class="btn secondary" style="min-width:220px;">Admin</button>
+        <button id="btnLogout" class="btn danger" style="min-width:220px;">Log Out</button>
       </div>
     </section>
 
-    <!-- TRACKER PAGE (your JS will fill this / show/hide sections) -->
-    <section id="trackerView" class="hidden"></section>
+    <!-- ROUTINE TRACKER VIEW (skeleton with IDs app.js expects) -->
+    <section id="trackerView" class="card hidden">
+      <div class="pageTitle">Routine Tracker</div>
 
-    <!-- Accident & Illness page -->
-    <section id="accidentView" class="hidden"></section>
+      <div class="row nowrap">
+        <button id="btnTrackerPrevDay" class="btn secondary" style="min-width:52px;">◀</button>
+        <button id="btnTrackerNextDay" class="btn secondary" style="min-width:52px;">▶</button>
+        <div class="col" style="display:flex;align-items:center;font-weight:800;" id="trackerDateLabel"></div>
+        <button id="btnBackToMenu" class="btn secondary">Back to Menu</button>
+      </div>
 
-    <!-- New Medication / Admin page -->
-    <section id="addMedicationView" class="hidden"></section>
+      <label>Child</label>
+      <select id="childSelect"></select>
 
-    <!-- Export page -->
-    <section id="exportView" class="hidden"></section>
+      <div class="row nowrap">
+        <input id="childName" placeholder="Add new child (e.g. Freddie)" />
+        <button id="btnAddChild" class="btn col">Add Child</button>
+      </div>
 
-    <!-- Old views (kept for compatibility with your app.js hide/show list) -->
-    <section id="historicRoutineView" class="hidden"></section>
-    <section id="historicAIView" class="hidden"></section>
+      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+
+      <h3>Sleep</h3>
+      <div class="row nowrap">
+        <button id="btnSleepStart" class="btn col">Start Sleep (now)</button>
+        <button id="btnSleepEnd" class="btn col">End Sleep (now)</button>
+      </div>
+
+      <label>Manual sleep entry</label>
+      <div class="row nowrap">
+        <input id="sleepManualStart" type="datetime-local" />
+        <input id="sleepManualEnd" type="datetime-local" />
+        <button id="btnAddSleepManual" class="btn col">Add</button>
+      </div>
+
+      <label>Sleep notes</label>
+      <textarea id="sleepNotes" placeholder="Sleep notes (optional)"></textarea>
+
+      <div id="sleepTotal" class="helpText"></div>
+      <ul id="sleepList"></ul>
+
+      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+
+      <h3>Meals</h3>
+      <div class="row">
+        <div class="col">
+          <select id="mealType"></select>
+        </div>
+        <div class="col">
+          <select id="mealPercent"></select>
+        </div>
+      </div>
+
+      <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
+
+      <div class="row nowrap">
+        <textarea id="mealNotes" class="col" placeholder="Meal notes"></textarea>
+        <button id="btnAddMeal" class="btn" style="min-width:160px;">Save</button>
+      </div>
+      <ul id="mealList"></ul>
+
+      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+
+      <h3>Mood</h3>
+      <div class="row">
+        <div class="col"><select id="moodPeriod"></select></div>
+        <div class="col"><select id="moodValue"></select></div>
+      </div>
+
+      <div class="row nowrap">
+        <textarea id="moodNotes" class="col" placeholder="Mood notes"></textarea>
+        <button id="btnAddMood" class="btn" style="min-width:160px;">Save</button>
+      </div>
+      <ul id="moodList"></ul>
+
+      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+
+      <h3>Medication</h3>
+      <div class="row">
+        <div class="col"><select id="medSelect"></select></div>
+        <div class="col"><input id="medDose" placeholder="Dose (e.g. 5ml)"></div>
+        <div class="col"><input id="medTime" type="time"></div>
+      </div>
+
+      <div class="row nowrap">
+        <textarea id="medNotes" class="col" placeholder="Medication notes"></textarea>
+        <button id="btnAddDose" class="btn" style="min-width:160px;">Save</button>
+      </div>
+      <ul id="medList"></ul>
+    </section>
+
+    <!-- ACCIDENT & ILLNESS VIEW -->
+    <section id="accidentView" class="card hidden">
+      <div class="pageTitle">Accident &amp; Illness</div>
+
+      <div class="row nowrap">
+        <button id="btnAIPrevDay" class="btn secondary" style="min-width:52px;">◀</button>
+        <button id="btnAINextDay" class="btn secondary" style="min-width:52px;">▶</button>
+        <div class="col" style="display:flex;align-items:center;font-weight:800;" id="aiDateLabel"></div>
+        <button id="btnAIBackToMenu" class="btn secondary">Back to Menu</button>
+      </div>
+
+      <label>Child</label>
+      <select id="aiChildSelect"></select>
+
+      <div class="row nowrap" style="margin-top:10px;">
+        <button id="tabAccident" class="btn col">Accident</button>
+        <button id="tabIllness" class="btn secondary col">Illness</button>
+      </div>
+
+      <!-- Accident form -->
+      <div id="accidentForm" style="margin-top:14px;">
+        <label>What happened</label>
+        <textarea id="accWhat" placeholder="Describe what happened..."></textarea>
+
+        <div class="row">
+          <div class="col">
+            <label>Injury severity</label>
+            <select id="accSeverity"></select>
+          </div>
+          <div class="col">
+            <label>Body area affected</label>
+            <select id="accBodyArea"></select>
+            <input id="accBodyOther" class="hidden" placeholder="Other body area" />
+          </div>
+        </div>
+
+        <label>Where did it happen</label>
+        <input id="accWhere" placeholder="e.g. living room / nursery garden" />
+
+        <div class="row">
+          <div class="col">
+            <label>Reported by</label>
+            <select id="accReportedBy"></select>
+            <input id="accReportedOther" class="hidden" placeholder="Other reporter" />
+          </div>
+          <div class="col" id="accTimeWrap">
+            <label>Time of incident (today only)</label>
+            <input id="accTime" type="time" />
+          </div>
+        </div>
+
+        <label>Action taken</label>
+        <textarea id="accAction" placeholder="What action was taken?"></textarea>
+
+        <label>Safeguarding put in place</label>
+        <textarea id="accSafeguarding" placeholder="What safeguarding was put in place?"></textarea>
+
+        <div class="row nowrap">
+          <textarea id="accNotes" class="col" placeholder="Notes"></textarea>
+          <button id="btnAddAccident" class="btn" style="min-width:160px;">Save</button>
+        </div>
+
+        <ul id="accidentList"></ul>
+      </div>
+
+      <!-- Illness form -->
+      <div id="illnessForm" style="margin-top:14px;" class="hidden">
+        <label>Symptom</label>
+        <select id="illSymptom"></select>
+
+        <div class="row">
+          <div class="col">
+            <label>Temperature (°C)</label>
+            <input id="illTemp" placeholder="e.g. 38.2 (optional)" />
+          </div>
+          <div class="col" id="illTimeWrap">
+            <label>Time of event (today only)</label>
+            <input id="illTime" type="time" />
+          </div>
+        </div>
+
+        <label>Medication (optional link)</label>
+        <select id="illMedication"></select>
+
+        <label>Reported by</label>
+        <select id="illReportedBy"></select>
+
+        <div class="row nowrap">
+          <textarea id="illNotes" class="col" placeholder="Notes"></textarea>
+          <button id="btnAddIllness" class="btn" style="min-width:160px;">Save</button>
+        </div>
+
+        <ul id="illnessList"></ul>
+      </div>
+    </section>
+
+    <!-- NEW MEDICATION PAGE -->
+    <section id="addMedicationView" class="card hidden">
+      <div class="pageTitle">New Medication</div>
+
+      <div class="row nowrap">
+        <div class="col">
+          <input id="medAdminName" placeholder="Name (e.g. Calpol)" />
+        </div>
+        <div class="col">
+          <input id="medAdminUnit" placeholder="Unit (ml/mg)" />
+        </div>
+        <button id="btnAddMedMenu" class="btn" style="min-width:180px;">Save</button>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button id="btnAddMedBackToMenu" class="btn secondary">Back to Menu</button>
+      </div>
+
+      <div id="medAdminMsg" class="helpText"></div>
+    </section>
+
+    <!-- HISTORIC ROUTINE VIEW -->
+    <section id="historicRoutineView" class="card hidden">
+      <div class="pageTitle">Historic Routine Tracker</div>
+      <label>Select date</label>
+      <input id="historicRoutinePick" type="date" />
+      <div class="row nowrap" style="margin-top:12px;">
+        <button id="btnOpenHistoricRoutine" class="btn col">Open</button>
+        <button id="btnHistoricRoutineBackToMenu" class="btn secondary col">Back</button>
+      </div>
+    </section>
+
+    <!-- HISTORIC A&I VIEW -->
+    <section id="historicAIView" class="card hidden">
+      <div class="pageTitle">Historic Accident &amp; Illness</div>
+      <label>Select date</label>
+      <input id="historicAIPick" type="date" />
+      <div class="row nowrap" style="margin-top:12px;">
+        <button id="btnOpenHistoricAI" class="btn col">Open</button>
+        <button id="btnHistoricAIBackToMenu" class="btn secondary col">Back</button>
+      </div>
+    </section>
+
+    <!-- EXPORT VIEW (placeholder) -->
+    <section id="exportView" class="card hidden">
+      <div class="pageTitle">Export</div>
+      <div class="helpText">Export will be added next.</div>
+      <div class="row" style="margin-top:12px;">
+        <button id="btnExportBackToMenu" class="btn secondary">Back to Menu</button>
+      </div>
+    </section>
 
   </div>
 
-  <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- App logic -->
   <script src="./app.js"></script>
 
-  <!-- Service worker -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", async () => {
-        try {
-          const reg = await navigator.serviceWorker.register("./sw.js");
-          console.log("SW registered", reg.scope);
-        } catch (e) {
-          console.warn("SW registration failed", e);
-        }
+        try { await navigator.serviceWorker.register("./sw.js"); }
+        catch(e){ console.warn("SW reg failed", e); }
       });
     }
   </script>
