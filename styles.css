@@ -19,6 +19,9 @@
 
   /* ONE spacing value everywhere */
   --space: 12px;
+
+  /* Menu tile size (match logo-ish) */
+  --tile: 120px; /* change to 110px if you want exact logo size */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -99,7 +102,7 @@ button.miniBtn {
   padding: 0 14px;
 }
 
-/* ✅ THE IMPORTANT BIT: consistent vertical spacing */
+/* ✅ consistent vertical spacing */
 .stack > * + * {
   margin-top: var(--space);
 }
@@ -127,13 +130,9 @@ button.miniBtn {
   align-items: stretch;
   min-height: calc(var(--control-height) * 2.4);
 }
-
 .actionRow textarea,
 .actionRow button { height: 100%; }
-
-.actionRow button {
-  min-width: 150px;
-}
+.actionRow button { min-width: 150px; }
 
 /* Day bar */
 .dayBar {
@@ -141,16 +140,31 @@ button.miniBtn {
   justify-content: space-between;
   align-items: center;
   gap: var(--space);
+  flex-wrap: nowrap;
 }
 
 .dayBarLeft {
   display: flex;
   gap: var(--space);
   align-items: center;
+  min-width: 0;
 }
 
-.dateText { font-weight: 900; }
+.dateText {
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
 .historicDate { color: var(--danger); font-weight: 900; }
+
+.datePick {
+  height: var(--control-height);
+  width: auto;
+  min-width: 150px;
+  max-width: 170px;
+}
 
 .muted { color: var(--muted); font-size: 0.9rem; }
 .danger { color: var(--danger); }
@@ -179,11 +193,49 @@ li { margin-bottom: 6px; }
   gap: var(--space);
 }
 
-#authView input + input { margin-top: var(--space); }
+/* Login logo */
+.logoBox {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+.logoBox img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 14px;
+}
 
-.logout-wrapper {
-  display: flex;
+/* MAIN MENU: tiles same size as logo */
+.menuGrid{
+  display: grid;
+  grid-template-columns: repeat(2, var(--tile));
+  gap: 12px;
   justify-content: center;
+  margin-top: 10px;
+}
+
+.menuTile{
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: 16px;
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.1;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* keep logout full-width */
+#btnLogout{
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
 }
 
 /* Hidden */
@@ -198,163 +250,9 @@ li { margin-bottom: 6px; }
   .dayBar { flex-direction: column; align-items: stretch; }
 }
 
-
-/* --- MAIN MENU: tiles same size as logo --- */
-.menuGrid{
-  display:grid;
-  grid-template-columns: repeat(2, 120px);   /* two tiles across */
-  gap: 12px;
-  justify-content: center;                  /* center the grid */
-  margin-top: 10px;
-}
-
-.menuTile{
-  width: 120px;
-  height: 120px;                            /* square like the logo */
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.1;
-  padding: 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  cursor:pointer;
-}
-
-/* keep logout full-width */
-#btnLogout{
-  grid-column: 1 / -1;
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-}
-
-/* --- MAIN MENU: tiles same size as logo --- */
-.menuGrid{
-  display:grid;
-  grid-template-columns: repeat(2, 120px);   /* two tiles across */
-  gap: 12px;
-  justify-content: center;                  /* center the grid */
-  margin-top: 10px;
-}
-
-.menuTile{
-  width: 120px;
-  height: 120px;                            /* square like the logo */
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.1;
-  padding: 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  cursor:pointer;
-}
-
-/* keep logout full-width */
-#btnLogout{
-  grid-column: 1 / -1;
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-}
-
-
-/* date pick input */
-.datePick {
-  height: var(--control-height);
-  width: auto;
-  min-width: 150px;
-}
-
-/* login logo box */
-.logoBox {
-  display: grid;
-  place-items: center;
-  padding: 14px;
-}
-.logoBox img {
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  border-radius: 16px;
-}
-
-/* mobile menu stack */
-@media (max-width: 700px) {
-  .menuGrid { grid-template-columns: 1fr; }
-  .menuTile { height: 90px; }
-}
-
-
-/* ====== UI FIX PACK (2026-01-04) ====== */
-
-/* Login logo: smaller + centred */
-.logoBox {
-  display: grid;
-  place-items: center;
-  padding: 8px;
-}
-.logoBox img {
-  width: 110px;
-  height: 110px;
-  object-fit: contain;
-  border-radius: 14px;
-}
-
-/* Main menu: 2-across square tiles + small gaps */
-.menuGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: var(--space);
-}
-
-.menuTile {
-  aspect-ratio: 1 / 1;   /* makes them square */
-  height: auto;          /* let aspect-ratio control it */
-  width: 100%;
-  font-size: 18px;
-  font-weight: 900;
-  border-radius: var(--radius);
-  padding: 10px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-/* Slightly smaller on small mobiles */
-@media (max-width: 420px) {
-  .menuTile { font-size: 16px; }
-}
-
-/* Date bar: keep date on one line */
-.dayBar {
-  flex-wrap: nowrap !important;
-  gap: 10px !important;
-}
-
-.dayBarLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.dateText {
-  white-space: nowrap;     /* stop wrapping */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;        /* prevents pushing buttons off-screen */
-}
-
-/* Date picker */
-.datePick {
-  height: var(--control-height);
-  min-width: 150px;
-  max-width: 170px;
+/* Small phones: keep menu tidy */
+@media (max-width: 420px){
+  :root { --tile: 110px; }
+  .menuGrid { gap: 10px; }
+  .menuTile { font-size: 14px; }
 }
