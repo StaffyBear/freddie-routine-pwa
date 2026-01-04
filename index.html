@@ -5,410 +5,757 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Routine Tracker</title>
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f6f4f">
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0f6b4b" />
 
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- iOS fallback -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+  <style>
+    :root{
+      --bg: #eaf6f1;
+      --card: #f2fbf7;
+      --card-historic: #ffe7ee; /* filled pale pink */
+      --border: rgba(0,0,0,.10);
+      --text: #0b1f16;
+      --muted: rgba(0,0,0,.55);
+      --green: #0f6b4b;
+      --mint: #bfeee1;
+      --btnText: #ffffff;
+      --radius: 14px;
+      --gap: 12px;
+      --controlH: 44px;
+      --shadow: 0 10px 24px rgba(0,0,0,.08);
+      --maxw: 980px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-synthesis-weight: none;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #dff3ec 0%, #eef8f4 60%, #f8fffc 100%);
+    }
+
+    .wrap{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topTitle{
+      text-align:center;
+      font-size: 26px;
+      font-weight: 800;
+      margin: 6px 0 14px;
+      letter-spacing:.2px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .card.historic{
+      background: var(--card-historic);
+    }
+
+    .row{
+      display:flex;
+      gap: var(--gap);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .rowBetween{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: var(--gap);
+      flex-wrap: wrap;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: var(--gap);
+      align-items: stretch;
+    }
+
+    @media (max-width: 720px){
+      .grid2{ grid-template-columns: 1fr; }
+      .grid3{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+    }
+
+    input, select, textarea, button{
+      font: inherit;
+    }
+
+    input, select{
+      width:100%;
+      height: var(--controlH);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 0 12px;
+      background: #fff;
+      outline: none;
+    }
+
+    textarea{
+      width:100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      background:#fff;
+      outline:none;
+      min-height: var(--controlH);
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(15,107,75,.45);
+      box-shadow: 0 0 0 3px rgba(15,107,75,.12);
+    }
+
+    button{
+      height: var(--controlH);
+      border-radius: 10px;
+      border: 1px solid transparent;
+      padding: 0 14px;
+      cursor: pointer;
+      user-select:none;
+      background: var(--green);
+      color: var(--btnText);
+      font-weight: 700;
+    }
+
+    button:hover{ filter: brightness(1.05); }
+    button:active{ transform: translateY(1px); }
+    button:disabled{
+      opacity:.45;
+      cursor: not-allowed;
+    }
+
+    .btnSoft{
+      background: var(--mint);
+      color: #064b34;
+      border: 1px solid rgba(15,107,75,.10);
+    }
+
+    .btnGhost{
+      background: transparent;
+      color: var(--green);
+      border: 1px solid rgba(15,107,75,.25);
+    }
+
+    .btnTile{
+      width:100%;
+      aspect-ratio: 1 / 1; /* square */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 18px;
+      background: #ffffff;
+      color: #073a28;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+
+    .btnTile:hover{
+      border-color: rgba(15,107,75,.25);
+      box-shadow: 0 14px 24px rgba(0,0,0,.08);
+    }
+
+    .btnFull{
+      width:100%;
+    }
+
+    .muted{ color: var(--muted); }
+    .hidden{ display:none !important; }
+
+    /* Login layout */
+    .loginHead{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin: 10px 0 16px;
+    }
+    .loginLogo{
+      width: 78px;  /* smaller */
+      height: 78px;
+      border-radius: 16px;
+      box-shadow: 0 10px 18px rgba(0,0,0,.12);
+    }
+    .authActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--gap);
+      margin-top: 10px;
+    }
+    @media (max-width: 720px){
+      .authActions{ grid-template-columns: 1fr; }
+    }
+
+    /* Date bar */
+    .dateBar{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .datePill{
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background:#fff;
+      font-weight: 800;
+      white-space: nowrap; /* keep date on one line */
+    }
+
+    .pillHistoric{
+      background: #ffe7ee;
+      border-color: rgba(160,0,40,.15);
+    }
+
+    /* Notes + Save row */
+    .notesRow{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--gap);
+      align-items: stretch;
+    }
+    .notesRow textarea{ height: 100%; min-height: 72px; }
+    .notesRow button{ height: 100%; min-height: 72px; }
+
+    /* Offline banner */
+    .banner{
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: #fff;
+      font-weight: 700;
+    }
+
+    /* Tabs */
+    .tabRow{
+      display:flex;
+      gap: var(--gap);
+      margin-top: 10px;
+    }
+    .tabBtn{
+      background: var(--mint);
+      color:#064b34;
+      border: 1px solid rgba(15,107,75,.10);
+    }
+    .tabBtn.active{
+      background: var(--green);
+      color: #fff;
+    }
+  </style>
 </head>
 
 <body>
-
-<!-- ================= AUTH ================= -->
-<div id="authView" class="card">
-  <h1 class="page-title">Login</h1>
-
-  <div class="stack">
-    <div class="logoBox">
-      <img src="./icons/icon-512.png" alt="Routine Tracker Logo" />
-    </div>
-
-    <input id="email" placeholder="Email" autocomplete="email" />
-    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-
-    <input id="inviteCode" placeholder="Invite Code (required for Register)" inputmode="numeric" />
-
-    <div class="authRow">
-      <button id="btnLogin">Login</button>
-      <button id="btnRegister" class="secondary">Register</button>
-      <button id="btnForgotPassword" class="secondary">Forgot password?</button>
-    </div>
-
-    <p id="authMsg" class="danger"></p>
-  </div>
-</div>
-
-<!-- ============== PASSWORD RESET ============== -->
-<div id="resetView" class="card hidden">
-  <h1 class="page-title">Reset Password</h1>
-
-  <div class="stack">
-    <input id="newPassword" type="password" placeholder="New password" />
-    <input id="newPassword2" type="password" placeholder="Confirm new password" />
-
-    <button id="btnSetNewPassword">Update Password</button>
-    <button id="btnBackToLogin" class="secondary">Back to login</button>
-
-    <p id="resetMsg" class="danger"></p>
-  </div>
-</div>
-
-<!-- ================= MAIN MENU ================= -->
-<div id="menuView" class="hidden">
-  <div class="card">
-    <h1 class="page-title">Main Menu</h1>
-
+  <div class="wrap">
     <div id="offlineBanner" class="banner hidden"></div>
 
-    <div class="menuGrid">
-      <button id="btnGoSleep" class="menuTile">Sleep</button>
-      <button id="btnGoMeals" class="menuTile">Meals</button>
-      <button id="btnGoMoods" class="menuTile">Moods</button>
-      <button id="btnGoMedication" class="menuTile">Medication</button>
-      <button id="btnGoAI" class="menuTile">Accidents &amp; Illnesses</button>
-      <button id="btnGoExport" class="menuTile">Export</button>
-    </div>
-
-    <div class="logout-wrapper stack" style="margin-top: var(--space);">
-      <button id="btnGoAdmin" class="secondary" style="max-width:280px;">Admin</button>
-      <button id="btnLogout" style="max-width:420px;">Log Out</button>
-      <button id="btnInstallApp" class="secondary hidden" style="max-width:420px;">Install App</button>
-      <p id="installMsg" class="muted"></p>
-    </div>
-  </div>
-</div>
-
-<!-- ================= ADMIN ================= -->
-<div id="adminView" class="hidden">
-  <div class="card">
-    <h1 class="page-title">Admin</h1>
-
-    <div class="stack">
-      <div class="dayBar">
-        <div></div>
-        <button id="btnAdminBackToMenu" class="miniBtn secondary">Back to Menu</button>
-      </div>
-
-      <div class="card today">
-        <h2>Add Child</h2>
-        <div class="stack">
-          <input id="childNameAdmin" placeholder="Child name (e.g. Freddie)" />
-          <button id="btnAddChildAdmin">Save</button>
-          <p id="childAdminMsg" class="muted"></p>
+    <!-- LOGIN -->
+    <section id="authView">
+      <div class="topTitle">Login</div>
+      <div class="card">
+        <div class="loginHead">
+          <img class="loginLogo" src="./icons/icon-192.png" alt="Routine Tracker" />
         </div>
-      </div>
 
-      <div class="card today">
-        <h2>New Medication</h2>
-        <div class="stack">
-          <div class="row">
-            <input id="newMedNameAdmin" placeholder="Medication name (e.g. Calpol)" />
-            <input id="newMedUnitAdmin" placeholder="Unit (ml / mg)" />
+        <div class="grid2">
+          <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
           </div>
-          <button id="btnAddMedAdmin">Save</button>
-          <p id="medAdminMsg" class="muted"></p>
+          <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <div>
+          <label for="inviteCode">Invite Code (required for Register)</label>
+          <input id="inviteCode" type="text" placeholder="Enter invite code" />
+        </div>
+
+        <div class="authActions">
+          <button id="btnLogin">Login</button>
+          <button id="btnRegister" class="btnSoft">Register</button>
+          <button id="btnForgot" class="btnGhost">Forgot password?</button>
+        </div>
+
+        <div id="authMsg" class="muted" style="margin-top:10px;font-weight:700;"></div>
+      </div>
+    </section>
+
+    <!-- RESET PASSWORD -->
+    <section id="resetView" class="hidden">
+      <div class="topTitle">Reset Password</div>
+      <div class="card">
+        <label>New password</label>
+        <input id="newPassword" type="password" />
+        <label>Confirm new password</label>
+        <input id="newPassword2" type="password" />
+        <div style="height:10px"></div>
+        <button id="btnSetNewPassword" class="btnFull">Set new password</button>
+        <div id="resetMsg" class="muted" style="margin-top:10px;font-weight:700;"></div>
+      </div>
+    </section>
+
+    <!-- MAIN MENU -->
+    <section id="menuView" class="hidden">
+      <div class="topTitle">Main Menu</div>
+
+      <div class="card">
+        <div class="grid2">
+          <button class="btnTile" id="goSleep">Sleep</button>
+          <button class="btnTile" id="goMeals">Meals</button>
+          <button class="btnTile" id="goMoods">Moods</button>
+          <button class="btnTile" id="goMedication">Medication</button>
+          <button class="btnTile" id="goAI">Accidents & Illness</button>
+          <button class="btnTile" id="goExport">Export</button>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="grid2">
+          <button id="goAdmin" class="btnSoft btnFull">Admin</button>
+          <button id="btnLogout" class="btnGhost btnFull">Log out</button>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ================= SLEEP ================= -->
-<div id="sleepView" class="hidden">
-  <h1 class="page-title">Sleep</h1>
-
-  <div id="sleepTopCard" class="card today">
-    <div class="stack">
-      <div class="dayBar">
-        <div class="dayBarLeft">
-          <button id="btnSleepPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnSleepNextDay" class="miniBtn secondary">▶</button>
-          <input id="sleepDatePick" type="date" class="datePick" />
-          <span id="sleepDateLabel" class="dateText"></span>
+    <!-- ADMIN -->
+    <section id="adminView" class="hidden">
+      <div class="topTitle">Admin</div>
+      <div class="card">
+        <div class="rowBetween">
+          <div class="muted" style="font-weight:800;">Manage setup items</div>
+          <button id="adminBack" class="btnSoft">Back to Menu</button>
         </div>
-        <button id="btnSleepBackToMenu" class="miniBtn secondary">Back to Menu</button>
+
+        <div style="height:10px"></div>
+
+        <button id="goAdminChildren" class="btnFull">Add Child</button>
+        <div style="height:10px"></div>
+        <button id="goAdminMeds" class="btnFull">New Medication</button>
       </div>
+    </section>
 
-      <label class="muted">Child</label>
-      <select id="sleepChildSelect"></select>
-    </div>
-  </div>
-
-  <div id="sleepCard" class="card today">
-    <h2>Sleep</h2>
-
-    <div class="stack">
-      <div class="row">
-        <button id="btnSleepStart">Start</button>
-        <button id="btnSleepEnd">End</button>
-      </div>
-
-      <div class="row3">
-        <input id="sleepStartManual" type="datetime-local" />
-        <input id="sleepEndManual" type="datetime-local" />
-        <button id="btnAddSleepManual">Save</button>
-      </div>
-
-      <textarea id="sleepNote" placeholder="Sleep notes"></textarea>
-
-      <p><b>Total sleep:</b> <span id="sleepTotal">0.00h</span></p>
-      <ul id="sleepList"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MEALS ================= -->
-<div id="mealsView" class="hidden">
-  <h1 class="page-title">Meals</h1>
-
-  <div id="mealsTopCard" class="card today">
-    <div class="stack">
-      <div class="dayBar">
-        <div class="dayBarLeft">
-          <button id="btnMealsPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnMealsNextDay" class="miniBtn secondary">▶</button>
-          <input id="mealsDatePick" type="date" class="datePick" />
-          <span id="mealsDateLabel" class="dateText"></span>
+    <!-- ADMIN: CHILD -->
+    <section id="adminChildrenView" class="hidden">
+      <div class="topTitle">Add Child</div>
+      <div class="card">
+        <div class="rowBetween">
+          <div class="muted" style="font-weight:800;">Children</div>
+          <button id="adminChildrenBack" class="btnSoft">Back</button>
         </div>
-        <button id="btnMealsBackToMenu" class="miniBtn secondary">Back to Menu</button>
-      </div>
 
-      <label class="muted">Child</label>
-      <select id="mealsChildSelect"></select>
-    </div>
-  </div>
-
-  <div id="mealsCard" class="card today">
-    <h2>Meals</h2>
-
-    <div class="stack">
-      <div class="row">
-        <select id="mealType">
-          <option>Breakfast</option><option>Morning snack</option><option>Lunch</option>
-          <option>Afternoon snack</option><option>Dinner</option><option>Bottle</option>
-        </select>
-
-        <select id="mealPercent">
-          <option value="0">0%</option><option value="25">25%</option>
-          <option value="50">50%</option><option value="75">75%</option>
-          <option value="100">100%</option>
-        </select>
-      </div>
-
-      <input id="mealFood" placeholder="What he ate" />
-
-      <div class="actionRow">
-        <textarea id="mealNotes" placeholder="Meal notes"></textarea>
-        <button id="btnAddMeal">Save</button>
-      </div>
-
-      <ul id="mealList"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MOODS ================= -->
-<div id="moodsView" class="hidden">
-  <h1 class="page-title">Moods</h1>
-
-  <div id="moodsTopCard" class="card today">
-    <div class="stack">
-      <div class="dayBar">
-        <div class="dayBarLeft">
-          <button id="btnMoodsPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnMoodsNextDay" class="miniBtn secondary">▶</button>
-          <input id="moodsDatePick" type="date" class="datePick" />
-          <span id="moodsDateLabel" class="dateText"></span>
+        <label for="childName">Child name</label>
+        <div class="grid3">
+          <input id="childName" placeholder="e.g. Freddie" />
+          <div></div>
+          <button id="btnAddChild">Add</button>
         </div>
-        <button id="btnMoodsBackToMenu" class="miniBtn secondary">Back to Menu</button>
+
+        <div id="childAdminMsg" class="muted" style="margin-top:10px;font-weight:700;"></div>
       </div>
+    </section>
 
-      <label class="muted">Child</label>
-      <select id="moodsChildSelect"></select>
-    </div>
-  </div>
-
-  <div id="moodCard" class="card today">
-    <h2>Mood</h2>
-
-    <div class="stack">
-      <div class="row">
-        <select id="moodPeriod">
-          <option>Morning</option><option>Afternoon</option><option>Evening</option>
-        </select>
-
-        <select id="moodValue">
-          <option>Happy</option><option>Calm</option><option>Fussy</option>
-          <option>Settled</option><option>Unwell</option>
-        </select>
-      </div>
-
-      <div class="actionRow">
-        <textarea id="moodNotes" placeholder="Mood notes"></textarea>
-        <button id="btnAddMood">Save</button>
-      </div>
-
-      <ul id="moodList"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MEDICATION ================= -->
-<div id="medicationView" class="hidden">
-  <h1 class="page-title">Medication</h1>
-
-  <div id="medTopCard" class="card today">
-    <div class="stack">
-      <div class="dayBar">
-        <div class="dayBarLeft">
-          <button id="btnMedPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnMedNextDay" class="miniBtn secondary">▶</button>
-          <input id="medDatePick" type="date" class="datePick" />
-          <span id="medDateLabel" class="dateText"></span>
+    <!-- ADMIN: MEDS -->
+    <section id="adminMedsView" class="hidden">
+      <div class="topTitle">New Medication</div>
+      <div class="card">
+        <div class="rowBetween">
+          <div class="muted" style="font-weight:800;">Medication list</div>
+          <button id="adminMedsBack" class="btnSoft">Back</button>
         </div>
-        <button id="btnMedBackToMenu" class="miniBtn secondary">Back to Menu</button>
-      </div>
 
-      <label class="muted">Child</label>
-      <select id="medChildSelect"></select>
-    </div>
-  </div>
-
-  <div id="medCard" class="card today">
-    <h2>Medication</h2>
-
-    <div class="stack">
-      <div class="row3">
-        <select id="medSelect"></select>
-        <input id="medDose" placeholder="Dose" />
-        <input id="medTime" type="time" />
-      </div>
-
-      <div class="actionRow">
-        <textarea id="medNotes" placeholder="Medication notes"></textarea>
-        <button id="btnAddDose">Save</button>
-      </div>
-
-      <ul id="medList"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- ================= ACCIDENT & ILLNESS ================= -->
-<div id="aiView" class="hidden">
-  <h1 class="page-title">Accidents &amp; Illnesses</h1>
-
-  <div id="aiTopCard" class="card today">
-    <div class="stack">
-      <div class="dayBar">
-        <div class="dayBarLeft">
-          <button id="btnAIPrevDay" class="miniBtn secondary">◀</button>
-          <button id="btnAINextDay" class="miniBtn secondary">▶</button>
-          <input id="aiDatePick" type="date" class="datePick" />
-          <span id="aiDateLabel" class="dateText"></span>
+        <div class="grid2">
+          <div>
+            <label for="newMedNameMenu">Name</label>
+            <input id="newMedNameMenu" placeholder="e.g. Calpol" />
+          </div>
+          <div>
+            <label for="newMedUnitMenu">Unit</label>
+            <input id="newMedUnitMenu" placeholder="ml / mg" />
+          </div>
         </div>
-        <button id="btnAIBackToMenu" class="miniBtn secondary">Back to Menu</button>
+
+        <div style="height:10px"></div>
+        <button id="btnAddMedAdmin" class="btnFull">Save</button>
+
+        <div id="medAdminMsg" class="muted" style="margin-top:10px;font-weight:700;"></div>
+      </div>
+    </section>
+
+    <!-- SLEEP -->
+    <section id="sleepView" class="hidden">
+      <div class="topTitle">Sleep Tracker</div>
+
+      <div id="sleepTopCard" class="card">
+        <div class="rowBetween">
+          <div class="dateBar">
+            <button id="sleepPrev" class="btnSoft">◀</button>
+            <button id="sleepToday" class="btnSoft">✕</button>
+            <button id="sleepNext" class="btnSoft">▶</button>
+            <div id="sleepDateLabel" class="datePill"></div>
+            <input id="sleepDatePicker" type="date" style="max-width:180px;" />
+          </div>
+          <button id="sleepBack" class="btnSoft">Back to Menu</button>
+        </div>
+
+        <label>Child</label>
+        <select id="sleepChildSelect"></select>
       </div>
 
-      <label class="muted">Child</label>
-      <select id="aiChildSelect"></select>
+      <div id="sleepCard" class="card">
+        <div class="row">
+          <button id="btnSleepStart" class="btnFull">Start (today only)</button>
+          <button id="btnSleepEnd" class="btnFull">End (today only)</button>
+        </div>
 
-      <div class="pillRow">
-        <button id="tabAccident" class="pill active">Accident</button>
-        <button id="tabIllness" class="pill">Illness</button>
+        <label>Manual sleep entry</label>
+        <div class="grid3">
+          <input id="sleepStartManual" type="datetime-local" />
+          <input id="sleepEndManual" type="datetime-local" />
+          <button id="btnSleepManual">Add</button>
+        </div>
+
+        <label>Sleep notes</label>
+        <textarea id="sleepNote" placeholder="Notes (optional)"></textarea>
+
+        <div style="height:10px"></div>
+        <div style="font-weight:900;">Total sleep: <span id="sleepTotal">0.00h</span></div>
+        <ul id="sleepList"></ul>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Accident -->
-  <div id="accidentTab" class="card today">
-    <h2>Accident</h2>
+    <!-- MEALS -->
+    <section id="mealsView" class="hidden">
+      <div class="topTitle">Meal Tracker</div>
 
-    <div class="stack">
-      <textarea id="accWhat" placeholder="What happened"></textarea>
+      <div id="mealsTopCard" class="card">
+        <div class="rowBetween">
+          <div class="dateBar">
+            <button id="mealsPrev" class="btnSoft">◀</button>
+            <button id="mealsToday" class="btnSoft">✕</button>
+            <button id="mealsNext" class="btnSoft">▶</button>
+            <div id="mealsDateLabel" class="datePill"></div>
+            <input id="mealsDatePicker" type="date" style="max-width:180px;" />
+          </div>
+          <button id="mealsBack" class="btnSoft">Back to Menu</button>
+        </div>
 
-      <div class="row">
-        <select id="accSeverity">
-          <option>Minor</option><option>Moderate</option><option>Serious</option>
+        <label>Child</label>
+        <select id="mealsChildSelect"></select>
+      </div>
+
+      <div id="mealsCard" class="card">
+        <div class="grid2">
+          <div>
+            <label>Meal type</label>
+            <select id="mealType">
+              <option>Breakfast</option>
+              <option>Morning snack</option>
+              <option>Lunch</option>
+              <option>Afternoon snack</option>
+              <option>Dinner</option>
+              <option>Bottle</option>
+            </select>
+          </div>
+          <div>
+            <label>Percent eaten</label>
+            <select id="mealPercent">
+              <option value="0">0%</option>
+              <option value="25">25%</option>
+              <option value="50">50%</option>
+              <option value="75">75%</option>
+              <option value="100">100%</option>
+            </select>
+          </div>
+        </div>
+
+        <label>What he ate</label>
+        <input id="mealFood" placeholder="e.g. porridge" />
+
+        <label>Notes</label>
+        <div class="notesRow">
+          <textarea id="mealNotes" placeholder="Meal notes"></textarea>
+          <button id="btnAddMeal">Add</button>
+        </div>
+
+        <ul id="mealList"></ul>
+      </div>
+    </section>
+
+    <!-- MOODS -->
+    <section id="moodsView" class="hidden">
+      <div class="topTitle">Mood Tracker</div>
+
+      <div id="moodsTopCard" class="card">
+        <div class="rowBetween">
+          <div class="dateBar">
+            <button id="moodsPrev" class="btnSoft">◀</button>
+            <button id="moodsToday" class="btnSoft">✕</button>
+            <button id="moodsNext" class="btnSoft">▶</button>
+            <div id="moodsDateLabel" class="datePill"></div>
+            <input id="moodsDatePicker" type="date" style="max-width:180px;" />
+          </div>
+          <button id="moodsBack" class="btnSoft">Back to Menu</button>
+        </div>
+
+        <label>Child</label>
+        <select id="moodsChildSelect"></select>
+      </div>
+
+      <div id="moodsCard" class="card">
+        <div class="grid2">
+          <div>
+            <label>Period</label>
+            <select id="moodPeriod">
+              <option>Morning</option>
+              <option>Afternoon</option>
+              <option>Evening</option>
+            </select>
+          </div>
+          <div>
+            <label>Mood</label>
+            <select id="moodValue">
+              <option>Calm</option><option>Content</option><option>Energetic</option><option>Fussy</option>
+              <option>Happy</option><option>Irritable</option><option>Playful</option><option>Settled</option>
+              <option>Sick</option><option>Unwell</option><option>Overtired</option><option>Hungry</option>
+              <option>In Pain</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Notes</label>
+        <div class="notesRow">
+          <textarea id="moodNotes" placeholder="Mood notes"></textarea>
+          <button id="btnAddMood">Save</button>
+        </div>
+
+        <ul id="moodList"></ul>
+      </div>
+    </section>
+
+    <!-- MEDICATION -->
+    <section id="medsView" class="hidden">
+      <div class="topTitle">Medication Tracker</div>
+
+      <div id="medsTopCard" class="card">
+        <div class="rowBetween">
+          <div class="dateBar">
+            <button id="medPrev" class="btnSoft">◀</button>
+            <button id="medToday" class="btnSoft">✕</button>
+            <button id="medNext" class="btnSoft">▶</button>
+            <div id="medDateLabel" class="datePill"></div>
+            <input id="medDatePicker" type="date" style="max-width:180px;" />
+          </div>
+          <button id="medBack" class="btnSoft">Back to Menu</button>
+        </div>
+
+        <label>Child</label>
+        <select id="medChildSelect"></select>
+      </div>
+
+      <div id="medCard" class="card">
+        <div class="grid3">
+          <select id="medSelect"></select>
+          <input id="medDose" placeholder="Dose (e.g. 5ml)" />
+          <input id="medTime" type="time" />
+        </div>
+
+        <label>Notes</label>
+        <div class="notesRow">
+          <textarea id="medNotes" placeholder="Medication notes"></textarea>
+          <button id="btnAddDose">Add</button>
+        </div>
+
+        <ul id="medList"></ul>
+      </div>
+    </section>
+
+    <!-- ACCIDENT & ILLNESS -->
+    <section id="aiView" class="hidden">
+      <div class="topTitle">Accident & Illness</div>
+
+      <div id="aiTopCard" class="card">
+        <div class="rowBetween">
+          <div class="dateBar">
+            <button id="aiPrev" class="btnSoft">◀</button>
+            <button id="aiToday" class="btnSoft">✕</button>
+            <button id="aiNext" class="btnSoft">▶</button>
+            <div id="aiDateLabel" class="datePill"></div>
+            <input id="aiDatePicker" type="date" style="max-width:180px;" />
+          </div>
+          <button id="aiBack" class="btnSoft">Back to Menu</button>
+        </div>
+
+        <label>Child</label>
+        <select id="aiChildSelect"></select>
+
+        <div class="tabRow">
+          <button id="tabAccident" class="tabBtn active">Accident</button>
+          <button id="tabIllness" class="tabBtn">Illness</button>
+        </div>
+      </div>
+
+      <div id="accidentTab" class="card">
+        <label>What happened</label>
+        <textarea id="accWhat" placeholder="Describe what happened..."></textarea>
+
+        <div class="grid2">
+          <div>
+            <label>Injury severity</label>
+            <select id="accSeverity">
+              <option>Minor</option><option>Moderate</option><option>Serious</option>
+            </select>
+          </div>
+          <div>
+            <label>Body area affected</label>
+            <select id="accBodyArea">
+              <option>Head</option><option>Arm</option><option>Leg</option><option>Torso</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="accBodyOtherWrap" class="hidden">
+          <label>Body area (Other)</label>
+          <input id="accBodyOther" placeholder="Describe body area..." />
+        </div>
+
+        <label>Where did it happen</label>
+        <input id="accWhere" placeholder="e.g. living room / nursery garden" />
+
+        <div class="grid2">
+          <div>
+            <label>Reported by</label>
+            <select id="accReportedBy">
+              <option>Mum</option><option>HLM</option><option>Nursery</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Time of incident</label>
+            <input id="accTime" type="time" />
+          </div>
+        </div>
+
+        <div id="accReportedOtherWrap" class="hidden">
+          <label>Reported by (Other)</label>
+          <input id="accReportedOther" placeholder="Who reported it?" />
+        </div>
+
+        <label>Action taken</label>
+        <textarea id="accAction" placeholder="What action was taken?"></textarea>
+
+        <label>Safeguarding put in place</label>
+        <textarea id="accSafeguarding" placeholder="What safeguarding was put in place?"></textarea>
+
+        <label>Notes</label>
+        <div class="notesRow">
+          <textarea id="accNotes" placeholder="Notes"></textarea>
+          <button id="btnAddAccident">Add</button>
+        </div>
+
+        <ul id="accidentList"></ul>
+      </div>
+
+      <div id="illnessTab" class="card hidden">
+        <label>Symptom</label>
+        <select id="illSymptom">
+          <option>Temperature</option><option>Vomiting</option><option>Diarrhoea</option><option>Rash</option>
+          <option>Lethargic</option><option>Poor Appetite</option><option>Not Drinking</option>
+          <option>Breathing difficulties</option>
+          <option>Teething</option><option>Runny Nose</option><option>Cough</option>
+          <option>Other</option>
         </select>
 
-        <select id="accBodyArea">
-          <option>Head</option><option>Arm</option><option>Leg</option>
-          <option>Torso</option><option>Other</option>
+        <div id="illOtherWrap" class="hidden">
+          <label>Symptom (Other)</label>
+          <input id="illOther" placeholder="Describe symptom..." />
+        </div>
+
+        <div id="illFlag" class="hidden" style="margin-top:10px;font-weight:900;color:#9b1c31;">
+          ⚠ Breathing difficulties — consider urgent medical advice.
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Temperature (°C)</label>
+            <input id="illTemp" placeholder="e.g. 38.2 (optional)" />
+          </div>
+          <div>
+            <label>Time of event</label>
+            <input id="illTime" type="time" />
+          </div>
+        </div>
+
+        <label>Medication (optional link)</label>
+        <select id="illMedication"></select>
+
+        <label>Reported by</label>
+        <select id="illReportedBy">
+          <option>Mum</option><option>HLM</option><option>Nursery</option><option>Other</option>
         </select>
+
+        <div id="illReportedOtherWrap" class="hidden">
+          <label>Reported by (Other)</label>
+          <input id="illReportedOther" placeholder="Who reported it?" />
+        </div>
+
+        <label>Notes</label>
+        <div class="notesRow">
+          <textarea id="illNotes" placeholder="Notes"></textarea>
+          <button id="btnAddIllness">Add</button>
+        </div>
+
+        <ul id="illnessList"></ul>
       </div>
+    </section>
 
-      <input id="accBodyOther" class="hidden" placeholder="Other body area" />
-      <input id="accWhere" placeholder="Where did it happen" />
-
-      <select id="accReportedBy">
-        <option>Mum</option><option>HLM</option><option>Nursery</option><option>Other</option>
-      </select>
-      <input id="accReportedOther" class="hidden" placeholder="Reported by (other)" />
-
-      <input id="accTime" type="time" />
-
-      <textarea id="accAction" placeholder="Action taken"></textarea>
-      <textarea id="accSafeguarding" placeholder="Safeguarding"></textarea>
-
-      <div class="actionRow">
-        <textarea id="accNotes" placeholder="Notes"></textarea>
-        <button id="btnAddAccident">Save</button>
+    <!-- EXPORT -->
+    <section id="exportView" class="hidden">
+      <div class="topTitle">Export</div>
+      <div class="card">
+        <div class="rowBetween">
+          <div class="muted" style="font-weight:800;">(Coming next)</div>
+          <button id="exportBack" class="btnSoft">Back to Menu</button>
+        </div>
+        <p class="muted">We’ll add export as CSV/PDF next.</p>
       </div>
+    </section>
 
-      <ul id="accidentList"></ul>
-    </div>
   </div>
 
-  <!-- Illness -->
-  <div id="illnessTab" class="card today hidden">
-    <h2>Illness</h2>
-
-    <div class="stack">
-      <select id="illSymptom">
-        <option>Temperature</option><option>Vomiting</option><option>Diarrhoea</option>
-        <option>Rash</option><option>Lethargic</option><option>Breathing difficulties</option>
-        <option>Other</option>
-      </select>
-
-      <input id="illSymptomOther" class="hidden" placeholder="Other symptom" />
-
-      <div class="row">
-        <input id="illTemp" placeholder="Temperature °C" />
-        <input id="illTime" type="time" />
-      </div>
-
-      <select id="illMedication"></select>
-
-      <select id="illReportedBy">
-        <option>Mum</option><option>HLM</option><option>Nursery</option><option>Other</option>
-      </select>
-      <input id="illReportedOther" class="hidden" placeholder="Reported by (other)" />
-
-      <div class="actionRow">
-        <textarea id="illNotes" placeholder="Notes"></textarea>
-        <button id="btnAddIllness">Save</button>
-      </div>
-
-      <ul id="illnessList"></ul>
-
-      <p class="danger hidden" id="illFlag">
-        Breathing difficulties flagged — if severe or worsening consider urgent medical advice.
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- ================= EXPORT ================= -->
-<div id="exportView" class="card hidden">
-  <h1 class="page-title">Export</h1>
-
-  <div class="stack">
-    <p class="muted">Export tools will be added next.</p>
-    <button id="btnExportBackToMenu" class="secondary">Back to Menu</button>
-  </div>
-</div>
-
-<script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
