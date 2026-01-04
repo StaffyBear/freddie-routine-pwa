@@ -8,376 +8,402 @@
 
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-
-  <style>
-    :root{
-      --bg1:#EAF7F2;
-      --bg2:#D9F0E8;
-      --card:rgba(243,251,247,.92);
-      --primary:#0B6B4F;
-      --mint:#BFECE0;
-      --text:#0E2A22;
-      --muted:#3b5a52;
-      --border:#cfe7de;
-      --radius:16px;
-      --pad:16px;
-      --gap:12px;
-      --controlH:46px;
-    }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background: repeating-linear-gradient(
-        to bottom,
-        var(--bg1), var(--bg1) 40px,
-        var(--bg2), var(--bg2) 80px
-      );
-      min-height:100vh;
-    }
-    .hidden{ display:none !important; }
-
-    #offlineBanner{
-      display:none;
-      position:sticky;
-      top:0;
-      z-index:50;
-      padding:10px 14px;
-      background:#fff3cd;
-      color:#664d03;
-      border-bottom:1px solid #ffe69c;
-      font-weight:600;
-    }
-
-    .container{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 14px 40px;
-    }
-
-    .pageTitle{
-      text-align:center;
-      font-size: 28px;
-      font-weight: 800;
-      margin: 8px 0 16px;
-    }
-
-    .card{
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      padding: var(--pad);
-      box-shadow: 0 10px 28px rgba(0,0,0,.06);
-      margin-bottom: 16px;
-    }
-
-    .row{
-      display:flex;
-      gap:var(--gap);
-      align-items:stretch;
-      flex-wrap:wrap;
-    }
-    .row.nowrap{ flex-wrap:nowrap; }
-    .col{ flex:1; min-width: 210px; }
-
-    label{
-      display:block;
-      font-size: 13px;
-      color:var(--muted);
-      margin: 6px 0 6px;
-      font-weight:650;
-    }
-
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      background:#fff;
-      color:var(--text);
-      outline:none;
-      height: var(--controlH);
-      font-size: 14px;
-    }
-
-    textarea{
-      height:auto;
-      min-height: var(--controlH);
-      resize: vertical;
-      padding-top: 10px;
-      line-height:1.3;
-    }
-
-    .btn{
-      height: var(--controlH);
-      border:none;
-      border-radius: 10px;
-      padding: 0 14px;
-      background: var(--primary);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .btn:hover{ background:#085a42; }
-    .btn.secondary{
-      background: var(--mint);
-      color: var(--primary);
-      font-weight:900;
-    }
-    .btn.secondary:hover{ filter: brightness(.95); }
-    .btn.danger{ background:#a73737; }
-    .btn.danger:hover{ background:#8f2f2f; }
-
-    .helpText{ font-size: 13px; color: var(--muted); margin-top: 10px; }
-
-    .logoWrap{ display:flex; justify-content:center; margin: 10px 0 14px; }
-    .logoWrap img{ width: 110px; height: 110px; object-fit:contain; border-radius: 18px; }
-
-    .menuGrid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .tile{
-      background: rgba(243,251,247,.95);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      min-height: 120px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-weight: 900;
-      font-size: 18px;
-      color: var(--primary);
-      cursor:pointer;
-      user-select:none;
-      box-shadow: 0 10px 24px rgba(0,0,0,.05);
-    }
-    .tile:hover{ background: rgba(191,236,224,.55); }
-
-    .footerSingle{ margin-top: 14px; display:flex; justify-content:center; }
-
-    @media (max-width: 520px){
-      .pageTitle{ font-size:24px; }
-      .tile{ min-height: 104px; font-size:16px; }
-      :root{ --controlH:48px; }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-  <div id="offlineBanner"></div>
+  <div id="offlineBanner" class="card hidden" style="margin-bottom:12px; background:#fff3cd; border-color:#ffe69c;">
+    Offline mode: entries will save locally and sync when you’re back online.
+  </div>
 
-  <div class="container">
+  <!-- AUTH -->
+  <section id="authView" class="card">
+    <h1 class="page-title">Login</h1>
 
-    <!-- LOGIN -->
-    <section id="authView" class="card">
-      <div class="pageTitle">Login</div>
+    <div class="logoBox">
+      <img src="./icons/icon-192.png" alt="Routine Tracker Logo" style="width:110px;height:110px;border-radius:16px;" />
+    </div>
 
-      <div class="logoWrap">
-        <img src="./icons/icon-192.png" alt="Routine Tracker Logo">
+    <div class="stack">
+      <div>
+        <label>Email</label>
+        <input id="email" type="email" autocomplete="email" placeholder="Email" />
       </div>
 
-      <label for="email">Email</label>
-      <input id="email" type="email" placeholder="Email" autocomplete="email" />
-
-      <label for="password">Password</label>
-      <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-
-      <label for="inviteCode">Invite code (required to register)</label>
-      <input id="inviteCode" type="text" placeholder="Invite Code" />
-
-      <div class="row nowrap" style="margin-top:12px;">
-        <!-- THESE IDs MUST MATCH app.js -->
-        <button id="btnLogin" class="btn col">Login</button>
-        <button id="btnRegister" class="btn secondary col">Register</button>
-        <button id="btnForgotPassword" class="btn secondary col">Forgotten Password</button>
+      <div>
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password" />
       </div>
 
-      <div id="authMsg" class="helpText"></div>
-    </section>
-
-    <!-- RESET PASSWORD VIEW -->
-    <section id="resetView" class="card hidden">
-      <div class="pageTitle">Reset Password</div>
-
-      <label for="newPassword">New password</label>
-      <input id="newPassword" type="password" placeholder="New password" />
-
-      <label for="newPassword2">Confirm new password</label>
-      <input id="newPassword2" type="password" placeholder="Confirm new password" />
-
-      <div class="row nowrap" style="margin-top:12px;">
-        <button id="btnSetNewPassword" class="btn col">Set Password</button>
-        <button id="btnBackToLogin" class="btn secondary col">Back</button>
+      <div>
+        <label>Invite code (required to register)</label>
+        <input id="inviteCode" type="text" placeholder="Invite Code" />
       </div>
 
-      <div id="resetMsg" class="helpText"></div>
-    </section>
-
-    <!-- MAIN MENU -->
-    <section id="menuView" class="card hidden">
-      <div class="pageTitle">Main Menu</div>
-
-      <div class="menuGrid">
-        <div class="tile" id="btnGoTracker">Routine Tracker</div>
-        <div class="tile" id="btnGoAccident">Accident &amp; Illness</div>
-        <div class="tile" id="btnGoAddMedication">New Medication</div>
-        <div class="tile" id="btnGoHistoricTracker">Historic Routine Tracker</div>
-        <div class="tile" id="btnGoHistoricAccident">Historic Accident &amp; Illness</div>
-        <div class="tile" id="btnInstallApp">Install App</div>
+      <div class="authRow">
+        <button id="btnLogin">Login</button>
+        <button id="btnRegister" class="secondary">Register</button>
+        <button id="btnForgot" class="secondary">Forgotten Password</button>
       </div>
 
-      <div id="installMsg" class="helpText"></div>
+      <div id="authMsg" class="muted"></div>
+    </div>
+  </section>
 
-      <div class="footerSingle">
-        <button id="btnLogout" class="btn danger" style="min-width:220px;">Log Out</button>
-      </div>
-    </section>
+  <!-- RESET PASSWORD (email recovery link lands here) -->
+  <section id="resetView" class="card hidden">
+    <h1 class="page-title">Reset Password</h1>
 
-    <!-- ROUTINE TRACKER VIEW (skeleton with IDs app.js expects) -->
-    <section id="trackerView" class="card hidden">
-      <div class="pageTitle">Routine Tracker</div>
-
-      <div class="row nowrap">
-        <button id="btnTrackerPrevDay" class="btn secondary" style="min-width:52px;">◀</button>
-        <button id="btnTrackerNextDay" class="btn secondary" style="min-width:52px;">▶</button>
-        <div class="col" style="display:flex;align-items:center;font-weight:800;" id="trackerDateLabel"></div>
-        <button id="btnBackToMenu" class="btn secondary">Back to Menu</button>
+    <div class="stack">
+      <div>
+        <label>New password</label>
+        <input id="newPassword" type="password" placeholder="New password" />
       </div>
 
-      <label>Child</label>
-      <select id="childSelect"></select>
+      <div>
+        <label>Confirm new password</label>
+        <input id="newPassword2" type="password" placeholder="Confirm new password" />
+      </div>
 
-      <div class="row nowrap">
+      <button id="btnSetNewPassword">Set Password</button>
+      <div id="resetMsg" class="muted"></div>
+    </div>
+  </section>
+
+  <!-- MAIN MENU -->
+  <section id="menuView" class="card hidden">
+    <h1 class="page-title">Main Menu</h1>
+
+    <div class="menuGrid">
+      <button id="goSleep" class="menuTile">Sleep</button>
+      <button id="goMeals" class="menuTile">Meals</button>
+      <button id="goMoods" class="menuTile">Moods</button>
+      <button id="goMedication" class="menuTile">Medication</button>
+      <button id="goAI" class="menuTile">Accidents &amp; Illnesses</button>
+      <button id="goExport" class="menuTile">Export</button>
+      <button id="goAdmin" class="menuTile secondary">Admin</button>
+      <button id="btnLogout" class="menuTile" style="background:var(--danger);">Log Out</button>
+    </div>
+  </section>
+
+  <!-- EXPORT -->
+  <section id="exportView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <h1 class="page-title" style="margin:0;">Export</h1>
+      </div>
+      <button id="exportBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
+
+    <div class="stack">
+      <div class="muted">Export features will appear here.</div>
+      <div id="exportMsg" class="muted"></div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="adminView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <h1 class="page-title" style="margin:0;">Admin</h1>
+      </div>
+      <button id="adminBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
+
+    <div class="menuGrid">
+      <button id="goAdminChildren" class="menuTile">Children</button>
+      <button id="goAdminMeds" class="menuTile">New Medication</button>
+    </div>
+  </section>
+
+  <!-- ADMIN: CHILDREN -->
+  <section id="adminChildrenView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <h1 class="page-title" style="margin:0;">Children</h1>
+      </div>
+      <button id="adminChildrenBack" class="secondary miniBtn">Back</button>
+    </div>
+
+    <div class="stack">
+      <div class="row">
         <input id="childName" placeholder="Add new child (e.g. Freddie)" />
-        <button id="btnAddChild" class="btn col">Add Child</button>
+        <button id="btnAddChild">Add Child</button>
+      </div>
+      <div id="childAdminMsg" class="muted"></div>
+    </div>
+  </section>
+
+  <!-- ADMIN: MEDS -->
+  <section id="adminMedsView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <h1 class="page-title" style="margin:0;">New Medication</h1>
+      </div>
+      <button id="adminMedsBack" class="secondary miniBtn">Back</button>
+    </div>
+
+    <div class="stack">
+      <div class="row">
+        <input id="newMedNameMenu" placeholder="Name (e.g. Calpol)" />
+        <input id="newMedUnitMenu" placeholder="Unit (ml/mg)" />
+      </div>
+      <button id="btnAddMedAdmin">Save Medication</button>
+      <div id="medAdminMsg" class="muted"></div>
+    </div>
+  </section>
+
+  <!-- SLEEP -->
+  <section id="sleepView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <button id="sleepPrev" class="secondary miniBtn">◀</button>
+        <button id="sleepToday" class="secondary miniBtn">Today</button>
+        <button id="sleepNext" class="secondary miniBtn">▶</button>
+        <div id="sleepDateLabel" class="dateText"></div>
+        <input id="sleepDatePicker" type="date" class="datePick" />
+      </div>
+      <button id="sleepBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
+
+    <div class="stack">
+      <div>
+        <label>Child</label>
+        <select id="sleepChildSelect"></select>
       </div>
 
-      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
-
-      <h3>Sleep</h3>
-      <div class="row nowrap">
-        <button id="btnSleepStart" class="btn col">Start Sleep (now)</button>
-        <button id="btnSleepEnd" class="btn col">End Sleep (now)</button>
+      <div class="row">
+        <button id="btnSleepStart">Start Sleep (now)</button>
+        <button id="btnSleepEnd">End Sleep (now)</button>
       </div>
 
-      <label>Manual sleep entry</label>
-      <div class="row nowrap">
+      <div>
+        <strong>Manual sleep entry</strong>
+      </div>
+
+      <div class="row3">
         <input id="sleepManualStart" type="datetime-local" />
         <input id="sleepManualEnd" type="datetime-local" />
-        <button id="btnAddSleepManual" class="btn col">Add</button>
+        <button id="btnSleepManual">Add Manual</button>
       </div>
 
-      <label>Sleep notes</label>
       <textarea id="sleepNotes" placeholder="Sleep notes (optional)"></textarea>
 
-      <div id="sleepTotal" class="helpText"></div>
+      <div><strong>Total sleep:</strong> <span id="sleepTotal">0.00h</span></div>
       <ul id="sleepList"></ul>
+    </div>
+  </section>
 
-      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+  <!-- MEALS -->
+  <section id="mealsView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <button id="mealsPrev" class="secondary miniBtn">◀</button>
+        <button id="mealsToday" class="secondary miniBtn">Today</button>
+        <button id="mealsNext" class="secondary miniBtn">▶</button>
+        <div id="mealsDateLabel" class="dateText"></div>
+        <input id="mealsDatePicker" type="date" class="datePick" />
+      </div>
+      <button id="mealsBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
 
-      <h3>Meals</h3>
+    <div class="stack">
+      <div>
+        <label>Child</label>
+        <select id="mealsChildSelect"></select>
+      </div>
+
       <div class="row">
-        <div class="col">
-          <select id="mealType"></select>
-        </div>
-        <div class="col">
-          <select id="mealPercent"></select>
-        </div>
+        <select id="mealType">
+          <option>Breakfast</option>
+          <option>Morning snack</option>
+          <option>Lunch</option>
+          <option>Afternoon snack</option>
+          <option>Dinner</option>
+          <option>Bottle</option>
+        </select>
+
+        <!-- IMPORTANT: numeric values so app.js doesn't show undefined% -->
+        <select id="mealPercent">
+          <option value="0">0%</option>
+          <option value="25">25%</option>
+          <option value="50">50%</option>
+          <option value="75">75%</option>
+          <option value="100">100%</option>
+        </select>
       </div>
 
       <input id="mealFood" placeholder="What he ate (e.g. porridge)" />
 
-      <div class="row nowrap">
-        <textarea id="mealNotes" class="col" placeholder="Meal notes"></textarea>
-        <button id="btnAddMeal" class="btn" style="min-width:160px;">Save</button>
+      <div class="actionRow">
+        <textarea id="mealNotes" placeholder="Meal notes"></textarea>
+        <button id="btnAddMeal">Save</button>
       </div>
+
       <ul id="mealList"></ul>
+    </div>
+  </section>
 
-      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+  <!-- MOODS -->
+  <section id="moodsView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <button id="moodsPrev" class="secondary miniBtn">◀</button>
+        <button id="moodsToday" class="secondary miniBtn">Today</button>
+        <button id="moodsNext" class="secondary miniBtn">▶</button>
+        <div id="moodsDateLabel" class="dateText"></div>
+        <input id="moodsDatePicker" type="date" class="datePick" />
+      </div>
+      <button id="moodsBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
 
-      <h3>Mood</h3>
+    <div class="stack">
+      <div>
+        <label>Child</label>
+        <select id="moodsChildSelect"></select>
+      </div>
+
       <div class="row">
-        <div class="col"><select id="moodPeriod"></select></div>
-        <div class="col"><select id="moodValue"></select></div>
+        <select id="moodPeriod">
+          <option>Morning</option>
+          <option>Afternoon</option>
+          <option>Evening</option>
+        </select>
+
+        <select id="moodValue">
+          <option>Calm</option>
+          <option>Content</option>
+          <option>Energetic</option>
+          <option>Fussy</option>
+          <option>Happy</option>
+          <option>Irritable</option>
+          <option>Playful</option>
+          <option>Settled</option>
+          <option>Sick</option>
+          <option>Unwell</option>
+        </select>
       </div>
 
-      <div class="row nowrap">
-        <textarea id="moodNotes" class="col" placeholder="Mood notes"></textarea>
-        <button id="btnAddMood" class="btn" style="min-width:160px;">Save</button>
+      <div class="actionRow">
+        <textarea id="moodNotes" placeholder="Mood notes"></textarea>
+        <button id="btnAddMood">Save</button>
       </div>
+
       <ul id="moodList"></ul>
+    </div>
+  </section>
 
-      <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;">
+  <!-- MEDS -->
+  <section id="medsView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <button id="medPrev" class="secondary miniBtn">◀</button>
+        <button id="medToday" class="secondary miniBtn">Today</button>
+        <button id="medNext" class="secondary miniBtn">▶</button>
+        <div id="medDateLabel" class="dateText"></div>
+        <input id="medDatePicker" type="date" class="datePick" />
+      </div>
+      <button id="medBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
 
-      <h3>Medication</h3>
-      <div class="row">
-        <div class="col"><select id="medSelect"></select></div>
-        <div class="col"><input id="medDose" placeholder="Dose (e.g. 5ml)"></div>
-        <div class="col"><input id="medTime" type="time"></div>
+    <div class="stack">
+      <div>
+        <label>Child</label>
+        <select id="medChildSelect"></select>
       </div>
 
-      <div class="row nowrap">
-        <textarea id="medNotes" class="col" placeholder="Medication notes"></textarea>
-        <button id="btnAddDose" class="btn" style="min-width:160px;">Save</button>
-      </div>
-      <ul id="medList"></ul>
-    </section>
-
-    <!-- ACCIDENT & ILLNESS VIEW -->
-    <section id="accidentView" class="card hidden">
-      <div class="pageTitle">Accident &amp; Illness</div>
-
-      <div class="row nowrap">
-        <button id="btnAIPrevDay" class="btn secondary" style="min-width:52px;">◀</button>
-        <button id="btnAINextDay" class="btn secondary" style="min-width:52px;">▶</button>
-        <div class="col" style="display:flex;align-items:center;font-weight:800;" id="aiDateLabel"></div>
-        <button id="btnAIBackToMenu" class="btn secondary">Back to Menu</button>
+      <div class="row3">
+        <select id="medName"></select>
+        <input id="medDose" placeholder="Dose (e.g. 5ml)" />
+        <input id="medTime" type="time" />
       </div>
 
-      <label>Child</label>
-      <select id="aiChildSelect"></select>
-
-      <div class="row nowrap" style="margin-top:10px;">
-        <button id="tabAccident" class="btn col">Accident</button>
-        <button id="tabIllness" class="btn secondary col">Illness</button>
+      <div class="actionRow">
+        <textarea id="medNotes" placeholder="Medication notes"></textarea>
+        <button id="btnAddDose">Save</button>
       </div>
 
-      <!-- Accident form -->
-      <div id="accidentForm" style="margin-top:14px;">
+      <ul id="doseList"></ul>
+    </div>
+  </section>
+
+  <!-- ACCIDENT & ILLNESS -->
+  <section id="aiView" class="card hidden">
+    <div class="dayBar">
+      <div class="dayBarLeft">
+        <button id="aiPrev" class="secondary miniBtn">◀</button>
+        <button id="aiToday" class="secondary miniBtn">Today</button>
+        <button id="aiNext" class="secondary miniBtn">▶</button>
+        <div id="aiDateLabel" class="dateText"></div>
+        <input id="aiDatePicker" type="date" class="datePick" />
+      </div>
+      <button id="aiBack" class="secondary miniBtn">Back to Menu</button>
+    </div>
+
+    <div class="stack">
+      <div>
+        <label>Child</label>
+        <select id="aiChildSelect"></select>
+      </div>
+
+      <div class="pillRow">
+        <button id="tabAccident" class="pill active">Accident</button>
+        <button id="tabIllness" class="pill">Illness</button>
+      </div>
+
+      <!-- ACCIDENT TAB -->
+      <div id="accidentTab" class="stack">
         <label>What happened</label>
         <textarea id="accWhat" placeholder="Describe what happened..."></textarea>
 
         <div class="row">
-          <div class="col">
+          <div>
             <label>Injury severity</label>
-            <select id="accSeverity"></select>
+            <select id="accSeverity">
+              <option>Minor</option>
+              <option>Moderate</option>
+              <option>Serious</option>
+            </select>
           </div>
-          <div class="col">
+
+          <div>
             <label>Body area affected</label>
-            <select id="accBodyArea"></select>
-            <input id="accBodyOther" class="hidden" placeholder="Other body area" />
+            <select id="accBodyArea">
+              <option>Head</option>
+              <option>Arm</option>
+              <option>Leg</option>
+              <option>Torso</option>
+              <option>Other</option>
+            </select>
           </div>
+        </div>
+
+        <div id="accBodyOtherWrap" class="hidden">
+          <input id="accBodyOther" placeholder="Body area (Other)" />
         </div>
 
         <label>Where did it happen</label>
         <input id="accWhere" placeholder="e.g. living room / nursery garden" />
 
         <div class="row">
-          <div class="col">
+          <div>
             <label>Reported by</label>
-            <select id="accReportedBy"></select>
-            <input id="accReportedOther" class="hidden" placeholder="Other reporter" />
+            <select id="accReportedBy">
+              <option>Mum</option>
+              <option>HLM</option>
+              <option>Nursery</option>
+              <option>Other</option>
+            </select>
           </div>
-          <div class="col" id="accTimeWrap">
+
+          <div>
             <label>Time of incident (today only)</label>
             <input id="accTime" type="time" />
           </div>
+        </div>
+
+        <div id="accReportedOtherWrap" class="hidden">
+          <input id="accReportedOther" placeholder="Reported by (Other)" />
         </div>
 
         <label>Action taken</label>
@@ -386,109 +412,81 @@
         <label>Safeguarding put in place</label>
         <textarea id="accSafeguarding" placeholder="What safeguarding was put in place?"></textarea>
 
-        <div class="row nowrap">
-          <textarea id="accNotes" class="col" placeholder="Notes"></textarea>
-          <button id="btnAddAccident" class="btn" style="min-width:160px;">Save</button>
+        <div class="actionRow">
+          <textarea id="accNotes" placeholder="Notes"></textarea>
+          <button id="btnAddAccident">Save</button>
         </div>
 
+        <h3>Accidents</h3>
         <ul id="accidentList"></ul>
       </div>
 
-      <!-- Illness form -->
-      <div id="illnessForm" style="margin-top:14px;" class="hidden">
+      <!-- ILLNESS TAB -->
+      <div id="illnessTab" class="stack hidden">
         <label>Symptom</label>
-        <select id="illSymptom"></select>
+        <select id="illSymptom">
+          <option>Temperature</option>
+          <option>Vomiting</option>
+          <option>Diarrhoea</option>
+          <option>Rash</option>
+          <option>Lethargic</option>
+          <option>Poor Appetite</option>
+          <option>Not Drinking</option>
+          <option>Breathing difficulties</option>
+          <option>Teething</option>
+          <option>Runny Nose</option>
+          <option>Cough</option>
+          <option>Other</option>
+        </select>
+
+        <div id="illOtherWrap" class="hidden">
+          <input id="illOther" placeholder="Symptom (Other)" />
+        </div>
 
         <div class="row">
-          <div class="col">
+          <div>
             <label>Temperature (°C)</label>
             <input id="illTemp" placeholder="e.g. 38.2 (optional)" />
           </div>
-          <div class="col" id="illTimeWrap">
+          <div>
             <label>Time of event (today only)</label>
             <input id="illTime" type="time" />
           </div>
         </div>
 
         <label>Medication (optional link)</label>
-        <select id="illMedication"></select>
+        <select id="illMedication">
+          <option value="">None</option>
+        </select>
 
         <label>Reported by</label>
-        <select id="illReportedBy"></select>
+        <select id="illReportedBy">
+          <option>Mum</option>
+          <option>HLM</option>
+          <option>Nursery</option>
+          <option>Other</option>
+        </select>
 
-        <div class="row nowrap">
-          <textarea id="illNotes" class="col" placeholder="Notes"></textarea>
-          <button id="btnAddIllness" class="btn" style="min-width:160px;">Save</button>
+        <div id="illReportedOtherWrap" class="hidden">
+          <input id="illReportedOther" placeholder="Reported by (Other)" />
         </div>
 
+        <div class="actionRow">
+          <textarea id="illNotes" placeholder="Notes"></textarea>
+          <button id="btnAddIllness">Save</button>
+        </div>
+
+        <div id="breathingFlag" class="danger muted hidden" style="font-weight:900;">
+          ⚠ Breathing difficulties selected — consider medical advice if needed.
+        </div>
+
+        <h3>Illnesses</h3>
         <ul id="illnessList"></ul>
       </div>
-    </section>
-
-    <!-- NEW MEDICATION PAGE -->
-    <section id="addMedicationView" class="card hidden">
-      <div class="pageTitle">New Medication</div>
-
-      <div class="row nowrap">
-        <div class="col">
-          <input id="medAdminName" placeholder="Name (e.g. Calpol)" />
-        </div>
-        <div class="col">
-          <input id="medAdminUnit" placeholder="Unit (ml/mg)" />
-        </div>
-        <button id="btnAddMedMenu" class="btn" style="min-width:180px;">Save</button>
-      </div>
-
-      <div class="row" style="margin-top:10px;">
-        <button id="btnAddMedBackToMenu" class="btn secondary">Back to Menu</button>
-      </div>
-
-      <div id="medAdminMsg" class="helpText"></div>
-    </section>
-
-    <!-- HISTORIC ROUTINE VIEW -->
-    <section id="historicRoutineView" class="card hidden">
-      <div class="pageTitle">Historic Routine Tracker</div>
-      <label>Select date</label>
-      <input id="historicRoutinePick" type="date" />
-      <div class="row nowrap" style="margin-top:12px;">
-        <button id="btnOpenHistoricRoutine" class="btn col">Open</button>
-        <button id="btnHistoricRoutineBackToMenu" class="btn secondary col">Back</button>
-      </div>
-    </section>
-
-    <!-- HISTORIC A&I VIEW -->
-    <section id="historicAIView" class="card hidden">
-      <div class="pageTitle">Historic Accident &amp; Illness</div>
-      <label>Select date</label>
-      <input id="historicAIPick" type="date" />
-      <div class="row nowrap" style="margin-top:12px;">
-        <button id="btnOpenHistoricAI" class="btn col">Open</button>
-        <button id="btnHistoricAIBackToMenu" class="btn secondary col">Back</button>
-      </div>
-    </section>
-
-    <!-- EXPORT VIEW (placeholder) -->
-    <section id="exportView" class="card hidden">
-      <div class="pageTitle">Export</div>
-      <div class="helpText">Export will be added next.</div>
-      <div class="row" style="margin-top:12px;">
-        <button id="btnExportBackToMenu" class="btn secondary">Back to Menu</button>
-      </div>
-    </section>
-
-  </div>
+    </div>
+  </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./app.js"></script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", async () => {
-        try { await navigator.serviceWorker.register("./sw.js"); }
-        catch(e){ console.warn("SW reg failed", e); }
-      });
-    }
-  </script>
 </body>
 </html>
