@@ -228,3 +228,35 @@ button.dangerBtn:hover,
     flex: 1 1 0 !important;
   }
 }
+
+/* ===== Fix: Login buttons spacing like other pages ===== */
+#authView .authRow{
+  margin-top: var(--space);
+  gap: var(--space);
+}
+#authView .authRow button{
+  height: var(--control-height);
+}
+
+
+@media (max-width: 700px){
+  #authView .authRow button + button{
+    margin-top: var(--space);
+  }
+}
+
+
+/* ===== Fix: A&I textarea spacing consistent ===== */
+#aiView textarea{
+  margin-top: 6px; /* small breathing room after label */
+}
+
+#aiView textarea + label,
+#aiView textarea + .actionRow,
+#aiView .row + label,
+#aiView .row3 + label,
+#aiView input + label,
+#aiView select + label{
+  margin-top: var(--space);
+}
+
