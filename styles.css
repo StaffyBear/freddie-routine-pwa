@@ -258,6 +258,26 @@ li { margin-bottom: 6px; line-height: 1.35; }
     text-align: center;
   }
 
+  /* ===== MOBILE TRACKER TOP BAR FIX ===== */
+@media (max-width: 600px) {
+
+  .dayBar {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* Allow Main Menu to wrap */
+  .dayBar button:last-child {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.1;
+    padding: 8px 10px;
+  }
+
+}
+
   /* Keep top bar on one line */
   .dayBar { flex-direction: row !important; }
 }
