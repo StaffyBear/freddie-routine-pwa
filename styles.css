@@ -338,3 +338,47 @@ li { margin-bottom: 6px; line-height: 1.35; }
     padding: 6px 8px !important;
   }
 }
+
+
+  /* ===== MOBILE: force Main Menu to wrap + equal spacing on the top bar ===== */
+@media (max-width: 700px) {
+
+  /* Spread the whole top bar evenly */
+  .dayBar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Keep left cluster tight */
+  .dayBarLeft {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* FORCE any "Main Menu" style button to wrap */
+  .dayBar > button.secondary,
+  .dayBar > button.secondary.miniBtn,
+  .dayBar > button.secondary.miniBtn#sleepBack {
+    width: 78px !important;          /* force wrap */
+    min-width: 78px !important;
+    max-width: 78px !important;
+
+    height: var(--control-height) !important;
+    padding: 6px 8px !important;
+
+    white-space: normal !important;  /* allow wrap */
+    word-break: break-word !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
