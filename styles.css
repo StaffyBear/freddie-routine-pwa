@@ -229,6 +229,43 @@ button.dangerBtn:hover,
   /* Bigger save buttons on mobile */
   .actionRow button {
     height: calc(var(--control-height) * 2) !important;
+
+
+/* --- Lists: bring bullets in (mobile + web) --- */
+ul{
+  list-style: disc;
+  list-style-position: inside; /* bullet stays inside the card */
+  padding-left: 0;
+  margin: 0;
+}
+
+li{
+  margin: 8px 0;
+  line-height: 1.35;
+}
+
+
+/* --- Day bar: evenly spread left group + right button --- */
+.dayBar{
+  justify-content: space-between;
+}
+
+.dayBarLeft{
+  gap: var(--space);
+}
+
+/* Make the right button sit at far right consistently */
+.dayBar > button{
+  margin-left: auto;
+}
+    
     min-height: calc(var(--control-height) * 2) !important;
+  }
+}
+
+@media (max-width: 700px){
+  #btnSleepManual{
+    height: calc(var(--control-height) * 2);
+    font-size: 16px;
   }
 }
