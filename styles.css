@@ -13,26 +13,33 @@
   --text: #111;
   --muted: #6b7280;
   --border: #dbe7e3;
-
   --danger: #9b1c1c;
 
   --radius: 14px;
   --control-height: 44px;
-
-  /* ONE spacing value everywhere */
   --space: 12px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
+html, body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
   background: var(--bg);
   color: var(--text);
   padding: var(--space);
   max-width: 900px;
   margin-inline: auto;
 }
+
+input, select, textarea, button,
+.menuTile, .pill {
+  font-family: inherit !important;
+}
+
+.hidden { display: none !important; }
 
 .page-title {
   text-align: center;
@@ -49,13 +56,10 @@ body {
   margin-bottom: calc(var(--space) * 1.25);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-
 .card.today { background: var(--today-bg); }
 
 /* Historic ALWAYS filled */
-.historicCard,
-.card.historic,
-.card.today.historicCard {
+.card.historic {
   background: var(--historic-bg) !important;
   border-color: #f0b9c0 !important;
 }
@@ -101,18 +105,23 @@ button.secondary {
 }
 button.secondary:hover { background: var(--secondary-hover); }
 
-button.danger {
-  background: var(--danger);
-  color: #fff;
-}
-button.danger:hover { filter: brightness(0.95); }
-
 button.miniBtn {
   width: auto;
   padding: 0 14px;
 }
 
-/* ✅ consistent vertical spacing */
+/* ✅ Logout red */
+#btnLogout,
+.menuTile.dangerBtn {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+#btnLogout:hover,
+.menuTile.dangerBtn:hover {
+  filter: brightness(0.95);
+}
+
+/* Spacing */
 .stack > * + * { margin-top: var(--space); }
 
 /* Rows */
@@ -122,7 +131,6 @@ button.miniBtn {
   gap: var(--space);
   align-items: center;
 }
-
 .row3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -130,69 +138,78 @@ button.miniBtn {
   align-items: center;
 }
 
-/* Notes + button (desktop: side by side) */
+/* Notes + button */
 .actionRow {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr 160px;
   gap: var(--space);
   align-items: stretch;
-  min-height: calc(var(--control-height) * 2.4);
 }
-
 .actionRow textarea,
 .actionRow button { height: 100%; }
 
-.actionRow button { min-width: 150px; }
-
-/* Tracker top bar — ALWAYS one line, even on mobile */
-.dayBar {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--space);
+/* Day bar */
+.dayBar{
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
 }
-
-.dayBarLeft {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  gap: var(--space);
+.dayBarLeft{
+  display: flex;
   align-items: center;
+  gap: var(--space);
+  flex: 1;
   min-width: 0;
 }
-
-/* Date picker */
 .datePick {
   height: var(--control-height);
-  width: 100%;
-  min-width: 0;
+  width: auto;
+  min-width: 150px;
 }
 
-/* keep date on one line if you display it anywhere */
-.dateText {
+/* Login logo (small, centred) */
+.logoBox {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+.logoBox img {
+  width: 110px !important;
+  height: 110px !important;
+  object-fit: contain !important;
+  border-radius: 14px !important;
+}
+
+/* Main menu tiles */
+.menuGrid{
+  display:grid;
+  grid-template-columns: repeat(2, 140px);
+  gap: 14px;
+  justify-content: center;
+  margin-top: var(--space);
+}
+.menuTile{
+  width: 140px;
+  height: 140px;
+  border-radius: 18px;
   font-weight: 900;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 18px;
+  line-height: 1.1;
+  padding: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
-.historicDate { color: var(--danger); font-weight: 900; }
-
-.muted { color: var(--muted); font-size: 0.9rem; }
-
-/* Lists: fix bullets too far left */
-ul {
-  padding-left: 26px;      /* more comfortable indent */
-  margin-top: 8px;
-}
-li { margin-bottom: 6px; }
 
 /* Pills */
-.pillRow {
-  display: flex;
+.pillRow{
+  display:flex;
   gap: var(--space);
   flex-wrap: nowrap;
 }
-
-.pill {
+.pill{
   height: var(--control-height);
   padding: 0 14px;
   border-radius: 999px;
@@ -201,123 +218,46 @@ li { margin-bottom: 6px; }
   color: var(--primary);
   font-weight: 900;
   cursor: pointer;
+  flex: 1 1 0;
 }
-.pill.active {
+.pill.active{
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
 }
 
+/* Lists (bullets not hanging off left) */
+ul { padding-left: 26px; margin-top: 8px; }
+li { margin-bottom: 6px; line-height: 1.35; }
+
 /* Auth row */
-.authRow {
-  display: grid;
+.authRow{
+  display:grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space);
-  margin-top: var(--space);
 }
 
-/* Logo */
-.logoBox {
-  display: grid;
-  place-items: center;
-  padding: 8px;
-}
-.logoBox img {
-  width: 110px;
-  height: 110px;
-  object-fit: contain;
-  border-radius: 14px;
-}
-
-/* MAIN MENU: centred square tiles */
-.menuGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 140px);
-  gap: 14px;
-  justify-content: center;
-  margin-top: var(--space);
-}
-
-.menuTile {
-  width: 140px;
-  height: 140px;
-  border-radius: 18px;
-  font-weight: 900;
-  font-size: 18px;
-  line-height: 1.1;
-  padding: 10px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-/* Hidden */
-.hidden { display: none; }
-
-/* Mobile tweaks */
+/* Mobile */
 @media (max-width: 700px) {
-  .row, .row3 { grid-template-columns: 1fr; }
+  .row3 { grid-template-columns: 1fr; }
+  .authRow { grid-template-columns: 1fr; }
 
-  /* Notes+button: stack on mobile BUT keep height nice */
-  .actionRow { grid-template-columns: 1fr; min-height: auto; }
+  /* Keep Sleep start/end + manual start/end side-by-side */
+  #sleepView .row { grid-template-columns: 1fr 1fr !important; }
+
+  /* Notes+button stack */
+  .actionRow { grid-template-columns: 1fr; }
   .actionRow textarea { min-height: 120px; }
   .actionRow button { height: calc(var(--control-height) * 1.6); }
 
-  /* Keep tracker top bar on one row, but tighten */
-  .dayBarLeft { grid-template-columns: auto auto 1fr; }
-  .datePick { min-width: 0; }
-
-  /* Menu tiles still centred, just slightly smaller */
-  .menuGrid { grid-template-columns: repeat(2, 140px); gap: 12px; }
-  .menuTile { width: 140px; height: 140px; font-size: 17px; }
-
-  /* Auth buttons stack on mobile */
-  .authRow { grid-template-columns: 1fr; }
-}
-
-/* Very small phones */
-@media (max-width: 420px) {
-  .menuGrid { grid-template-columns: repeat(2, 130px); }
-  .menuTile { width: 130px; height: 130px; font-size: 16px; }
-}
-
-
-/* ===== FIX: Logout tile red ===== */
-#btnLogout,
-#tileLogout,
-.menuTile.logout {
-  background: var(--danger) !important;
-  color: #fff !important;
-}
-#btnLogout:hover,
-#tileLogout:hover,
-.menuTile.logout:hover {
-  filter: brightness(0.95);
-}
-
-/* ===== FIX: Consistent font everywhere ===== */
-html, body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-}
-
-input, select, textarea, button,
-.menuTile, .pill {
-  font-family: inherit !important;
-}
-
-/* ===== FIX: allow some rows to stay 2-across on mobile ===== */
-@media (max-width: 700px) {
-  .row.keep2 {
-    grid-template-columns: 1fr 1fr !important;
-  }
-}
-
-/* ===== FIX: Main Menu wrap nicely on mobile ===== */
-@media (max-width: 700px) {
-  .mainMenuBtn {
-    white-space: normal !important;
+  /* Main Menu button wrap on tracker pages */
+  .dayBar > button.secondary.miniBtn{
+    width: 110px;
+    white-space: normal;
     line-height: 1.05;
-    padding: 8px 10px;
     text-align: center;
   }
+
+  /* Keep top bar on one line */
+  .dayBar { flex-direction: row !important; }
 }
