@@ -1,5 +1,5 @@
 // sw.js — offline shell cache
-const CACHE_NAME = "routine-tracker-v30";
+const CACHE_NAME = "routine-tracker-v31";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,7 +27,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Cache-first for app shell, network for everything else
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -36,11 +35,13 @@ self.addEventListener("fetch", (event) => {
 
   if (url.origin === location.origin) {
     event.respondWith(
-      caches.match(req).then((cached) => cached || fetch(req).then((resp) => {
-        const copy = resp.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-        return resp;
-      }).catch(() => cached))
+      caches.match(req).then((cached) =>
+        cached || fetch(req).then((resp) => {
+          const copy = resp.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          return resp;
+        }).catch(() => cached)
+      )
     );
     return;
   }
