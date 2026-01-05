@@ -1,5 +1,5 @@
 // sw.js — offline shell cache
-const CACHE_NAME = "routine-tracker-v22";
+const CACHE_NAME = "routine-tracker-v30";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,6 +27,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Cache-first for app shell, network for everything else
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
