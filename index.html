@@ -94,19 +94,21 @@
       <label for="sleepChild">Child</label>
       <select id="sleepChild"></select>
 
-      <div class="row">
-        <button id="btnSleepStart">Start (today only)</button>
-        <button id="btnSleepEnd">End (today only)</button>
-      </div>
+    <div class="row">
+      <button id="btnSleepStart">Start (today only)</button>
+      <button id="btnSleepEnd">End (today only)</button>
+    </div>
+    
+    <h3>Manual sleep entry</h3>
+    <div class="row">
+      <input id="sleepStartManual" type="datetime-local" />
+      <input id="sleepEndManual" type="datetime-local" />
+    </div>
+    
+    <textarea id="sleepNote" placeholder="Notes (optional)"></textarea>
+    
+    <button id="btnSleepManual">Save</button>
 
-      <h3>Manual sleep entry</h3>
-      <div class="row3">
-        <input id="sleepStartManual" type="datetime-local" />
-        <input id="sleepEndManual" type="datetime-local" />
-        <button id="btnSleepManual">Add</button>
-      </div>
-
-      <textarea id="sleepNote" placeholder="Notes (optional)"></textarea>
 
       <div>
         <strong>Total sleep:</strong> <span id="sleepTotal">0.00h</span>
@@ -317,10 +319,12 @@
         <label>Safeguarding put in place</label>
         <textarea id="accSafeguarding" placeholder="What safeguarding was put in place?"></textarea>
 
+        <label>Notes</label>
         <div class="actionRow">
           <textarea id="accNotes" placeholder="Notes"></textarea>
           <button id="btnAddAccident">Save</button>
         </div>
+
 
         <h3>Accidents</h3>
         <ul id="accidentList"></ul>
@@ -366,6 +370,7 @@
           <option>Other</option>
         </select>
 
+        <label>Notes</label>
         <div class="actionRow">
           <textarea id="illNotes" placeholder="Notes"></textarea>
           <button id="btnAddIllness">Save</button>
