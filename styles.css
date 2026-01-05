@@ -258,26 +258,53 @@ li { margin-bottom: 6px; line-height: 1.35; }
     text-align: center;
   }
 
-  /* ===== MOBILE TRACKER TOP BAR FIX ===== */
-@media (max-width: 600px) {
-
+/* ===== FORCE Main Menu button wrap + consistent sizing (MOBILE) ===== */
+@media (max-width: 700px) {
+  /* Ensure the header row spreads evenly */
   .dayBar {
-    display: grid;
-    grid-template-columns: auto auto 1fr auto;
-    gap: 10px;
-    align-items: center;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px !important;
   }
 
-  /* Allow Main Menu to wrap */
-  .dayBar button:last-child {
-    white-space: normal;
-    text-align: center;
-    line-height: 1.1;
-    padding: 8px 10px;
+  .dayBarLeft {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
   }
 
-}
+  /* Date picker shouldn't hog the whole row */
+  .datePick {
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
+    max-width: 160px !important;
+  }
 
-  /* Keep top bar on one line */
-  .dayBar { flex-direction: row !important; }
+  /* Target ALL buttons in the top row */
+  .dayBar button {
+    height: var(--control-height) !important;
+  }
+
+  /* IMPORTANT: target the Main Menu button specifically */
+  #btnBackToMenu,
+  #btnMainMenu,
+  .btnBackToMenu,
+  .btnMainMenu {
+    width: 92px !important;               /* fixed width so it can wrap */
+    min-width: 92px !important;
+    max-width: 92px !important;
+
+    height: var(--control-height) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    white-space: normal !important;        /* allow wrap */
+    line-height: 1.05 !important;
+    text-align: center !important;
+    padding: 6px 8px !important;
+  }
 }
