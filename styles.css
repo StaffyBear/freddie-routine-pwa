@@ -352,3 +352,66 @@ li{
     font-size: 16px;
   }
 }
+
+
+/* =========================
+   Tracker top row balance (mobile + web)
+   Paste at bottom of styles.css
+   ========================= */
+
+/* Make the top bar feel evenly spaced */
+.dayBar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  padding: 0;                 /* important: no weird extra padding */
+}
+
+/* Left side stays grouped */
+.dayBarLeft{
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Date never wraps */
+.dateText{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+/* Undo the old "push Main Menu hard-right" rule */
+.dayBar > button{
+  margin-left: 0 !important;
+}
+
+/* Give Main Menu a consistent width so spacing feels even */
+#btnBackMenu,
+#btnBackToMenu,
+#btnMainMenu{
+  width: 140px;
+}
+
+/* Mobile: keep everything on one row but not glued to the edge */
+@media (max-width: 700px){
+  .dayBar{
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  .dayBarLeft{
+    flex-wrap: nowrap;
+  }
+
+  /* Slightly smaller on mobile so it doesn't feel huge */
+  #btnBackMenu,
+  #btnBackToMenu,
+  #btnMainMenu{
+    width: 120px;
+  }
+}
