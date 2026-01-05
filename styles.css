@@ -280,3 +280,44 @@ li { margin-bottom: 6px; }
   .menuGrid { grid-template-columns: repeat(2, 130px); }
   .menuTile { width: 130px; height: 130px; font-size: 16px; }
 }
+
+
+/* ===== FIX: Logout tile red ===== */
+#btnLogout,
+#tileLogout,
+.menuTile.logout {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+#btnLogout:hover,
+#tileLogout:hover,
+.menuTile.logout:hover {
+  filter: brightness(0.95);
+}
+
+/* ===== FIX: Consistent font everywhere ===== */
+html, body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+input, select, textarea, button,
+.menuTile, .pill {
+  font-family: inherit !important;
+}
+
+/* ===== FIX: allow some rows to stay 2-across on mobile ===== */
+@media (max-width: 700px) {
+  .row.keep2 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ===== FIX: Main Menu wrap nicely on mobile ===== */
+@media (max-width: 700px) {
+  .mainMenuBtn {
+    white-space: normal !important;
+    line-height: 1.05;
+    padding: 8px 10px;
+    text-align: center;
+  }
+}
