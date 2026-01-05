@@ -18,7 +18,7 @@
 
   <!-- AUTH -->
   <section id="authView" class="card">
-    <h1 class="pagetitleLogin</h1>
+    <h1 class="page-title">Login</h1>
 
     <div class="logoBox">
       <img src="./icons/icon-512.png" alt="Routine Tracker logo" />
@@ -72,7 +72,6 @@
       <button id="goAI" class="menuTile">Accidents &amp; Illnesses</button>
       <button id="goExport" class="menuTile">Export</button>
 
-      <!-- Admin + Logout as tiles (same size as others) -->
       <button id="goAdmin" class="menuTile secondary">Admin</button>
       <button id="btnLogout" class="menuTile dangerBtn">Log Out</button>
     </div>
@@ -292,8 +291,6 @@
           </div>
         </div>
 
-        <input id="accBodyOther" class="hidden" placeholder="Other body area (required)" />
-
         <label>Where did it happen</label>
         <input id="accWhere" placeholder="e.g. living room / nursery garden" />
 
@@ -313,8 +310,6 @@
             <input id="accTime" type="time" />
           </div>
         </div>
-
-        <input id="accReportedOther" class="hidden" placeholder="Other reporter (required)" />
 
         <label>Action taken</label>
         <textarea id="accAction" placeholder="What action was taken?"></textarea>
@@ -349,8 +344,6 @@
           <option>Other</option>
         </select>
 
-        <input id="illSymptomOther" class="hidden" placeholder="Other symptom (required)" />
-
         <div class="row">
           <div>
             <label>Temperature (°C)</label>
@@ -372,8 +365,6 @@
           <option>Nursery</option>
           <option>Other</option>
         </select>
-
-        <input id="illReportedOther" class="hidden" placeholder="Other reporter (required)" />
 
         <div class="actionRow">
           <textarea id="illNotes" placeholder="Notes"></textarea>
