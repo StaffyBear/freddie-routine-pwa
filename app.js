@@ -307,14 +307,35 @@ async function refreshVisible(){
 }
 
 // ---------- sleep ----------
+function toGB24(iso){
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
+function overlapMs(st, et, dayStart, dayEnd){
+  // returns overlap (ms) between [st, et] and [dayStart, dayEnd]
+  const a = Math.max(st.getTime(), dayStart.getTime());
+  const b = Math.min(et.getTime(), dayEnd.getTime());
+  return Math.max(0, b - a);
+}
+
 async function loadSleep(){
   const { start, end } = toIsoRangeForDate(selectedDateStr);
-  const res = await sb.from("sleep_sessions")
+  const dayStart = new Date(start);
+  const dayEnd = new Date(end);
+
+  // Pull ANY session that overlaps the selected day:
+  // start_time < dayEnd AND (end_time is null OR end_time > dayStart)
+  const res = await sb
+    .from("sleep_sessions")
     .select("*")
     .eq("child_id", childId)
-    .gte("start_time", start)
-    .lte("start_time", end)
-    .order("start_time", { ascending:false });
+    .lt("start_time", end)
+    .or(`end_time.is.null,end_time.gt.${start}`)
+    .order("start_time", { ascending: false });
 
   if (res.error) { console.error(res.error); return; }
 
@@ -326,11 +347,19 @@ async function loadSleep(){
 
   (res.data || []).forEach(s => {
     const st = new Date(s.start_time);
-    const et = s.end_time ? new Date(s.end_time) : null;
-    if (et) totalMs += (et - st);
 
+    // If open-ended:
+    const et = s.end_time ? new Date(s.end_time) : null;
+
+    // Only count sleeps that have an end time (so totals aren’t inflated)
+    if (et){
+      totalMs += overlapMs(st, et, dayStart, dayEnd);
+    }
+
+    // Show times (24h), but don’t wrap to a different date in the UI – just show times
     const li = document.createElement("li");
-    li.textContent = `${hhmm(s.start_time)} → ${s.end_time ? hhmm(s.end_time) : "…"}${s.notes ? " • " + s.notes : ""}`;
+    li.textContent =
+      `${toGB24(s.start_time)} → ${s.end_time ? toGB24(s.end_time) : "…"}${s.notes ? " • " + s.notes : ""}`;
     list.appendChild(li);
   });
 
@@ -338,58 +367,63 @@ async function loadSleep(){
   if (totalEl) totalEl.textContent = (totalMs / 3600000).toFixed(2) + "h";
 }
 
-async function sleepStart(){
-  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only.");
-  if (!navigator.onLine) return alert("Start requires internet. Use Manual entry while offline.");
-
-  const user = await requireUser();
-  const notes = ($("sleepNote")?.value || "").trim() || null;
-
-  const res = await sb.from("sleep_sessions").insert({
-    child_id: childId,
-    start_time: new Date().toISOString(),
-    notes,
-    user_id: user.id
-  });
-  if (res.error) return alert(res.error.message);
-  await loadSleep();
-}
-
-async function sleepEnd(){
-  if (!isToday(selectedDateStr)) return alert("Start/End buttons are for TODAY only.");
-  if (!navigator.onLine) return alert("End requires internet. Use Manual entry while offline.");
-
-  const open = await sb.from("sleep_sessions")
-    .select("id")
-    .eq("child_id", childId)
-    .is("end_time", null)
-    .order("start_time", { ascending:false })
-    .limit(1);
-
-  if (open.error) return alert(open.error.message);
-  if (!open.data?.length) return alert("No active sleep session found.");
-
-  const res = await sb.from("sleep_sessions")
-    .update({ end_time: new Date().toISOString() })
-    .eq("id", open.data[0].id);
-
-  if (res.error) return alert(res.error.message);
-  await loadSleep();
-}
-
 async function addSleepManual(){
   const startVal = $("sleepStartManual")?.value;
   const endVal = $("sleepEndManual")?.value;
   const notes = ($("sleepNote")?.value || "").trim() || null;
 
-  if (!startVal) return alert("Pick a manual sleep START time.");
+  const user = await requireUser();
+
+  // END only: close the most recent open session
+  if (!startVal && endVal){
+    const endIso = new Date(endVal).toISOString();
+
+    if (!navigator.onLine) {
+      alert("End-only manual requires internet (it updates an existing sleep).");
+      return;
+    }
+
+    const open = await sb.from("sleep_sessions")
+      .select("id,start_time")
+      .eq("child_id", childId)
+      .is("end_time", null)
+      .order("start_time", { ascending:false })
+      .limit(1);
+
+    if (open.error) return alert(open.error.message);
+    if (!open.data?.length) return alert("No active sleep session found to end.");
+
+    const st = new Date(open.data[0].start_time);
+    const et = new Date(endIso);
+    if (et < st) return alert("End must be after the start time of the open sleep.");
+
+    const upd = await sb.from("sleep_sessions")
+      .update({ end_time: endIso })
+      .eq("id", open.data[0].id);
+
+    if (upd.error) return alert(upd.error.message);
+
+    if ($("sleepStartManual")) $("sleepStartManual").value = "";
+    if ($("sleepEndManual")) $("sleepEndManual").value = "";
+    await loadSleep();
+    return;
+  }
+
+  // START required if not doing end-only
+  if (!startVal) return alert("Pick a manual sleep START time (or set END only to close an open sleep).");
 
   const startIso = new Date(startVal).toISOString();
   const endIso = endVal ? new Date(endVal).toISOString() : null;
+
   if (endIso && new Date(endIso) < new Date(startIso)) return alert("End must be after start.");
 
-  const user = await requireUser();
-  const payload = { child_id: childId, start_time: startIso, end_time: endIso, notes, user_id: user.id };
+  const payload = {
+    child_id: childId,
+    start_time: startIso,
+    end_time: endIso,
+    notes,
+    user_id: user.id
+  };
 
   if (!navigator.onLine){
     queueInsert("sleep_sessions", payload);
@@ -406,6 +440,7 @@ async function addSleepManual(){
   if ($("sleepEndManual")) $("sleepEndManual").value = "";
   await loadSleep();
 }
+
 
 // ---------- meals ----------
 async function loadMeals(){
