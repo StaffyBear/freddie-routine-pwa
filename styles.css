@@ -29,6 +29,10 @@ body {
   margin-inline: auto;
 }
 
+/* Headings centered */
+.page-title { text-align: center; margin-bottom: var(--space); }
+h3 { margin-top: var(--space); text-align: center; }
+
 /* Cards */
 .card {
   background: var(--card-bg);
@@ -38,7 +42,6 @@ body {
   margin-bottom: calc(var(--space) * 1.5);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-
 .card.today { background: var(--today-bg); }
 
 /* Historic = pink filled */
@@ -54,16 +57,15 @@ input, select, textarea, button {
   border: 1px solid var(--border);
   font-size: 14px;
 }
-
 input, select, button {
   height: var(--control-height);
   padding: 0 14px;
 }
-
 textarea {
   min-height: calc(var(--control-height) * 2.2);
   padding: 12px 14px;
   resize: vertical;
+  background: #fff;
 }
 
 /* Buttons */
@@ -73,6 +75,7 @@ button {
   font-weight: 800;
   border: none;
   cursor: pointer;
+  transition: filter 0.15s ease, background 0.15s ease;
 }
 button:hover { background: var(--primary-hover); }
 
@@ -82,13 +85,23 @@ button.secondary {
 }
 button.secondary:hover { background: #b7e4dc; }
 
-button.miniBtn { width: auto; padding: 0 14px; }
+button.miniBtn {
+  width: auto;
+  padding: 0 14px;
+}
 
-/* Logout red */
-.dangerBtn { background: var(--danger) !important; }
-.dangerBtn:hover { filter: brightness(0.95); }
+/* Logout red (works even when also .menuTile) */
+button.dangerBtn,
+.menuTile.dangerBtn {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+button.dangerBtn:hover,
+.menuTile.dangerBtn:hover {
+  filter: brightness(0.95);
+}
 
-/* spacing */
+/* consistent spacing */
 .stack > * + * { margin-top: var(--space); }
 
 /* Rows */
@@ -105,7 +118,7 @@ button.miniBtn { width: auto; padding: 0 14px; }
   align-items: center;
 }
 
-/* Notes + save button */
+/* Notes + Save button */
 .actionRow {
   display: grid;
   grid-template-columns: 1fr 160px;
@@ -127,14 +140,32 @@ button.miniBtn { width: auto; padding: 0 14px; }
   gap: var(--space);
   align-items: center;
 }
+.datePick {
+  height: var(--control-height);
+  width: auto;
+  min-width: 150px;
+}
 
-/* Login */
-.logoBox { display: flex; justify-content: center; }
+/* Login logo - force small and centered */
+.logoBox {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
 .logoBox img {
-  width: 110px;
-  height: 110px;
-  object-fit: contain;
-  border-radius: 16px;
+  width: 110px !important;
+  height: 110px !important;
+  max-width: 110px !important;
+  max-height: 110px !important;
+  object-fit: contain !important;
+  border-radius: 14px !important;
+}
+
+/* Auth row */
+.authRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space);
 }
 
 /* Menu */
@@ -143,6 +174,7 @@ button.miniBtn { width: auto; padding: 0 14px; }
   grid-template-columns: repeat(2, 110px);
   gap: 14px;
   justify-content: center;
+  justify-items: center;
   margin-top: var(--space);
 }
 .menuTile {
@@ -157,11 +189,14 @@ button.miniBtn { width: auto; padding: 0 14px; }
   text-align: center;
 }
 
-/* Pills (Accident / Illness) – side by side */
+/* Pills (always side by side) */
 .pillRow {
-  display: flex;
-  gap: var(--space);
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: var(--space) !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
 }
 .pill {
   height: var(--control-height);
@@ -172,6 +207,7 @@ button.miniBtn { width: auto; padding: 0 14px; }
   color: var(--primary);
   font-weight: 900;
   cursor: pointer;
+  flex: 1 1 0;
 }
 .pill.active {
   background: var(--primary);
@@ -179,145 +215,20 @@ button.miniBtn { width: auto; padding: 0 14px; }
   border-color: var(--primary);
 }
 
+/* Utils */
 .hidden { display: none; }
 .muted { color: var(--muted); }
 .danger { color: var(--danger); }
 
+/* Mobile */
 @media (max-width: 700px) {
   .row, .row3, .authRow { grid-template-columns: 1fr; }
   .actionRow { grid-template-columns: 1fr; }
   .menuGrid { grid-template-columns: 1fr 1fr; }
-  .pillRow { flex-direction: row; }
-}
 
-
-/* ===== FIX: Logout red even when also .menuTile ===== */
-button.dangerBtn,
-.menuTile.dangerBtn {
-  background: var(--danger) !important;
-  color: #fff !important;
-}
-button.dangerBtn:hover,
-.menuTile.dangerBtn:hover {
-  filter: brightness(0.95);
-}
-
-/* ===== FIX: Accident/Illness pills ALWAYS side-by-side ===== */
-.pillRow {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: var(--space) !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: nowrap !important;
-}
-
-.pillRow .pill {
-  width: auto !important;
-  flex: 1 1 0 !important;   /* make them equal width */
-  min-width: 0 !important;
-}
-
-/* On small phones still keep them side-by-side */
-@media (max-width: 700px) {
-  .pillRow {
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-  }
-  .pillRow .pill {
-    flex: 1 1 0 !important;
-  }
-}
-
-/* ===== Fix: Login buttons spacing like other pages ===== */
-#authView .authRow{
-  margin-top: var(--space);
-  gap: var(--space);
-}
-#authView .authRow button{
-  height: var(--control-height);
-}
-
-
-@media (max-width: 700px){
-  #authView .authRow button + button{
-    margin-top: var(--space);
-  }
-}
-
-
-/* ===== Fix: A&I textarea spacing consistent ===== */
-#aiView textarea{
-  margin-top: 6px; /* small breathing room after label */
-}
-
-#aiView textarea + label,
-#aiView textarea + .actionRow,
-#aiView .row + label,
-#aiView .row3 + label,
-#aiView input + label,
-#aiView select + label{
-  margin-top: var(--space);
-}
-
-/* ===== Headings centred (all pages) ===== */
-.page-title,
-h1, h2, h3 {
-  text-align: center;
-}
-
-/* ===== Mobile: make action buttons taller (Save/Add) ===== */
-@media (max-width: 700px) {
+  /* Bigger save buttons on mobile */
   .actionRow button {
-    height: calc(var(--control-height) * 2) !important;  /* double height */
+    height: calc(var(--control-height) * 2) !important;
     min-height: calc(var(--control-height) * 2) !important;
   }
-}
-
-/* If A&I notes row isn't .actionRow, target the notes textarea + the next button */
-#aiView textarea#accNotes,
-#aiView textarea#illNotes {
-  min-height: calc(var(--control-height) * 2.4);
-}
-
-#aiView textarea#accNotes + button,
-#aiView textarea#illNotes + button {
-  height: calc(var(--control-height) * 2.4) !important;
-}
-
-/* ===== Login: consistent spacing between stacked buttons ===== */
-#authView .authRow {
-  gap: var(--space) !important;
-}
-
-@media (max-width: 700px) {
-  #authView .authRow {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: var(--space) !important;
-  }
-  #authView .authRow button {
-    margin: 0 !important; /* avoid double spacing from old rules */
-  }
-}
-
-/* Center the menu tiles on mobile */
-.menuGrid{
-  justify-content: center !important;
-  justify-items: center !important;
-}
-
-.menuTile{
-  max-width: 170px;   /* stops them stretching full width */
-  width: 100%;
-}
-
-/* FORCE login logo size (final override) */
-.logoBox img{
-  width: 110px !important;
-  height: 110px !important;
-  max-width: 110px !important;
-  max-height: 110px !important;
-  object-fit: contain !important;
-  border-radius: 14px !important;
 }
