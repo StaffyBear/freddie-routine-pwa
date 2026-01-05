@@ -311,3 +311,13 @@ h1, h2, h3 {
   max-width: 170px;   /* stops them stretching full width */
   width: 100%;
 }
+
+/* FORCE login logo size (final override) */
+.logoBox img{
+  width: 110px !important;
+  height: 110px !important;
+  max-width: 110px !important;
+  max-height: 110px !important;
+  object-fit: contain !important;
+  border-radius: 14px !important;
+}
