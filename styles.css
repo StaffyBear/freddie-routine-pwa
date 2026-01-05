@@ -260,3 +260,54 @@ button.dangerBtn:hover,
   margin-top: var(--space);
 }
 
+/* ===== Headings centred (all pages) ===== */
+.page-title,
+h1, h2, h3 {
+  text-align: center;
+}
+
+/* ===== Mobile: make action buttons taller (Save/Add) ===== */
+@media (max-width: 700px) {
+  .actionRow button {
+    height: calc(var(--control-height) * 2) !important;  /* double height */
+    min-height: calc(var(--control-height) * 2) !important;
+  }
+}
+
+/* If A&I notes row isn't .actionRow, target the notes textarea + the next button */
+#aiView textarea#accNotes,
+#aiView textarea#illNotes {
+  min-height: calc(var(--control-height) * 2.4);
+}
+
+#aiView textarea#accNotes + button,
+#aiView textarea#illNotes + button {
+  height: calc(var(--control-height) * 2.4) !important;
+}
+
+/* ===== Login: consistent spacing between stacked buttons ===== */
+#authView .authRow {
+  gap: var(--space) !important;
+}
+
+@media (max-width: 700px) {
+  #authView .authRow {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--space) !important;
+  }
+  #authView .authRow button {
+    margin: 0 !important; /* avoid double spacing from old rules */
+  }
+}
+
+/* Center the menu tiles on mobile */
+.menuGrid{
+  justify-content: center !important;
+  justify-items: center !important;
+}
+
+.menuTile{
+  max-width: 170px;   /* stops them stretching full width */
+  width: 100%;
+}
