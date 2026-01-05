@@ -269,3 +269,86 @@ li{
     font-size: 16px;
   }
 }
+
+
+/* =========================
+   UI FIX OVERRIDES (paste at bottom)
+   ========================= */
+
+/* 1) Lists: bullets not hanging off the left */
+.card ul,
+#sleepList,
+#mealsList,
+#moodList,
+#medList,
+#accList,
+#illList {
+  list-style: disc;
+  list-style-position: outside;
+  padding-left: 22px;   /* pulls bullets in */
+  margin: 10px 0 0 0;
+}
+
+.card li {
+  margin: 8px 0;
+  line-height: 1.35;
+}
+
+/* 2) Trackers top bar: spread out properly (mobile + web) */
+.dayBar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+}
+
+.dayBarLeft{
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  flex: 1;
+  min-width: 0;
+}
+
+.dateText{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+/* Make the "Main Menu" button sit at the far right */
+.dayBar > button{
+  margin-left: auto;
+}
+
+/* 3) Mobile: keep Sleep start/end + manual start/end SIDE BY SIDE */
+@media (max-width: 700px) {
+
+  /* IMPORTANT: don't stack the tracker top bar into a column */
+  .dayBar{
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  /* Keep the nav/date row tight but still readable */
+  .dayBarLeft{
+    flex-wrap: nowrap;
+  }
+
+  /* Sleep tracker rows stay 2 across on mobile */
+  #sleepView .row{
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* If you use a 3-column row anywhere in Sleep, force it to 2 */
+  #sleepView .row3{
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Make Save button the same "big" feel */
+  #btnSleepManual{
+    height: calc(var(--control-height) * 2);
+    font-size: 16px;
+  }
+}
