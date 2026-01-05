@@ -1,5 +1,5 @@
 /**************************************************
- * Routine Tracker – app.js (stable + UI-aligned)
+ * Routine Tracker – app.js (HTML-ID aligned + stable)
  **************************************************/
 
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
@@ -325,8 +325,6 @@ async function loadSleep(){
   const dayStart = new Date(start);
   const dayEnd = new Date(end);
 
-  // Overlap query:
-  // start_time < dayEnd AND (end_time is null OR end_time > dayStart)
   const res = await sb
     .from("sleep_sessions")
     .select("*")
@@ -849,7 +847,7 @@ async function doLogout(){
 // ---------- openers ----------
 function openPage(viewId, after){
   return async () => {
-    setDate(todayStr());     // open on today
+    setDate(todayStr());
     showView(viewId);
     if (after) await after();
     await refreshVisible();
@@ -872,7 +870,7 @@ function openPage(viewId, after){
     $("btnForgot").onclick = doForgotPassword;
     $("btnSetNewPassword").onclick = setNewPassword;
 
-    // menu
+    // menu (THESE IDs MATCH YOUR CURRENT index.html)
     $("goSleep").onclick = openPage("sleepView", async () => { await fillChildSelect("sleepChild"); });
     $("goMeals").onclick = openPage("mealsView", async () => { await fillChildSelect("mealsChild"); });
     $("goMoods").onclick = openPage("moodsView", async () => { await fillChildSelect("moodsChild"); });
