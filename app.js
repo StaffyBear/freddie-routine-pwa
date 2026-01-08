@@ -130,11 +130,15 @@ function showView(id, push = true){
     const el = $(v);
     if (el) el.classList.toggle("hidden", v !== id);
   }
+
   if (push) history.pushState({ view: id }, "", "#"+id);
-  case "summaryView":
-  loadSummary();
-  break;
+
+  // Load data for specific views
+  if (id === "summaryView") {
+    loadSummary();
+  }
 }
+
 
 window.addEventListener("popstate", (e) => {
   const view = e.state?.view || (location.hash ? location.hash.replace("#","") : "menuView");
