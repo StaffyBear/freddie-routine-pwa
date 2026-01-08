@@ -64,6 +64,23 @@ input, select, textarea, button,
   border-color: #f0b9c0 !important;
 }
 
+/* Summary Item */
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space);
+  cursor: pointer;
+}
+
+.summaryItem strong {
+  font-weight: 900;
+}
+
+.summaryItem span {
+  color: var(--muted);
+}
+
 /* Controls */
 label { font-weight: 800; }
 
