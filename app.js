@@ -131,6 +131,9 @@ function showView(id, push = true){
     if (el) el.classList.toggle("hidden", v !== id);
   }
   if (push) history.pushState({ view: id }, "", "#"+id);
+  case "summaryView":
+  loadSummary();
+  break;
 }
 
 window.addEventListener("popstate", (e) => {
@@ -317,6 +320,97 @@ async function refreshVisible(){
     if (activeView === "aiView")    { await loadMedicationDropdowns(); await loadAccidents(); await loadIllnesses(); }
   }catch(err){ console.error(err); }
 }
+
+// ---------- Summary Loader ----------
+async function loadSummary() {
+  const date = selectedDateStr;
+  const container = document.getElementById("summaryCards");
+  container.innerHTML = "";
+
+  await addSummaryItem("Sleep", await getSleepSummary(date), () => {
+    selectedDateStr = date;
+    showView("sleepView");
+  });
+
+  await addSummaryItem("Meals", await getMealsSummary(date), () => {
+    selectedDateStr = date;
+    showView("mealsView");
+  });
+
+  await addSummaryItem("Mood", await getMoodSummary(date), () => {
+    selectedDateStr = date;
+    showView("moodView");
+  });
+
+  await addSummaryItem("Medication", await getMedicationSummary(date), () => {
+    selectedDateStr = date;
+    showView("medicationView");
+  });
+
+  await addSummaryItem("Accidents & Illness", await getAccidentSummary(date), () => {
+    selectedDateStr = date;
+    showView("accidentView");
+  });
+}
+
+// ---------- Summary Card Helper -----------
+async function addSummaryItem(title, text, onClick) {
+  if (!text) return;
+
+  const card = document.createElement("div");
+  card.className = "card summaryItem";
+  card.innerHTML = `<strong>${title}</strong><span>${text}</span>`;
+  card.onclick = onClick;
+
+  document.getElementById("summaryCards").appendChild(card);
+}
+
+// ---------- Summary Data Helper -----------
+async function getSleepSummary(date) {
+  const { start, end } = toIsoRangeForDate(date);
+  const { data } = await sb
+    .from("sleep_sessions")
+    .select("start_time,end_time")
+    .gte("start_time", start)
+    .lte("start_time", end);
+
+  if (!data?.length) return null;
+  return `${data.length} sleep sessions`;
+}
+
+async function getMealsSummary(date) {
+  const { data } = await sb
+    .from("meals")
+    .select("id")
+    .eq("date", date);
+  return data?.length ? `${data.length} meals logged` : null;
+}
+
+async function getMoodSummary(date) {
+  const { data } = await sb
+    .from("moods")
+    .select("mood")
+    .eq("date", date)
+    .limit(1);
+  return data?.[0]?.mood || null;
+}
+
+async function getMedicationSummary(date) {
+  const { data } = await sb
+    .from("medications_log")
+    .select("id")
+    .eq("date", date);
+  return data?.length ? `${data.length} doses given` : null;
+}
+
+async function getAccidentSummary(date) {
+  const { data } = await sb
+    .from("accidents")
+    .select("id")
+    .eq("date", date);
+  return data?.length ? `${data.length} event(s)` : null;
+}
+
 
 // ---------- sleep ----------
 function msToHoursMinutes(ms) {
