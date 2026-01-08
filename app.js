@@ -319,21 +319,42 @@ async function refreshVisible(){
 }
 
 // ---------- sleep ----------
-async function loadSleep(){
+function msToHoursMinutes(ms) {
+  const totalMinutes = Math.round(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
+}
+
+// Make sure hhmm can accept Date OR ISO string, and always 24h
+function hhmm(v) {
+  const d = (v instanceof Date) ? v : new Date(v);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+async function loadSleep() {
+  if (!childId) return;
+
+  // selectedDateStr should be "YYYY-MM-DD"
   const dayStart = new Date(`${selectedDateStr}T00:00:00`);
+  const nextDayStart = new Date(dayStart);
+  nextDayStart.setDate(nextDayStart.getDate() + 1);
+
+  // We will DISPLAY up to 23:59 for the chosen day
   const dayEnd = new Date(`${selectedDateStr}T23:59:59`);
 
   const res = await sb
     .from("sleep_sessions")
     .select("*")
     .eq("child_id", childId)
-    .or(
-      `and(start_time.lte.${dayEnd.toISOString()},end_time.gte.${dayStart.toISOString()}),and(start_time.lte.${dayEnd.toISOString()},end_time.is.null)`
-    )
+    .lt("start_time", nextDayStart.toISOString())
+    .or(`end_time.is.null,end_time.gte.${dayStart.toISOString()}`)
     .order("start_time", { ascending: true });
 
   if (res.error) {
-    console.error(res.error);
+    console.error("loadSleep error:", res.error);
     return;
   }
 
@@ -343,15 +364,13 @@ async function loadSleep(){
   list.innerHTML = "";
   let totalMs = 0;
 
-  (res.data || []).forEach(s => {
+  (res.data || []).forEach((s) => {
     const start = new Date(s.start_time);
     const end = s.end_time ? new Date(s.end_time) : null;
 
-    // Determine visible portion for this day
+    // Clip to this day for display + total
     const visibleStart = start < dayStart ? dayStart : start;
-    const visibleEnd = end
-      ? (end > dayEnd ? dayEnd : end)
-      : null;
+    const visibleEnd = end ? (end > dayEnd ? dayEnd : end) : null;
 
     if (visibleEnd && visibleEnd > visibleStart) {
       totalMs += visibleEnd - visibleStart;
@@ -359,18 +378,15 @@ async function loadSleep(){
 
     const li = document.createElement("li");
     li.textContent =
-      `${hhmm(visibleStart)} → ` +
-      `${visibleEnd ? hhmm(visibleEnd) : "…"}` +
-      (s.notes ? ` • ${s.notes}` : "");
-
+      `${hhmm(visibleStart)} → ${visibleEnd ? hhmm(visibleEnd) : "…"}`
+      + (s.notes ? ` • ${s.notes}` : "");
     list.appendChild(li);
   });
 
   const totalEl = $("sleepTotal");
-  if (totalEl) {
-    totalEl.textContent = msToHoursMinutes(totalMs);
-  }
+  if (totalEl) totalEl.textContent = msToHoursMinutes(totalMs);
 }
+
 
 
 async function sleepStart(){
