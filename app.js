@@ -320,20 +320,22 @@ async function refreshVisible(){
 
 // ---------- sleep ----------
 async function loadSleep(){
-  guardChild();
-  const { start, end } = toIsoRangeForDate(selectedDateStr);
-  const dayStart = new Date(start);
-  const dayEnd = new Date(end);
+  const dayStart = new Date(`${selectedDateStr}T00:00:00`);
+  const dayEnd = new Date(`${selectedDateStr}T23:59:59`);
 
   const res = await sb
     .from("sleep_sessions")
     .select("*")
     .eq("child_id", childId)
-    .lt("start_time", end)
-    .or(`end_time.is.null,end_time.gt.${start}`)
-    .order("start_time", { ascending: false });
+    .or(
+      `and(start_time.lte.${dayEnd.toISOString()},end_time.gte.${dayStart.toISOString()}),and(start_time.lte.${dayEnd.toISOString()},end_time.is.null)`
+    )
+    .order("start_time", { ascending: true });
 
-  if (res.error) throw res.error;
+  if (res.error) {
+    console.error(res.error);
+    return;
+  }
 
   const list = $("sleepList");
   if (!list) return;
@@ -342,19 +344,34 @@ async function loadSleep(){
   let totalMs = 0;
 
   (res.data || []).forEach(s => {
-    const st = new Date(s.start_time);
-    const et = s.end_time ? new Date(s.end_time) : null;
-    if (et) totalMs += overlapMs(st, et, dayStart, dayEnd);
+    const start = new Date(s.start_time);
+    const end = s.end_time ? new Date(s.end_time) : null;
+
+    // Determine visible portion for this day
+    const visibleStart = start < dayStart ? dayStart : start;
+    const visibleEnd = end
+      ? (end > dayEnd ? dayEnd : end)
+      : null;
+
+    if (visibleEnd && visibleEnd > visibleStart) {
+      totalMs += visibleEnd - visibleStart;
+    }
 
     const li = document.createElement("li");
     li.textContent =
-      `${toGB24(s.start_time)} → ${s.end_time ? toGB24(s.end_time) : "…"}${s.notes ? " • " + s.notes : ""}`;
+      `${hhmm(visibleStart)} → ` +
+      `${visibleEnd ? hhmm(visibleEnd) : "…"}` +
+      (s.notes ? ` • ${s.notes}` : "");
+
     list.appendChild(li);
   });
 
   const totalEl = $("sleepTotal");
-  if (totalEl) totalEl.textContent = (totalMs / 3600000).toFixed(2) + "h";
+  if (totalEl) {
+    totalEl.textContent = msToHoursMinutes(totalMs);
+  }
 }
+
 
 async function sleepStart(){
   try{
