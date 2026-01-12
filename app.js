@@ -8,6 +8,8 @@
 const SITE_URL = "https://staffybear.github.io/freddie-routine-pwa/";
 const SUPABASE_URL = "https://jjjombeomtbztzchiult.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6Le75u-UJnbGCZMbLQ8kQQ_9cFOsfIl";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqam9tYmVvbXRienR6Y2hpdWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczNzk5MTgsImV4cCI6MjA4Mjk1NTkxOH0.28ADFdTW2YKOMrp7klwbpRjKbSLIR7URaij_AmIqNOE";
+
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
