@@ -399,3 +399,19 @@ li { margin-bottom: 6px; line-height: 1.35; }
     justify-content: center !important;
   }
 }
+
+  /* --- Daily Summary clickable list --- */
+.summaryList { padding-left: 18px; }
+.summaryList li { margin-bottom: 8px; }
+
+.linkBtn{
+  width: auto;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+.linkBtn:hover{ text-decoration: underline; }
