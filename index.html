@@ -64,7 +64,7 @@
     <h1 class="page-title">Main Menu</h1>
 
     <div class="menuGrid">
-      <button class="menuTile" onclick="showView('summaryView')">Summary</button>
+      <button id="goSummary" class="menuTile">Daily<br>Summary</button>
       <button id="goSleep" class="menuTile">Sleep</button>
       <button id="goMeals" class="menuTile">Meals</button>
       <button id="goMoods" class="menuTile">Moods</button>
@@ -132,13 +132,31 @@
 
   <!-- ================= DAILY SUMMARY ================= -->
   <section id="summaryView" class="hidden">
-  <h1 class="page-title">Daily Summary</h1>
-
-  <div class="card stack">
-    <div id="summaryDate" class="dateText"></div>
-    <div id="summaryContent" class="stack"></div>
-  </div>
+    <h1 class="page-title">Daily Summary</h1>
+  
+    <div class="card stack">
+      <div class="dayBar">
+        <div class="dayBarLeft">
+          <button id="summaryPrev" class="secondary miniBtn">◀</button>
+          <button id="summaryNext" class="secondary miniBtn">▶</button>
+  
+          <div id="summaryDateText" class="dateText"></div>
+  
+          <input id="summaryDatePicker" class="datePick" type="date">
+        </div>
+  
+        <button id="summaryBack" class="secondary miniBtn">Main<br>Menu</button>
+      </div>
+  
+      <div class="stack">
+        <label>Child</label>
+        <select id="summaryChild"></select>
+      </div>
+  
+      <div id="summaryContent" class="stack"></div>
+    </div>
   </section>
+
 
 
   
